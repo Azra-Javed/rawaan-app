@@ -21,6 +21,7 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    //hide warnings
     LogBox.ignoreAllLogs(true);
     if (loaded || error) {
       SplashScreen.hideAsync();
