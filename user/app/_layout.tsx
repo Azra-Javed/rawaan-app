@@ -37,7 +37,7 @@ function RootLayoutNav() {
   return (
     <ToastProvider>
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(routes)/onboarding/index" />
+        <Stack.Screen name="(routes)/onboarding" />
       </Stack>
     </ToastProvider>
   );

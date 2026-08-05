@@ -9,11 +9,11 @@ import {
   View,
 } from "react-native";
 import Swiper from "react-native-swiper";
-import { styles } from "./styles";
 import { slides } from "@/configs/constants";
 import Images from "@/utils/images";
 import { router } from "expo-router";
 import { BackArrow } from "@/utils/icons";
+import { styles } from "./styles";
 
 type Slide = {
   image: ImageSourcePropType;
@@ -44,7 +44,7 @@ const OnBoardingScreen = () => {
 
                 <TouchableOpacity
                   style={styles.backArrow}
-                  onPress={() => router.push("/(routes)/login/index")}
+                  onPress={() => router.push("/(routes)/login")}
                 >
                   <BackArrow colors={color.whiteColor} width={21} height={21} />
                 </TouchableOpacity>
