@@ -28,6 +28,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.border,
   },
+
+  emailInput: {
+    width: windowWidth(700),
+    height: windowHeight(39),
+    backgroundColor: color.lightGray,
+    borderRadius: 4,
+    justifyContent: "center",
+    paddingHorizontal: windowHeight(9),
+    borderWidth: 1,
+    borderColor: color.border,
+    marginTop: 5,
+  },
+
   rememberMeText: {
     fontWeight: "400",
     fontFamily: fonts.medium,

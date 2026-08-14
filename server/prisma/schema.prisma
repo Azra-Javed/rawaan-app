@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  name         String?
+  email        String?  @unique
+  phone_number String?  @unique
+  ratings      Float    @default(0)
+  totalRides   Float    @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  ride         Rides[]  @relation("UserRides")
+}
+
+enum VehicleType {
+  Car
+  Motorcycle
+  CNG
+}
+
+model Driver {
+  id                 String      @id @default(auto()) @map("_id") @db.ObjectId
+  name               String
+  country            String
+  phone_number       String      @unique
+  email              String      @unique
+  vehicle_type       VehicleType
+  registeration_date DateTime
+  driving_license    Float
+  vehicle_color      String?
+  rate               Float
+  ratings            Float       @default(0)
+  totalEarning       Float       @default(0)
+  totalRides         Float       @default(0)
+  pendingRides       Float       @default(0)
+  cancelRides        Float       @default(0)
+  status             String      @default("inactive")
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  rides              Rides[]     @relation("DriverRides")
+}
+
+model Rides {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  driverId  String   @db.ObjectId
+  charge    Float
+  user      User     @relation("UserRides", fields: [userId], references: [id])
+  driver    Driver   @relation("DriverRides", fields: [driverId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Otp {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

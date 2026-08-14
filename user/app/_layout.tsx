@@ -1,18 +1,12 @@
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import "react-native-reanimated";
 import { Stack } from "expo-router";
 import { ToastProvider } from "react-native-toast-notifications";
 import { LogBox } from "react-native";
 import { useFonts } from "expo-font";
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from "expo-router";
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-// SplashScreen.preventAutoHideAsync();
+export { ErrorBoundary } from "expo-router";
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -21,6 +15,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     LogBox.ignoreAllLogs(true);
+
     if (loaded || error) {
       SplashScreen.hideAsync();
     }
@@ -35,7 +30,22 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   return (
-    <ToastProvider>
+    <ToastProvider
+      placement="top"
+      duration={3000}
+      animationType="slide-in"
+      animationDuration={250}
+      offsetTop={50}
+      swipeEnabled={true}
+      successColor="#16A36A"
+      dangerColor="#E53935"
+      warningColor="#F59E0B"
+      normalColor="#2878D4"
+      textStyle={{
+        fontSize: 14,
+        fontWeight: "600",
+      }}
+    >
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(routes)/onboarding" />
       </Stack>

@@ -25,9 +25,7 @@ export default function SignInText({
       <Text
         style={[commonStyles.regularText, external.pt_4, { textAlign: "left" }]}
       >
-        {subtitle
-          ? subtitle
-          : "Enter your phone number, get one otp and let's go 😍"}
+        {subtitle ? subtitle : "Enter your email, get one otp and let's go 😍"}
       </Text>
     </>
   );

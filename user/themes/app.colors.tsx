@@ -30,6 +30,7 @@ export type Color = {
   selectPrimary: string;
   secondaryFont: string;
   red: string;
+  title: string;
 };
 
 const color: Color = {
@@ -38,6 +39,7 @@ const color: Color = {
   primaryText: "#1F1F1F",
   linearBorder: "rgba(149, 143, 159, 0.00)",
   subtitle: "#9BA6B8",
+  title: "#3f4144",
   lightGreen: "#E8F4F1",
   whiteColor: "#fff",
   blackColor: "#000",
