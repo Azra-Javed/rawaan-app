@@ -8,6 +8,9 @@ const external = StyleSheet.create({
   Pb_15: {
     paddingBottom: windowHeight(14),
   },
+  pb_30: {
+    paddingBottom: windowHeight(30),
+  },
   pv_5: {
     paddingVertical: windowHeight(10),
   },
