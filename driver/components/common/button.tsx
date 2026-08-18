@@ -4,6 +4,7 @@ import { commonStyles } from "@/styles/common.style";
 import color from "@/themes/app.colors";
 import { windowHeight } from "@/themes/app.constant";
 import { external } from "@/styles/external.style";
+import { ButtonProps } from "@/@types/global";
 
 const Button: React.FC<ButtonProps> = ({
   title,
@@ -11,6 +12,8 @@ const Button: React.FC<ButtonProps> = ({
   width,
   backgroundColor,
   textColor,
+  height,
+  disabled,
 }) => {
   const widthNumber = width || "100%";
   return (
@@ -19,9 +22,11 @@ const Button: React.FC<ButtonProps> = ({
         styles.container,
         {
           width: widthNumber,
+          height: height,
           backgroundColor: backgroundColor || color.buttonBg,
         },
       ]}
+      disabled={disabled}
       onPress={onPress}
     >
       <Text
