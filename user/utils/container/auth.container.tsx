@@ -1,7 +1,14 @@
 import { external } from "@/styles/external.style";
 import { windowHeight, windowWidth } from "@/themes/app.constant";
 import { ReactNode } from "react";
-import { Image, ScrollView, Text, View } from "react-native";
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import styles from "./style";
 import Images from "../images";
 
@@ -13,7 +20,10 @@ type Props = {
 
 const AuthContainer = ({ container, topSpace, showImage }: Props) => {
   return (
-    <View style={[external.fx_1]}>
+    <KeyboardAvoidingView
+      style={[external.fx_1]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       {showImage && (
         <Text
           style={{
@@ -37,7 +47,7 @@ const AuthContainer = ({ container, topSpace, showImage }: Props) => {
           <ScrollView>{container}</ScrollView>
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
