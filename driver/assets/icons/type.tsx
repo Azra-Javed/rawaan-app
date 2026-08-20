@@ -1,4 +1,4 @@
 interface SvgComponentProps {
-    color: string;
+  color: string;
 }
-export default SvgComponentProps
+export default SvgComponentProps;

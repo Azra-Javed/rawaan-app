@@ -1,10 +1,6 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import HomeSecreen from "@/secreens/home/home.secreen";
+import React from "react";
 
 export default function home() {
-  return (
-    <View>
-      <Text>home</Text>
-    </View>
-  )
+  return <HomeSecreen />;
 }

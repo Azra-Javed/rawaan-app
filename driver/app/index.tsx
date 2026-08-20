@@ -10,7 +10,6 @@ export default function index() {
     const getData = async () => {
       try {
         const token = await getToken();
-        console.log(token);
         if (token) {
           setIsLoaggedIn(true);
         } else {

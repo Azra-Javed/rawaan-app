@@ -2,7 +2,7 @@ import { DriverType } from "@/@types/global";
 import { getDriver } from "@/utils/authStorage";
 import { useEffect, useState } from "react";
 
-export function useUser() {
+export function useDriver() {
   const [driver, setDriver] = useState<DriverType>();
   const [loading, setLoading] = useState(true);
 

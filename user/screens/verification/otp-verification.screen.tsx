@@ -69,7 +69,6 @@ const OtpVerificationScreen = () => {
         },
       );
 
-      console.log(response);
       const { isNewUser, token, user } = response.data;
 
       //save JWT + user securely
