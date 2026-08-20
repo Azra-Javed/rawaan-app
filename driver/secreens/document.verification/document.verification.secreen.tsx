@@ -12,9 +12,11 @@ import Button from "@/components/common/button";
 import color from "@/themes/app.colors";
 import { router, useLocalSearchParams } from "expo-router";
 import styles from "../signup/styles";
+import api from "@/api/client";
+import { Toast } from "react-native-toast-notifications";
 
 const DocumentVerificationSecreen = () => {
-  const driverData = useLocalSearchParams();
+  const signupData = useLocalSearchParams();
   const { colors } = useTheme();
   const [showWarning, setShowWarning] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,46 @@ const DocumentVerificationSecreen = () => {
     }));
   };
 
-  const handleSubmit = async () => {};
+  const handleSubmit = async () => {
+    setLoading(true);
+    const driver = {
+      ...signupData,
+      vehicle_type: formData.vehicleType,
+      registeration_number: formData.registrationNumber,
+      registration_date: formData.registrationDate,
+      driving_license: formData.drivingLicenseNumber,
+      vehicle_color: formData.color,
+      rate: formData.rate,
+    };
+
+    await api
+      .post("/driver/auth/registeration-otp", {
+        driver,
+      })
+      .then((res) => {
+        setLoading(false);
+        Toast.show(res.data.message, {
+          type: "success",
+        });
+        router.push({
+          pathname: "/(routes)/otp-verification",
+          params: {
+            email: Array.isArray(signupData?.email)
+              ? signupData.email[0]
+              : signupData?.email,
+
+            type: "registration",
+          },
+        });
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.log(error);
+        Toast.show(error.response?.data?.message || "Something went wrong", {
+          type: "danger",
+        });
+      });
+  };
 
   return (
     <ScrollView>

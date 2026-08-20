@@ -1,15 +1,16 @@
-import { getUser } from "@/utils/authStorage";
+import { DriverType } from "@/@types/global";
+import { getDriver } from "@/utils/authStorage";
 import { useEffect, useState } from "react";
 
 export function useUser() {
-  const [user, setUser] = useState<UserType>();
+  const [driver, setDriver] = useState<DriverType>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadUser = async () => {
+    const loadDriver = async () => {
       try {
-        const storedUser = await getUser();
-        setUser(storedUser);
+        const storedDriver = await getDriver();
+        setDriver(storedDriver);
       } catch (error) {
         console.log("Failed to load user:", error);
       } finally {
@@ -17,11 +18,11 @@ export function useUser() {
       }
     };
 
-    loadUser();
+    loadDriver();
   }, []);
 
   return {
-    user,
+    driver,
     loading,
   };
 }

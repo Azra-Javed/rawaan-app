@@ -1,12 +1,8 @@
-import { View, Text } from "react-native";
+import OtpVerificationScreen from "@/secreens/otp-verification/otp.verification.secreen";
 import React from "react";
 
 const OtpVerification = () => {
-  return (
-    <View>
-      <Text>OtpVerification</Text>
-    </View>
-  );
+  return <OtpVerificationScreen />;
 };
 
 export default OtpVerification;

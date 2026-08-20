@@ -18,7 +18,6 @@ import {
 import { commonStyles } from "@/styles/common.style";
 import { styles } from "./styles";
 import { useToast } from "react-native-toast-notifications";
-import axios from "axios";
 import api from "@/api/client";
 import { saveAuth } from "@/utils/authStorage";
 
@@ -30,8 +29,10 @@ const OtpVerificationScreen = () => {
 
   const toast = useToast();
 
-  // Get email from Login screen
-  const { email } = useLocalSearchParams<{ email: string }>();
+  const { email, type } = useLocalSearchParams<{
+    email: string;
+    type: "login" | "registration";
+  }>();
 
   const ref = useBlurOnFulfill({
     value,
@@ -61,35 +62,49 @@ const OtpVerificationScreen = () => {
     try {
       setLoading(true);
 
-      const response = await api.post(
-        `${process.env.EXPO_PUBLIC_SERVER_URI}/auth/verify-otp`,
-        {
+      // =========================
+      // REGISTRATION
+      // =========================
+      if (type === "registration") {
+        const response = await api.post("/driver/auth/registeration", {
           email,
           otp: value,
-        },
-      );
+        });
+
+        toast.show(response.data.message || "Registration successful!", {
+          type: "success",
+        });
+
+        // IMPORTANT:
+        // Registration does NOT save JWT
+        // Registration does NOT go to Home
+
+        router.replace("/(routes)/login");
+
+        return;
+      }
+
+      // =========================
+      // LOGIN
+      // =========================
+
+      console.log(value);
+      const response = await api.post(`/driver/auth/verify-otp`, {
+        email,
+        otp: value,
+      });
 
       console.log(response);
-      const { isNewUser, token, user } = response.data;
+      const { token, driver } = response.data;
 
-      //save JWT + user securely
-      await saveAuth(token, user);
+      // Save authentication information ONLY after login
+      await saveAuth(token, driver);
 
-      toast.show(response.data.message || "OTP verified successfully", {
+      toast.show(response.data.message || "Login successful!", {
         type: "success",
       });
 
-      if (isNewUser) {
-        router.replace({
-          pathname: "/(routes)/registeration",
-          params: {
-            userId: user.id,
-            email: user.email,
-          },
-        });
-      } else {
-        router.replace("/(tabs)/home");
-      }
+      router.replace("/(tabs)/home");
     } catch (error: any) {
       console.log("Verify OTP error:", error);
       console.log("Backend response:", error.response?.data);
@@ -113,16 +128,26 @@ const OtpVerificationScreen = () => {
     try {
       setLoading(true);
 
-      await axios.post(`${process.env.EXPO_PUBLIC_SERVER_URI}/auth/send-otp`, {
-        email,
-      });
+      // Registration and login may use different endpoints
+      if (type === "registration") {
+        await api.post("/driver/auth/registeration-otp", {
+          email,
+        });
+      } else {
+        await api.post("/driver/auth/send-otp", {
+          email,
+        });
+      }
 
       setValue("");
 
-      toast.show("Verified Successfully!", {
+      toast.show("OTP sent successfully!", {
         type: "success",
       });
     } catch (error: any) {
+      console.log("Resend OTP error:", error);
+      console.log("Backend response:", error.response?.data);
+
       toast.show(error.response?.data?.message || "Unable to resend OTP", {
         type: "danger",
       });

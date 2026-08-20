@@ -23,8 +23,6 @@ export async function sendOtp(req: Request, res: Response) {
     const key = `otp:${email}`;
     const existingOtp = await redis.get(key);
 
-    // Bug fix: previously this branch sent no response at all,
-    // causing the request to hang if an OTP was already active.
     if (existingOtp) {
       return res.status(200).json({
         success: true,

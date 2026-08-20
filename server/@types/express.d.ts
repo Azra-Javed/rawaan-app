@@ -7,6 +7,12 @@ declare global {
         userId: string;
         email: string;
       };
+
+      driver?: {
+        driverId: string;
+        email: string;
+        role: string;
+      };
     }
   }
 }

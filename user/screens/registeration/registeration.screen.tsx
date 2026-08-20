@@ -88,8 +88,6 @@ const RegisteranScreen = () => {
       // This gives proper international format
       const fullPhoneNumber = phoneNumber.number;
 
-      console.log("Phone:", fullPhoneNumber);
-
       const response = await api.put("/user/register", {
         userId,
         email: emailValue,

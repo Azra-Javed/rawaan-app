@@ -29,7 +29,7 @@ const Select = ({
   return (
     <View>
       {title && (
-        <Text style={[styles.title, { color: colors.text }]}>Select input</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
       )}
 
       <RNPickerSelect

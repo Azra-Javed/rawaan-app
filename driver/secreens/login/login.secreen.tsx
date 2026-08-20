@@ -10,8 +10,8 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 import AuthContainer from "../../utils/container/auth.container";
 import styles from "./styles";
 import { useToast } from "react-native-toast-notifications";
-import axios from "axios";
 import EmailInput from "@/components/login/email.input";
+import api from "@/api/client";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -29,12 +29,9 @@ const LoginScreen = () => {
 
     try {
       setLoading(true);
-      const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_SERVER_URI}/auth/send-otp`,
-        {
-          email: email.trim(),
-        },
-      );
+      const response = await api.post(`/driver/auth/send-otp`, {
+        email: email.trim(),
+      });
       setLoading(false);
       toast.show(response.data.message || "OTP sent successfully", {
         type: "success",
@@ -44,6 +41,7 @@ const LoginScreen = () => {
         pathname: "/(routes)/otp-verification",
         params: {
           email: email.trim(),
+          type: "login",
         },
       });
     } catch (error: any) {

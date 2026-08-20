@@ -37,7 +37,22 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   return (
-    <ToastProvider>
+    <ToastProvider
+      placement="top"
+      duration={3000}
+      animationType="slide-in"
+      animationDuration={250}
+      offsetTop={50}
+      swipeEnabled={true}
+      successColor="#16A36A"
+      dangerColor="#E53935"
+      warningColor="#F59E0B"
+      normalColor="#2878D4"
+      textStyle={{
+        fontSize: 14,
+        fontWeight: "600",
+      }}
+    >
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
       </Stack>
