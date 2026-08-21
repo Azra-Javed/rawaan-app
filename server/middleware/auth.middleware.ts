@@ -72,6 +72,7 @@ export const driverAuthMiddleware = (
   next: NextFunction,
 ) => {
   try {
+    console.log("req hit the console");
     const authHeader = req.headers.authorization;
 
     // No Authorization header

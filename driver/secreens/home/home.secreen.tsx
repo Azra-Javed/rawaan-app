@@ -18,11 +18,19 @@ import type { PlaceResult } from "@/utils/nominatim";
 import * as Location from "expo-location";
 import api from "@/api/client";
 import { getItem, setItem } from "@/utils/authStorage";
+import { Toast } from "react-native-toast-notifications";
+import { useDriver } from "@/hooks/useDriver";
+
+import {
+  connectWebSocket,
+  sendWebSocketMessage,
+  disconnectWebSocket,
+} from "@/utils/websocket";
 
 const HomeSecreen = () => {
   const { colors } = useTheme();
+  const { driver } = useDriver();
 
-  // initial location
   const [region, setRegion] = useState<any>({
     latitude: 31.5497,
     longitude: 74.3436,
@@ -31,59 +39,131 @@ const HomeSecreen = () => {
   });
 
   const [currentLocation, setCurrentLocation] = useState<Coord | null>(null);
-
-  // Pickup and destination
   const [pickup, setPickup] = useState<Coord | null>(null);
   const [dropoff, setDropoff] = useState<PlaceResult | null>(null);
 
-  // route
   const [routeCoords, setRouteCoords] = useState<Coord[]>([]);
 
-  // Ride/ UI state
   const [isOn, setIsOn] = useState<boolean>(false);
   const [loading, setloading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  // Get current location
-
+  // Connect to WebSocket
   useEffect(() => {
-    (async () => {
+    connectWebSocket((data) => {
+      console.log("WebSocket data:", data);
+
+      if (data.type === "rideRequest") {
+        console.log("New ride request:", data);
+
+        if (data.pickup) {
+          setPickup(data.pickup);
+        }
+
+        if (data.dropoff) {
+          setDropoff(data.dropoff);
+        }
+
+        setIsModalVisible(true);
+      }
+    });
+
+    return () => {
+      disconnectWebSocket();
+    };
+  }, []);
+
+  // Get saved driver status
+  useEffect(() => {
+    const getStatus = async () => {
+      try {
+        const status = await getItem("status");
+        setIsOn(status === "active" ? true : false);
+      } catch (error) {
+        console.log("Status error:", error);
+      }
+    };
+
+    getStatus();
+  }, []);
+
+  // Track driver location
+  useEffect(() => {
+    let subscription: Location.LocationSubscription | null = null;
+
+    const startLocationTracking = async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
 
         if (status !== "granted") {
-          console.log("Location permission denied");
+          Toast.show(
+            "Please give access to your location to use this application",
+            {
+              type: "danger",
+            },
+          );
           return;
         }
 
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.High,
-        });
+        subscription = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 3000,
+            distanceInterval: 10,
+          },
+          (location) => {
+            const { latitude, longitude } = location.coords;
 
-        const { latitude, longitude } = location.coords;
+            const current = {
+              latitude,
+              longitude,
+            };
 
-        const current = { latitude, longitude };
+            setCurrentLocation(current);
+            setPickup(current);
 
-        setCurrentLocation(current);
-        setPickup(current);
+            setRegion({
+              latitude,
+              longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            });
 
-        setRegion({
-          latitude,
-          longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        });
+            if (isOn && driver?.id) {
+              sendLocationUpdate(current);
+            }
+          },
+        );
       } catch (error) {
-        console.log("Current location error:", error);
+        console.log("Location tracking error:", error);
       }
-    })();
+    };
 
-    // Get saved status
-    (async () => {
-      const status = await getItem("status");
-      setIsOn(status === "active");
-    })();
-  }, []);
+    startLocationTracking();
+
+    return () => {
+      subscription?.remove();
+    };
+  }, [isOn, driver?.id]);
+
+  const sendLocationUpdate = (location: Coord) => {
+    if (!driver?.id) {
+      console.log("Driver ID is missing");
+      return;
+    }
+
+    sendWebSocketMessage({
+      type: "locationUpdate",
+      role: "driver",
+      driverId: driver.id,
+      data: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
+    });
+
+    console.log("Driver location sent:", location);
+  };
 
   const handleStatusChange = async () => {
     try {
@@ -112,12 +192,15 @@ const HomeSecreen = () => {
     setIsModalVisible(false);
   };
 
-  const acceptRideHandler = () => {};
+  const acceptRideHandler = () => {
+    console.log("Ride accepted");
+  };
 
   return (
     <View style={[external.fx_1]}>
       <View style={styles.spaceBelow}>
         <Header isOn={isOn} toggleSwitch={() => handleStatusChange()} />
+
         <FlatList
           data={rideData}
           numColumns={2}
@@ -174,12 +257,8 @@ const HomeSecreen = () => {
                 maximumZ={20}
               />
 
-              {/* Pickup */}
-              {currentLocation && (
-                <Marker coordinate={currentLocation} title="Pickup" />
-              )}
+              {pickup && <Marker coordinate={pickup} title="Pickup" />}
 
-              {/* Destination */}
               {dropoff && (
                 <Marker
                   coordinate={{
@@ -191,7 +270,6 @@ const HomeSecreen = () => {
                 />
               )}
 
-              {/* Route */}
               {routeCoords.length > 0 && (
                 <Polyline
                   coordinates={routeCoords}
@@ -201,7 +279,6 @@ const HomeSecreen = () => {
               )}
             </MapView>
 
-            {/* Attribution */}
             <View
               style={{
                 alignItems: "flex-end",
@@ -217,18 +294,23 @@ const HomeSecreen = () => {
             <View style={{ flexDirection: "row" }}>
               <View style={styles.leftView}>
                 <LocationIcon color={colors.text} />
+
                 <View
                   style={[styles.verticaldot, { borderColor: color.buttonBg }]}
                 />
+
                 <Gps colors={colors.text} />
               </View>
+
               <View style={styles.rightView}>
                 <Text style={[styles.pickup, { color: colors.text }]}>
-                  "chunian "
+                  Chunian
                 </Text>
+
                 <View style={styles.border} />
+
                 <Text style={[styles.drop, { color: colors.text }]}>
-                  "Lahore "
+                  Lahore
                 </Text>
               </View>
             </View>
@@ -241,10 +323,10 @@ const HomeSecreen = () => {
             >
               Distance: 45 km
             </Text>
+
             <Text
               style={{
                 paddingVertical: windowHeight(5),
-                paddingBottom: windowHeight(5),
                 fontSize: windowHeight(14),
               }}
             >
@@ -265,9 +347,10 @@ const HomeSecreen = () => {
                 height={windowHeight(30)}
                 backgroundColor="crimson"
               />
+
               <Button
                 title="Accept"
-                onPress={() => acceptRideHandler()}
+                onPress={acceptRideHandler}
                 width={windowWidth(120)}
                 height={windowHeight(30)}
               />

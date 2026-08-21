@@ -12,7 +12,7 @@ import {
 } from "react-native";
 
 import styles from "./styles";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { external } from "@/styles/external.style";
 import { windowHeight, windowWidth } from "@/themes/app.constant";
 
@@ -20,7 +20,7 @@ import MapView, { Marker, Polyline, UrlTile } from "react-native-maps";
 
 import { router } from "expo-router";
 
-import { Clock, LeftArrow, PickLocation, PickUpLocation } from "@/utils/icons";
+import { Clock, LeftArrow, PickLocation } from "@/utils/icons";
 
 import color from "@/themes/app.colors";
 import DownArrow from "@/assets/icons/downArrow";
@@ -28,7 +28,6 @@ import PlaceHolder from "@/assets/icons/placeHolder";
 
 import * as Location from "expo-location";
 
-import axios from "axios";
 import moment from "moment";
 
 import Button from "@/components/common/button";
@@ -37,50 +36,38 @@ import { getRoute } from "@/utils/osrm";
 import type { Coord } from "@/utils/osrm";
 import type { PlaceResult } from "@/utils/nominatim";
 
-import Constants from "expo-constants";
 import { useUser } from "@/hooks/useUser";
 import PlaceSearchInput from "@/components/location/placeSearchInput";
+
+import {
+  connectWebSocket,
+  sendWebSocketMessage,
+  disconnectWebSocket,
+} from "@/utils/websocket";
+import { Toast } from "react-native-toast-notifications";
+import api from "@/api/client";
 
 export default function RidePlanScreen() {
   const { user } = useUser();
 
-  // -----------------------------
-  // WebSocket
-  // -----------------------------
-
-  const ws = useRef<WebSocket | null>(null);
-  const notificationListener = useRef<any>(null);
-
   const [wsConnected, setWsConnected] = useState(false);
 
-  // -----------------------------
-  // Location
-  // -----------------------------
-
   const [region, setRegion] = useState<any>({
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
+    latitude: 31.5497,
+    longitude: 74.3436,
+    latitudeDelta: 0.9,
+    longitudeDelta: 0.1,
   });
 
   const [currentLocation, setCurrentLocation] = useState<Coord | null>(null);
 
-  // Pickup and destination
   const [pickup, setPickup] = useState<Coord | null>(null);
   const [dropoff, setDropoff] = useState<PlaceResult | null>(null);
 
-  // -----------------------------
-  // Route
-  // -----------------------------
-
   const [routeCoords, setRouteCoords] = useState<Coord[]>([]);
-  const [distance, setDistance] = useState<number | null>(null);
-  const [duration, setDuration] = useState<number | null>(null);
 
-  // -----------------------------
-  // Ride state
-  // -----------------------------
+  const [distance, setDistance] = useState<number | null>(null);
+  const [travelTime, setTravelTime] = useState<number | null>(null);
 
   const [locationSelected, setLocationSelected] = useState(false);
 
@@ -88,73 +75,45 @@ export default function RidePlanScreen() {
 
   const [keyboardAvoidingHeight, setKeyboardAvoidingHeight] = useState(false);
 
-  // -----------------------------
-  // Drivers
-  // -----------------------------
-
   const [driverLists, setDriverLists] = useState<any[]>([]);
-  const [selectedDriver, setSelectedDriver] = useState<any>(undefined);
+  // FIX: was `useState(true)` -- loader should not be true before any request is made
+  const [driverLoader, setDriverLoader] = useState(false);
 
-  const [driverLoader, setDriverLoader] = useState(true);
-
-  // -----------------------------
-  // Travel time
-  // -----------------------------
-
-  const [travelTime, setTravelTime] = useState<number | null>(null);
-
-  // =========================================================
-  // Notifications
-  // =========================================================
-
-  // Notifications.setNotificationHandler({
-  //   handleNotification: async () => ({
-  //     shouldShowAlert: true,
-  //     shouldPlaySound: true,
-  //     shouldSetBadge: false,
-  //   }),
-  // });
-
-  // useEffect(() => {
-  //   notificationListener.current =
-  //     Notifications.addNotificationReceivedListener((notification) => {
-  //       const data: any = notification.request.content.data;
-
-  //       const orderData = {
-  //         currentLocation: data.currentLocation,
-  //         marker: data.marker,
-  //         distance: data.distance,
-  //         driver: data.orderData,
-  //       };
-
-  //       router.push({
-  //         pathname: "/(routes)/ride-details",
-  //         params: {
-  //           orderData: JSON.stringify(orderData),
-  //         },
-  //       });
-  //     });
-
-  //   return () => {
-  //     if (notificationListener.current) {
-  //       Notifications.removeNotificationSubscription(
-  //         notificationListener.current,
-  //       );
-  //     }
-  //   };
-  // }, []);
-
-  // =========================================================
-  // Get current location
-  // =========================================================
+  // WebSocket
 
   useEffect(() => {
-    (async () => {
+    connectWebSocket(
+      (message) => {
+        console.log("WebSocket message:", message);
+
+        if (message.type === "nearbyDrivers") {
+          getDriversData(message.drivers);
+        }
+      },
+      () => {
+        setWsConnected(true);
+      },
+    );
+
+    return () => {
+      setWsConnected(false);
+      disconnectWebSocket();
+    };
+  }, []);
+
+  // Current location
+  useEffect(() => {
+    const getCurrentLocation = async () => {
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
 
         if (status !== "granted") {
-          console.log("Location permission denied");
+          Toast.show(
+            "Please give access to your location to use this application",
+            {
+              type: "danger",
+            },
+          );
           return;
         }
 
@@ -170,182 +129,91 @@ export default function RidePlanScreen() {
         };
 
         setCurrentLocation(current);
-
-        // Current location is pickup
         setPickup(current);
 
         setRegion({
           latitude,
           longitude,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
         });
       } catch (error) {
         console.log("Current location error:", error);
       }
-    })();
+    };
+
+    getCurrentLocation();
   }, []);
 
-  // =========================================================
-  // WebSocket
-  // =========================================================
-
-  const initializeWebSocket = () => {
-    ws.current = new WebSocket("ws://192.168.1.2:8080");
-
-    ws.current.onopen = () => {
-      console.log("Connected to websocket server");
-      setWsConnected(true);
-    };
-
-    ws.current.onerror = (error: any) => {
-      console.log("WebSocket error:", error.message);
-    };
-
-    ws.current.onclose = (event: any) => {
-      console.log("WebSocket closed:", event.code, event.reason);
-
-      setWsConnected(false);
-    };
-  };
-
-  useEffect(() => {
-    initializeWebSocket();
-
-    return () => {
-      if (ws.current) {
-        ws.current.close();
-      }
-    };
-  }, []);
-
-  // =========================================================
-  // Push notification registration
-  // =========================================================
-
-  // useEffect(() => {
-  //   registerForPushNotificationsAsync();
-  // }, []);
-
-  // async function registerForPushNotificationsAsync() {
-  //   if (!Device.isDevice) {
-  //     console.log("Push notifications require a physical device");
-  //     return;
-  //   }
-
-  //   const { status: existingStatus } =
-  //     await Notifications.getPermissionsAsync();
-
-  //   let finalStatus = existingStatus;
-
-  //   if (existingStatus !== "granted") {
-  //     const { status } = await Notifications.requestPermissionsAsync();
-
-  //     finalStatus = status;
-  //   }
-
-  //   if (finalStatus !== "granted") {
-  //     console.log("Push notification permission denied");
-  //     return;
-  //   }
-
-  //   const projectId =
-  //     Constants?.expoConfig?.extra?.eas?.projectId ??
-  //     Constants?.easConfig?.projectId;
-
-  //   if (!projectId) {
-  //     console.log("Expo project ID missing");
-  //     return;
-  //   }
-
-  //   try {
-  //     const token = await Notifications.getExpoPushTokenAsync({
-  //       projectId,
-  //     });
-
-  //     console.log("Push token:", token.data);
-  //   } catch (error) {
-  //     console.log("Push token error:", error);
-  //   }
-
-  //   if (Platform.OS === "android") {
-  //     await Notifications.setNotificationChannelAsync("default", {
-  //       name: "default",
-  //       importance: Notifications.AndroidImportance.MAX,
-  //       vibrationPattern: [0, 250, 250, 250],
-  //     });
-  //   }
-  // }
-
-  // =========================================================
   // Place selected
-  // =========================================================
-
   const handlePlaceSelect = async (place: PlaceResult) => {
     try {
-      const selectedDestination = {
+      const destination = {
         latitude: place.latitude,
         longitude: place.longitude,
       };
 
       setDropoff(place);
-
       setRegion({
         ...region,
         latitude: place.latitude,
         longitude: place.longitude,
       });
-
       setKeyboardAvoidingHeight(false);
-
       setLocationSelected(true);
 
-      // -----------------------------------
-      // Calculate route
-      // -----------------------------------
-
       if (pickup) {
-        const result = await getRoute(pickup, selectedDestination);
+        const result = await getRoute(pickup, destination);
 
         if (result) {
           setRouteCoords(result.coords);
-
           setDistance(result.distanceKm);
-
           setTravelTime(result.durationMin);
         }
       }
-
-      // -----------------------------------
-      // Find nearby drivers
-      // -----------------------------------
-
       requestNearbyDrivers();
     } catch (error) {
       console.log("Place selection error:", error);
     }
   };
 
-  // =========================================================
-  // Nearby drivers
-  // =========================================================
+  // Request nearby drivers
 
-  const getNearbyDrivers = () => {
-    if (!ws.current) return;
+  const requestNearbyDrivers = () => {
+    if (!currentLocation) {
+      console.log("Current location not available");
+      setDriverLoader(false);
+      return;
+    }
 
-    ws.current.onmessage = async (event: any) => {
-      try {
-        const message = JSON.parse(event.data);
+    if (!wsConnected) {
+      console.log("WebSocket not connected");
+      setDriverLoader(false);
+      return;
+    }
 
-        if (message.type === "nearbyDrivers") {
-          await getDriversData(message.drivers);
+    setDriverLoader(true);
+
+    sendWebSocketMessage({
+      type: "requestRide",
+      role: "user",
+      latitude: currentLocation.latitude,
+      longitude: currentLocation.longitude,
+    });
+
+    console.log("Nearby drivers requested");
+
+    setTimeout(() => {
+      setDriverLoader((prev) => {
+        if (prev) {
+          console.log("No driver response in time");
         }
-      } catch (error) {
-        console.log("WebSocket parsing error:", error);
-      }
-    };
+        return false;
+      });
+    }, 8000);
   };
 
+  // Get drivers information
   const getDriversData = async (drivers: any[]) => {
     try {
       if (!drivers?.length) {
@@ -356,46 +224,25 @@ export default function RidePlanScreen() {
 
       const driverIds = drivers.map((driver) => driver.id).join(",");
 
-      const response = await axios.get(
-        `${process.env.EXPO_PUBLIC_SERVER_URI}/driver/get-drivers-data`,
-        {
-          params: {
-            ids: driverIds,
-          },
+      console.log(driverIds);
+
+      const response = await api.get(`/driver/get-drivers-data`, {
+        params: {
+          ids: driverIds,
         },
-      );
+      });
+
+      console.log(response);
 
       setDriverLists(response.data);
-
-      setDriverLoader(false);
     } catch (error) {
       console.log("Driver data error:", error);
-
+    } finally {
       setDriverLoader(false);
     }
   };
 
-  const requestNearbyDrivers = () => {
-    if (!currentLocation || !ws.current || !wsConnected) {
-      console.log("WebSocket not ready");
-      return;
-    }
-
-    ws.current.send(
-      JSON.stringify({
-        type: "requestRide",
-        role: "user",
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
-      }),
-    );
-
-    getNearbyDrivers();
-  };
-  // =========================================================
   // Distance
-  // =========================================================
-
   const calculateDistance = (
     lat1: number,
     lon1: number,
@@ -427,9 +274,7 @@ export default function RidePlanScreen() {
     }
   }, [pickup, dropoff]);
 
-  // =========================================================
   // Arrival time
-  // =========================================================
 
   const getEstimatedArrivalTime = () => {
     if (travelTime === null) {
@@ -439,51 +284,15 @@ export default function RidePlanScreen() {
     return moment().add(travelTime, "minutes").format("hh:mm A");
   };
 
-  // =========================================================
-  // Push notification
-  // =========================================================
-
-  const sendPushNotification = async (expoPushToken: string, data: any) => {
-    try {
-      await axios.post("https://exp.host/--/api/v2/push/send", {
-        to: expoPushToken,
-        sound: "default",
-        title: "New Ride Request",
-        body: "You have a new ride request.",
-        data: {
-          orderData: data,
-        },
-      });
-    } catch (error) {
-      console.log("Push notification error:", error);
-    }
-  };
-
-  // =========================================================
-  // Confirm booking
-  // =========================================================
-
+  // Order
   const handleOrder = async () => {
     if (!currentLocation || !dropoff || distance === null) {
       return;
     }
 
     try {
-      /*
-       * IMPORTANT:
-       *
-       * We are NOT using Google reverse geocoding here.
-       *
-       * For now we use the selected place's
-       * display_name as destination name.
-       *
-       * Current location can later be reverse-geocoded
-       * through your backend/provider.
-       */
-
       const data = {
         user,
-
         currentLocation,
 
         marker: {
@@ -502,25 +311,19 @@ export default function RidePlanScreen() {
 
       console.log("Ride order:", data);
 
-      const driverPushToken = "ExponentPushToken[v1e34ML-hnypD7MKQDDwaK]";
-
-      await sendPushNotification(driverPushToken, JSON.stringify(data));
+      // send the booking
+      // through WebSocket here.
     } catch (error) {
       console.log("Order error:", error);
     }
   };
 
-  // =========================================================
-  // MAP
-  // =========================================================
-
   return (
     <KeyboardAvoidingView
       style={[external.fx_1]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
-      {/* ================= MAP ================= */}
-
       <View>
         <View
           style={{
@@ -531,15 +334,13 @@ export default function RidePlanScreen() {
             style={{ flex: 1 }}
             region={region}
             onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
-            rotateEnabled={true}
-            zoomEnabled={true}
-            zoomControlEnabled={true}
-            showsCompass={true}
-            pitchEnabled={true}
-            scrollEnabled={true}
+            rotateEnabled
+            zoomEnabled
+            zoomControlEnabled
+            showsCompass
+            pitchEnabled
+            scrollEnabled
           >
-            {/* Pickup */}
-
             <UrlTile
               urlTemplate={`https://api.maptiler.com/maps/positron-v4/256/{z}/{x}/{y}.png?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
               maximumZ={20}
@@ -548,8 +349,6 @@ export default function RidePlanScreen() {
             {currentLocation && (
               <Marker coordinate={currentLocation} title="Pickup" />
             )}
-
-            {/* Destination */}
 
             {dropoff && (
               <Marker
@@ -562,8 +361,6 @@ export default function RidePlanScreen() {
               />
             )}
 
-            {/* Route */}
-
             {routeCoords.length > 0 && (
               <Polyline
                 coordinates={routeCoords}
@@ -572,8 +369,6 @@ export default function RidePlanScreen() {
               />
             )}
           </MapView>
-
-          {/* Attribution */}
 
           <View
             style={{
@@ -585,25 +380,15 @@ export default function RidePlanScreen() {
               paddingVertical: 2,
             }}
           >
-            <Text
-              style={{
-                fontSize: 9,
-              }}
-            >
+            <Text style={{ fontSize: 9 }}>
               © MapTiler © OpenStreetMap contributors
             </Text>
           </View>
         </View>
       </View>
 
-      {/* ================= BOTTOM ================= */}
-
       <View style={styles.contentContainer}>
         <View style={styles.container}>
-          {/* ================================================= */}
-          {/* GATHERING OPTIONS */}
-          {/* ================================================= */}
-
           {locationSelected ? (
             <>
               {driverLoader ? (
@@ -624,8 +409,6 @@ export default function RidePlanScreen() {
                     height: windowHeight(280),
                   }}
                 >
-                  {/* Header */}
-
                   <View
                     style={{
                       borderBottomWidth: 1,
@@ -649,8 +432,6 @@ export default function RidePlanScreen() {
                     </Text>
                   </View>
 
-                  {/* Vehicles */}
-
                   <View
                     style={{
                       padding: windowWidth(10),
@@ -660,21 +441,14 @@ export default function RidePlanScreen() {
                       <Pressable
                         key={driver.id ?? index}
                         style={{
-                          width: windowWidth(420),
-
                           borderWidth:
                             selectedVehicle === driver.vehicle_type ? 2 : 0,
-
                           borderRadius: 10,
-
                           padding: 10,
-
                           marginVertical: 5,
                         }}
                         onPress={() => setSelectedVehicle(driver.vehicle_type)}
                       >
-                        {/* Vehicle image */}
-
                         <View
                           style={{
                             alignItems: "center",
@@ -693,14 +467,10 @@ export default function RidePlanScreen() {
                           />
                         </View>
 
-                        {/* Vehicle info */}
-
                         <View
                           style={{
                             flexDirection: "row",
-
                             alignItems: "center",
-
                             justifyContent: "space-between",
                           }}
                         >
@@ -740,12 +510,9 @@ export default function RidePlanScreen() {
                       </Pressable>
                     ))}
 
-                    {/* Confirm */}
-
                     <View
                       style={{
                         paddingHorizontal: windowWidth(10),
-
                         marginTop: windowHeight(15),
                       }}
                     >
@@ -762,10 +529,6 @@ export default function RidePlanScreen() {
             </>
           ) : (
             <>
-              {/* ================================================= */}
-              {/* PLAN YOUR RIDE */}
-              {/* ================================================= */}
-
               <View
                 style={{
                   flexDirection: "row",
@@ -787,22 +550,14 @@ export default function RidePlanScreen() {
                 </Text>
               </View>
 
-              {/* Pickup now */}
-
               <View
                 style={{
                   width: windowWidth(200),
-
                   height: windowHeight(28),
-
                   borderRadius: 20,
-
                   backgroundColor: color.lightGray,
-
                   alignItems: "center",
-
                   justifyContent: "center",
-
                   marginVertical: windowHeight(10),
                 }}
               >
@@ -828,25 +583,16 @@ export default function RidePlanScreen() {
                 </View>
               </View>
 
-              {/* ================================================= */}
-              {/* PICKUP / DESTINATION */}
-              {/* ================================================= */}
-
               <View
                 style={{
                   borderWidth: 2,
                   borderColor: "#000",
                   borderRadius: 15,
-
                   marginBottom: windowHeight(15),
-
                   paddingHorizontal: windowWidth(15),
-
                   paddingVertical: windowHeight(5),
                 }}
               >
-                {/* Current location */}
-
                 <View
                   style={{
                     flexDirection: "row",
@@ -857,13 +603,9 @@ export default function RidePlanScreen() {
                   <View
                     style={{
                       width: Dimensions.get("window").width - 110,
-
                       borderBottomWidth: 1,
-
                       borderBottomColor: "#999",
-
                       marginLeft: 5,
-
                       height: windowHeight(20),
                     }}
                   >
@@ -879,8 +621,6 @@ export default function RidePlanScreen() {
                   </View>
                 </View>
 
-                {/* Destination */}
-
                 <View
                   style={{
                     flexDirection: "row",
@@ -892,23 +632,18 @@ export default function RidePlanScreen() {
                   <View
                     style={{
                       marginLeft: 5,
-
                       width: Dimensions.get("window").width - 110,
                     }}
                   >
                     <PlaceSearchInput
                       placeholder="Where to?"
                       onSelect={(place) => {
-                        setKeyboardAvoidingHeight(false);
-
                         handlePlaceSelect(place);
                       }}
                     />
                   </View>
                 </View>
               </View>
-
-              {/* Distance */}
 
               {distance !== null && travelTime !== null && (
                 <View
@@ -925,6 +660,15 @@ export default function RidePlanScreen() {
                   </Text>
                 </View>
               )}
+
+              <Text
+                style={{
+                  marginTop: 10,
+                  fontSize: 12,
+                }}
+              >
+                WebSocket: {wsConnected ? "Connected" : "Disconnected"}
+              </Text>
             </>
           )}
         </View>
