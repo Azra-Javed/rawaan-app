@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import authRouter from "./modules/auth/auth.routes";
 import UserRouter from "./modules/user/user.routes";
 import authDriverRouter from "./modules/auth/driver.auth.routes";
+import driverRouter from "./modules/driver/driver.routes";
 
 export const app = express();
 
@@ -18,6 +19,7 @@ app.use(cookieParser());
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/user", UserRouter);
 app.use("/api/v1/driver/auth", authDriverRouter);
+app.use("/api/v1/driver", driverRouter);
 
 //testing api
 app.get("/test", (req: Request, res: Response, next: NextFunction) => {

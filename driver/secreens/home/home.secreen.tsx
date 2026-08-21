@@ -12,11 +12,12 @@ import { windowHeight, windowWidth } from "@/themes/app.constant";
 import Button from "@/components/common/button";
 import { Gps, Location as LocationIcon } from "@/utils/icons";
 import color from "@/themes/app.colors";
-import { getRoute } from "@/utils/osrm";
 import type { Coord } from "@/utils/osrm";
 import type { PlaceResult } from "@/utils/nominatim";
 
 import * as Location from "expo-location";
+import api from "@/api/client";
+import { getItem, setItem } from "@/utils/authStorage";
 
 const HomeSecreen = () => {
   const { colors } = useTheme();
@@ -39,7 +40,7 @@ const HomeSecreen = () => {
   const [routeCoords, setRouteCoords] = useState<Coord[]>([]);
 
   // Ride/ UI state
-  const [isOn, setIsOn] = useState<any>();
+  const [isOn, setIsOn] = useState<boolean>(false);
   const [loading, setloading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -76,10 +77,35 @@ const HomeSecreen = () => {
         console.log("Current location error:", error);
       }
     })();
+
+    // Get saved status
+    (async () => {
+      const status = await getItem("status");
+      setIsOn(status === "active");
+    })();
   }, []);
 
-  const handleStatusChange = () => {
-    setIsOn(!isOn);
+  const handleStatusChange = async () => {
+    try {
+      setloading(true);
+
+      const newStatus = isOn ? "inactive" : "active";
+
+      const changeStatus = await api.put(`/driver/update-status`, {
+        status: newStatus,
+      });
+
+      const status = changeStatus.data?.driver?.status;
+
+      if (status) {
+        await setItem("status", status.toString());
+        setIsOn(status === "active");
+      }
+    } catch (error) {
+      console.log("Status change error:", error);
+    } finally {
+      setloading(false);
+    }
   };
 
   const handleClose = () => {
