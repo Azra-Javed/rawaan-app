@@ -28,6 +28,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     backgroundColor: "white",
+    width: windowWidth(420),
     maxWidth: windowWidth(420),
     padding: windowWidth(15),
     paddingHorizontal: windowWidth(30),
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
   drop: {
     fontSize: fontSizes.FONT20,
     fontFamily: fonts.regular,
-    paddingTop: windowHeight(10),
+    paddingTop: windowHeight(13),
   },
 });
 export default styles;

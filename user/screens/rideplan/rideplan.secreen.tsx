@@ -392,7 +392,6 @@ export default function RidePlanScreen() {
 
     getNearbyDrivers();
   };
-
   // =========================================================
   // Distance
   // =========================================================
@@ -539,12 +538,12 @@ export default function RidePlanScreen() {
             pitchEnabled={true}
             scrollEnabled={true}
           >
+            {/* Pickup */}
+
             <UrlTile
               urlTemplate={`https://api.maptiler.com/maps/positron-v4/256/{z}/{x}/{y}.png?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
               maximumZ={20}
             />
-
-            {/* Pickup */}
 
             {currentLocation && (
               <Marker coordinate={currentLocation} title="Pickup" />

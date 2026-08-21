@@ -1,5 +1,5 @@
-import { View, Text, FlatList, Modal } from "react-native";
-import React, { useState } from "react";
+import { View, Text, FlatList, Modal, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
 import Header from "@/components/common/header";
 import { external } from "@/styles/external.style";
 import styles from "./styles";
@@ -7,36 +7,86 @@ import { recentRidesData, rideData } from "@/configs/constants";
 import RenderRideItem from "@/components/ride/render-ride-item";
 import { useTheme } from "@react-navigation/native";
 import RideCard from "@/components/ride/ride.card";
-import { useDriver } from "@/hooks/useDriver";
+import MapView, { Marker, Polyline, UrlTile } from "react-native-maps";
+import { windowHeight, windowWidth } from "@/themes/app.constant";
+import Button from "@/components/common/button";
+import { Gps, Location as LocationIcon } from "@/utils/icons";
+import color from "@/themes/app.colors";
+import { getRoute } from "@/utils/osrm";
+import type { Coord } from "@/utils/osrm";
+import type { PlaceResult } from "@/utils/nominatim";
+
+import * as Location from "expo-location";
 
 const HomeSecreen = () => {
-  const { driver, loading: DriverDataLoading } = useDriver();
-  const [userData, setUserData] = useState<any>(null);
+  const { colors } = useTheme();
+
+  // initial location
+  const [region, setRegion] = useState<any>({
+    latitude: 31.5497,
+    longitude: 74.3436,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  });
+
+  const [currentLocation, setCurrentLocation] = useState<Coord | null>(null);
+
+  // Pickup and destination
+  const [pickup, setPickup] = useState<Coord | null>(null);
+  const [dropoff, setDropoff] = useState<PlaceResult | null>(null);
+
+  // route
+  const [routeCoords, setRouteCoords] = useState<Coord[]>([]);
+
+  // Ride/ UI state
   const [isOn, setIsOn] = useState<any>();
   const [loading, setloading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [region, setRegion] = useState<any>({
-    latitude: 37.78825,
-    longitude: -122.4324,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
-  const [currentLocationName, setcurrentLocationName] = useState("");
-  const [destinationLocationName, setdestinationLocationName] = useState("");
-  const [distance, setdistance] = useState<any>();
-  const [wsConnected, setWsConnected] = useState(false);
-  const [marker, setMarker] = useState<any>(null);
-  const [currentLocation, setCurrentLocation] = useState<any>(null);
-  const [lastLocation, setLastLocation] = useState<any>(null);
-  const [recentRides, setrecentRides] = useState([]);
-  const ws = new WebSocket("ws://192.168.1.2:8080");
 
-  const { colors } = useTheme();
+  // Get current location
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+
+        if (status !== "granted") {
+          console.log("Location permission denied");
+          return;
+        }
+
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
+
+        const { latitude, longitude } = location.coords;
+
+        const current = { latitude, longitude };
+
+        setCurrentLocation(current);
+        setPickup(current);
+
+        setRegion({
+          latitude,
+          longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        });
+      } catch (error) {
+        console.log("Current location error:", error);
+      }
+    })();
+  }, []);
+
   const handleStatusChange = () => {
     setIsOn(!isOn);
   };
 
-  const handleClose = () => {};
+  const handleClose = () => {
+    setIsModalVisible(false);
+  };
+
+  const acceptRideHandler = () => {};
 
   return (
     <View style={[external.fx_1]}>
@@ -51,7 +101,10 @@ const HomeSecreen = () => {
         />
 
         <View style={[styles.rideContainer, { backgroundColor: colors.card }]}>
-          <Text style={[styles.rideTitle, { color: colors.text }]}>
+          <Text
+            style={[styles.rideTitle, { color: colors.text }]}
+            onPress={() => setIsModalVisible(true)}
+          >
             Recent Rides
           </Text>
 
@@ -62,11 +115,140 @@ const HomeSecreen = () => {
           />
         </View>
       </View>
+
       <Modal
         transparent={true}
         visible={isModalVisible}
         onRequestClose={handleClose}
-      ></Modal>
+      >
+        <TouchableOpacity style={styles.modalBackground} activeOpacity={1}>
+          <TouchableOpacity style={styles.modalContainer} activeOpacity={1}>
+            <View>
+              <Text style={styles.modalTitle}>New Ride Request Received!</Text>
+            </View>
+
+            <MapView
+              key={isModalVisible ? "map-visible" : "map-hidden"}
+              style={{
+                width: "100%",
+                height: windowHeight(250),
+                marginTop: windowHeight(10),
+              }}
+              region={region}
+              onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+              rotateEnabled={true}
+              zoomEnabled={true}
+              zoomControlEnabled={true}
+              showsCompass={true}
+              pitchEnabled={true}
+              scrollEnabled={true}
+            >
+              <UrlTile
+                urlTemplate={`https://api.maptiler.com/maps/positron-v4/256/{z}/{x}/{y}.png?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
+                maximumZ={20}
+              />
+
+              {/* Pickup */}
+              {currentLocation && (
+                <Marker coordinate={currentLocation} title="Pickup" />
+              )}
+
+              {/* Destination */}
+              {dropoff && (
+                <Marker
+                  coordinate={{
+                    latitude: dropoff.latitude,
+                    longitude: dropoff.longitude,
+                  }}
+                  title="Dropoff"
+                  pinColor="red"
+                />
+              )}
+
+              {/* Route */}
+              {routeCoords.length > 0 && (
+                <Polyline
+                  coordinates={routeCoords}
+                  strokeWidth={4}
+                  strokeColor="blue"
+                />
+              )}
+            </MapView>
+
+            {/* Attribution */}
+            <View
+              style={{
+                alignItems: "flex-end",
+                marginTop: -windowHeight(16),
+                marginBottom: windowHeight(6),
+              }}
+            >
+              <Text style={{ fontSize: 9 }}>
+                © MapTiler © OpenStreetMap contributors
+              </Text>
+            </View>
+
+            <View style={{ flexDirection: "row" }}>
+              <View style={styles.leftView}>
+                <LocationIcon color={colors.text} />
+                <View
+                  style={[styles.verticaldot, { borderColor: color.buttonBg }]}
+                />
+                <Gps colors={colors.text} />
+              </View>
+              <View style={styles.rightView}>
+                <Text style={[styles.pickup, { color: colors.text }]}>
+                  "chunian "
+                </Text>
+                <View style={styles.border} />
+                <Text style={[styles.drop, { color: colors.text }]}>
+                  "Lahore "
+                </Text>
+              </View>
+            </View>
+
+            <Text
+              style={{
+                paddingTop: windowHeight(5),
+                fontSize: windowHeight(14),
+              }}
+            >
+              Distance: 45 km
+            </Text>
+            <Text
+              style={{
+                paddingVertical: windowHeight(5),
+                paddingBottom: windowHeight(5),
+                fontSize: windowHeight(14),
+              }}
+            >
+              Amount: 135 BDT
+            </Text>
+
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginVertical: windowHeight(5),
+              }}
+            >
+              <Button
+                title="Decline"
+                onPress={handleClose}
+                width={windowWidth(120)}
+                height={windowHeight(30)}
+                backgroundColor="crimson"
+              />
+              <Button
+                title="Accept"
+                onPress={() => acceptRideHandler()}
+                width={windowWidth(120)}
+                height={windowHeight(30)}
+              />
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
