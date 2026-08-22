@@ -26,3 +26,20 @@ export async function searchPlaces(query: string): Promise<PlaceResult[]> {
     return [];
   }
 }
+
+export async function reverseGeocode(
+  lat: number,
+  lon: number,
+): Promise<string> {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+      { headers: { "User-Agent": "rawaan-app/1.0" } },
+    );
+    const data = await res.json();
+    return data.display_name || "Unknown location";
+  } catch (error) {
+    console.log("Reverse geocode error:", error);
+    return "Unknown location";
+  }
+}

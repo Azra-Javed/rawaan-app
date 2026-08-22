@@ -61,7 +61,6 @@ export const registerUser = async (req: Request, res: Response) => {
 
 // @desc   get user info
 // @route  PUT /api/v1/user/me
-
 export const getUserInfo = async (req: Request, res: Response) => {
   try {
     const user = req.user;
@@ -72,5 +71,29 @@ export const getUserInfo = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.log(error);
+  }
+};
+
+//@desc: update user's push notification token
+//@route: PUT /api/v1/user/update-push-token
+export const updateUserPushToken = async (req: Request, res: Response) => {
+  try {
+    const { pushToken } = req.body;
+
+    if (!pushToken || !req.user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing push token or user" });
+    }
+
+    const user = await prisma.user.update({
+      where: { id: req.user.userId },
+      data: { pushToken },
+    });
+
+    return res.status(200).json({ success: true, user });
+  } catch (error: any) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 };

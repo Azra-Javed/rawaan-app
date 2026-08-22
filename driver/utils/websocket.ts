@@ -2,8 +2,12 @@ let socket: WebSocket | null = null;
 
 const SOCKET_URL = "ws://192.168.43.237:8080";
 
-export const connectWebSocket = (onMessage?: (data: any) => void) => {
+export const connectWebSocket = (
+  onMessage?: (data: any) => void,
+  onConnect?: () => void,
+) => {
   if (socket && socket.readyState === WebSocket.OPEN) {
+    onConnect?.(); // already connected -- still notify the caller
     return socket;
   }
 
@@ -11,6 +15,7 @@ export const connectWebSocket = (onMessage?: (data: any) => void) => {
 
   socket.onopen = () => {
     console.log("WebSocket connected");
+    onConnect?.(); // notify the caller once the connection actually opens
   };
 
   socket.onmessage = (event) => {
@@ -37,10 +42,11 @@ export const connectWebSocket = (onMessage?: (data: any) => void) => {
 export const sendWebSocketMessage = (data: any) => {
   if (!socket || socket.readyState !== WebSocket.OPEN) {
     console.log("WebSocket is not connected");
-    return;
+    return false;
   }
 
   socket.send(JSON.stringify(data));
+  return true;
 };
 
 export const disconnectWebSocket = () => {
@@ -48,4 +54,8 @@ export const disconnectWebSocket = () => {
     socket.close();
     socket = null;
   }
+};
+
+export const isWebSocketConnected = (): boolean => {
+  return socket?.readyState === WebSocket.OPEN;
 };

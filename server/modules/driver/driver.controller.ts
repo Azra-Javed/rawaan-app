@@ -84,3 +84,41 @@ export const getDriversById = async (req: Request, res: Response) => {
     });
   }
 };
+
+//@desc: update driver's push notification token
+//@route: PUT /api/v1/driver/update-push-token
+export const updatePushToken = async (req: Request, res: Response) => {
+  try {
+    const { pushToken } = req.body;
+
+    if (!pushToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Push token is required",
+      });
+    }
+
+    if (!req.driver?.driverId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const driver = await prisma.driver.update({
+      where: { id: req.driver.driverId },
+      data: { pushToken },
+    });
+
+    return res.status(200).json({
+      success: true,
+      driver,
+    });
+  } catch (error: any) {
+    console.error("Update push token error:", error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
