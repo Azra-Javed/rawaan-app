@@ -212,7 +212,7 @@ export const updatingRideStatus = async (req: Request, res: Response) => {
 
     const updatedRide = await prisma.rides.update({
       where: { id: rideId },
-      data: { status: rideStatus },
+      data: { status: rideStatus } as any,
     });
 
     if (rideStatus === "Completed") {

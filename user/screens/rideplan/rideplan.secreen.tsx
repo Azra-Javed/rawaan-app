@@ -42,24 +42,24 @@ import { Toast } from "react-native-toast-notifications";
 import api from "@/api/client";
 import axios from "axios";
 
-import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
-import Constants from "expo-constants";
+// import * as Notifications from "expo-notifications";
+// import * as Device from "expo-device";
+// import Constants from "expo-constants";
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+// Notifications.setNotificationHandler({
+//   handleNotification: async () => ({
+//     shouldShowBanner: true,
+//     shouldShowList: true,
+//     shouldPlaySound: true,
+//     shouldSetBadge: false,
+//   }),
+// });
 
 export default function RidePlanScreen() {
   const { user } = useUser();
-  const notificationListener = useRef<Notifications.EventSubscription | null>(
-    null,
-  );
+  // const notificationListener = useRef<Notifications.EventSubscription | null>(
+  //   null,
+  // );
 
   const [wsConnected, setWsConnected] = useState(false);
   const [region, setRegion] = useState({
@@ -272,29 +272,29 @@ export default function RidePlanScreen() {
   };
 
   // Push Notifications Listener
-  useEffect(() => {
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        try {
-          const payload = JSON.parse(
-            notification?.request?.content?.data?.orderData as string,
-          );
+  // useEffect(() => {
+  //   notificationListener.current =
+  //     Notifications.addNotificationReceivedListener((notification) => {
+  //       try {
+  //         const payload = JSON.parse(
+  //           notification?.request?.content?.data?.orderData as string,
+  //         );
 
-          if (payload.type === "rideAccepted") {
-            router.push({
-              pathname: "/(routes)/ride-details",
-              params: { orderData: JSON.stringify(payload) },
-            });
-          }
-        } catch (error) {
-          console.log("Failed to process rider notification:", error);
-        }
-      });
+  //         if (payload.type === "rideAccepted") {
+  //           router.push({
+  //             pathname: "/(routes)/ride-details",
+  //             params: { orderData: JSON.stringify(payload) },
+  //           });
+  //         }
+  //       } catch (error) {
+  //         console.log("Failed to process rider notification:", error);
+  //       }
+  //     });
 
-    return () => {
-      notificationListener.current?.remove();
-    };
-  }, []);
+  //   return () => {
+  //     notificationListener.current?.remove();
+  //   };
+  // }, []);
 
   const sendPushNotification = async (expoPushToken: string, data: any) => {
     const message = {
@@ -310,65 +310,65 @@ export default function RidePlanScreen() {
       .catch((error) => console.log(error));
   };
 
-  async function registerForPushNotificationsAsync() {
-    if (Device.isDevice) {
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
+  // async function registerForPushNotificationsAsync() {
+  //   if (Device.isDevice) {
+  //     const { status: existingStatus } =
+  //       await Notifications.getPermissionsAsync();
+  //     let finalStatus = existingStatus;
 
-      if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
+  //     if (existingStatus !== "granted") {
+  //       const { status } = await Notifications.requestPermissionsAsync();
+  //       finalStatus = status;
+  //     }
 
-      if (finalStatus !== "granted") {
-        Toast.show("Failed to get push token for push notification!", {
-          type: "danger",
-        });
-        return;
-      }
+  //     if (finalStatus !== "granted") {
+  //       Toast.show("Failed to get push token for push notification!", {
+  //         type: "danger",
+  //       });
+  //       return;
+  //     }
 
-      const projectId =
-        Constants?.expoConfig?.extra?.eas?.projectId ??
-        Constants?.easConfig?.projectId;
+  //     const projectId =
+  //       Constants?.expoConfig?.extra?.eas?.projectId ??
+  //       Constants?.easConfig?.projectId;
 
-      if (!projectId) {
-        Toast.show("Failed to get project id for push notification!", {
-          type: "danger",
-        });
-        return;
-      }
+  //     if (!projectId) {
+  //       Toast.show("Failed to get project id for push notification!", {
+  //         type: "danger",
+  //       });
+  //       return;
+  //     }
 
-      try {
-        const pushTokenString = (
-          await Notifications.getExpoPushTokenAsync({ projectId })
-        ).data;
+  //     try {
+  //       const pushTokenString = (
+  //         await Notifications.getExpoPushTokenAsync({ projectId })
+  //       ).data;
 
-        await api.put("/user/update-push-token", {
-          pushToken: pushTokenString,
-        });
-      } catch (e: unknown) {
-        Toast.show(`${e}`, { type: "danger" });
-      }
-    } else {
-      Toast.show("Must use physical device for Push Notifications", {
-        type: "danger",
-      });
-    }
+  //       await api.put("/user/update-push-token", {
+  //         pushToken: pushTokenString,
+  //       });
+  //     } catch (e: unknown) {
+  //       Toast.show(`${e}`, { type: "danger" });
+  //     }
+  //   } else {
+  //     Toast.show("Must use physical device for Push Notifications", {
+  //       type: "danger",
+  //     });
+  //   }
 
-    if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
-        name: "default",
-        importance: Notifications.AndroidImportance.MAX,
-        vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
-      });
-    }
-  }
+  //   if (Platform.OS === "android") {
+  //     Notifications.setNotificationChannelAsync("default", {
+  //       name: "default",
+  //       importance: Notifications.AndroidImportance.MAX,
+  //       vibrationPattern: [0, 250, 250, 250],
+  //       lightColor: "#FF231F7C",
+  //     });
+  //   }
+  // }
 
-  useEffect(() => {
-    registerForPushNotificationsAsync();
-  }, []);
+  // useEffect(() => {
+  //   registerForPushNotificationsAsync();
+  // }, []);
 
   const handleOrder = async () => {
     if (!currentLocation || !dropoff || distance === null) return;
