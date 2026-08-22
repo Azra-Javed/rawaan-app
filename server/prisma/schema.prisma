@@ -17,7 +17,7 @@ model User {
   totalRides   Float    @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  ride         Rides[]  @relation("UserRides")
+  rides        Rides[]  @relation("UserRides")
 }
 
 enum VehicleType {
@@ -52,14 +52,19 @@ model Driver {
 }
 
 model Rides {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId    String   @db.ObjectId
-  driverId  String   @db.ObjectId
-  charge    Float
-  user      User     @relation("UserRides", fields: [userId], references: [id])
-  driver    Driver   @relation("DriverRides", fields: [driverId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                      String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId                  String   @db.ObjectId
+  driverId                String   @db.ObjectId
+  charge                  Float
+  currentLocationName     String?
+  destinationLocationName String?
+  distance                String
+  status                  String   @default("Processing")
+  rating                  Float?
+  user                    User     @relation("UserRides", fields: [userId], references: [id])
+  driver                  Driver   @relation("DriverRides", fields: [driverId], references: [id])
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
 }
 
 model Otp {
