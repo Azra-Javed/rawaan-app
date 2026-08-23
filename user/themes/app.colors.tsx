@@ -31,9 +31,11 @@ export type Color = {
   secondaryFont: string;
   red: string;
   title: string;
+  primary: string;
 };
 
 const color: Color = {
+  primary: "#1366d3",
   lightGray: "#F5F5F5",
   regularText: "#8F8F8F",
   primaryText: "#1F1F1F",

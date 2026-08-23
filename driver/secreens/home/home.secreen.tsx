@@ -99,7 +99,7 @@ const HomeScreen = () => {
 
   const [userData, setUserData] = useState<any>(null);
 
-  const [recentRides, setrecentRides] = useState([]);
+  const [recentRides, setrecentRides] = useState<any>([]);
 
   // Connect to the WebSocket once when the screen mounts, and mark connection state
   useEffect(() => {
@@ -347,7 +347,7 @@ const HomeScreen = () => {
       setIsModalVisible(false);
 
       router.push({
-        pathname: "/(routes)/ride-details/index",
+        pathname: "/(routes)/ride-details",
         params: { orderData: JSON.stringify(rideData) },
       });
     } catch (error) {
@@ -500,6 +500,17 @@ const HomeScreen = () => {
   //   registerForPushNotificationsAsync();
   // }, []);
 
+  //get recent rides
+
+  useEffect(() => {
+    const getRecentRides = async () => {
+      const res = await api.get(`/driver/get-rides`);
+      setrecentRides(res.data.rides);
+    };
+
+    getRecentRides();
+  }, []);
+
   return (
     <View style={[external.fx_1]}>
       <View style={styles.spaceBelow}>
@@ -522,7 +533,7 @@ const HomeScreen = () => {
           </Text>
 
           <FlatList
-            data={recentRidesData}
+            data={recentRides}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => <RideCard item={item} />}
           />

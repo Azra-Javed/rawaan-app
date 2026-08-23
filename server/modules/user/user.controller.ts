@@ -97,3 +97,34 @@ export const updateUserPushToken = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc: getting user's all rides
+//@route: PUT /api/v1/user/get-rides
+export const getAllRides = async (req: any, res: Response) => {
+  try {
+    const rides = await prisma.rides.findMany({
+      where: {
+        userId: req.user?.id,
+      },
+      include: {
+        driver: true,
+        user: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      rides,
+    });
+  } catch (error) {
+    console.log("Get all rides error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to get user rides",
+    });
+  }
+};

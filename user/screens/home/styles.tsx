@@ -1,16 +1,27 @@
 import { external } from "@/styles/external.style";
 import color from "@/themes/app.colors";
-import { windowHeight } from "@/themes/app.constant";
+import { fontSizes, windowHeight, windowWidth } from "@/themes/app.constant";
+import fonts from "@/themes/app.fonts";
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   container: {
-    //backgroudColor: "fff",
     paddingTop: windowHeight(23),
   },
   containerStyle: {
     backgroundColor: color.lightGray,
-    ...external.pb_30,
+    ...external.Pb_30,
+  },
+  rideContainer: {
+    paddingHorizontal: windowWidth(20),
+    paddingTop: windowHeight(2),
+    paddingBottom: windowHeight(3),
+  },
+  rideTitle: {
+    marginVertical: windowHeight(5),
+    fontSize: fontSizes.FONT25,
+    fontFamily: fonts.medium,
+    fontWeight: "600",
   },
 });
 

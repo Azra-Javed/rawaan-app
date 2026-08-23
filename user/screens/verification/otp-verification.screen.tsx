@@ -61,13 +61,10 @@ const OtpVerificationScreen = () => {
     try {
       setLoading(true);
 
-      const response = await api.post(
-        `${process.env.EXPO_PUBLIC_SERVER_URI}/auth/verify-otp`,
-        {
-          email,
-          otp: value,
-        },
-      );
+      const response = await api.post(`/auth/verify-otp`, {
+        email,
+        otp: value,
+      });
 
       const { isNewUser, token, user } = response.data;
 

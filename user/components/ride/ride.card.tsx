@@ -22,7 +22,7 @@ export default function RideCard({ item }: { item: any }) {
           <View style={[styles.profile, { flexDirection: "row" }]}>
             <Image source={Images.user} style={styles.userimage} />
             <Text style={[styles.userName, { color: colors.text }]}>
-              {item?.user?.name}
+              {item?.driver?.name}
             </Text>
           </View>
           <View style={styles.rate}>
