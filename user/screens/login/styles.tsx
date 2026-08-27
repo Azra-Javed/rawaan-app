@@ -1,77 +1,158 @@
-import { commonStyles } from "@/styles/common.style";
-import { external } from "@/styles/external.style";
 import color from "@/themes/app.colors";
-import { fontSizes, windowHeight, windowWidth } from "@/themes/app.constant";
+import { windowHeight } from "@/themes/app.constant";
 import fonts from "@/themes/app.fonts";
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
-  transformLine: {
-    transform: [{ rotate: "-90deg" }],
-    height: windowHeight(50),
-    width: windowWidth(120),
-    position: "absolute",
-    left: windowWidth(-50),
-    top: windowHeight(-20),
-  },
-  countryCodeContainer: {
-    width: windowWidth(69),
-  },
-  phoneNumberInput: {
-    width: windowWidth(326),
-    height: windowHeight(39),
-    backgroundColor: color.lightGray,
-    borderRadius: 4,
-    marginHorizontal: windowHeight(9),
-    justifyContent: "center",
-    paddingHorizontal: windowHeight(9),
-    borderWidth: 1,
-    borderColor: color.border,
+  screen: {
+    flex: 1,
+    backgroundColor: color.ivory,
   },
 
-  emailInput: {
-    width: windowWidth(700),
-    height: windowHeight(39),
-    backgroundColor: color.lightGray,
-    borderRadius: 4,
-    justifyContent: "center",
-    paddingHorizontal: windowHeight(9),
-    borderWidth: 1,
-    borderColor: color.border,
-    marginTop: 5,
+  // ================= HEADER =================
+
+  header: {
+    paddingTop: windowHeight(75),
+    paddingHorizontal: 24,
+    paddingBottom: windowHeight(45),
+
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
 
-  rememberMeText: {
-    fontWeight: "400",
-    fontFamily: fonts.medium,
-    fontSize: fontSizes.FONT16,
-    color: color.primaryText,
+  eyebrow: {
+    fontFamily: fonts.display,
+    color: color.routeAmber,
+
+    fontSize: 11,
+    letterSpacing: 2,
+
+    marginBottom: windowHeight(15),
   },
-  forgotPasswordText: {
-    fontWeight: "400",
-    fontFamily: fonts.medium,
-    color: color.buttonBg,
-    fontSize: fontSizes.FONT16,
+
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
-  newUserContainer: {
-    ...external.fd_row,
-    ...external.ai_center,
-    ...external.mt_12,
-    ...external.as_center,
+
+  titleIcon: {
+    width: 46,
+    height: 46,
+
+    borderRadius: 14,
+
+    backgroundColor: "rgba(255,255,255,0.10)",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginRight: 12,
   },
-  newUserText: {
-    ...commonStyles.regularText,
+
+  title: {
+    fontFamily: fonts.display,
+
+    color: color.white,
+
+    fontSize: 24,
+    lineHeight: 30,
   },
-  signUpText: {
-    ...commonStyles.mediumTextBlack12,
-    fontFamily: fonts.bold,
-    paddingHorizontal: windowHeight(4),
+
+  subtitle: {
+    color: "#D1DFDD",
+
+    fontSize: 12.5,
+
+    marginTop: 3,
+
+    lineHeight: 18,
   },
-  rememberTextView: {
-    ...external.fd_row,
-    ...external.ai_center,
-    ...external.mt_5,
-    ...external.js_space,
+
+  // ================= CONTENT =================
+
+  content: {
+    flex: 1,
+
+    paddingHorizontal: 20,
+    paddingTop: windowHeight(28),
+  },
+
+  // ================= FORM =================
+
+  formCard: {
+    backgroundColor: color.white,
+
+    borderRadius: 20,
+
+    paddingHorizontal: 18,
+    paddingVertical: 22,
+
+    borderWidth: 1,
+    borderColor: "#0F4C4A12",
+  },
+
+  formHeader: {
+    marginBottom: windowHeight(22),
+  },
+
+  formTitle: {
+    fontFamily: fonts.display,
+
+    fontSize: 20,
+
+    color: color.nightIndigo,
+
+    marginBottom: 5,
+  },
+
+  formSubtitle: {
+    fontSize: 12.5,
+
+    lineHeight: 19,
+
+    color: color.slateTeal,
+  },
+
+  // ================= INPUT =================
+
+  inputContainer: {
+    width: "100%",
+  },
+
+  // ================= BUTTON =================
+
+  buttonContainer: {
+    marginTop: windowHeight(20),
+  },
+
+  // ================= FOOTER =================
+
+  footer: {
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    justifyContent: "center",
+
+    marginTop: windowHeight(25),
+  },
+
+  footerLine: {
+    height: 1,
+
+    width: 35,
+
+    backgroundColor: "#0F4C4A18",
+  },
+
+  footerText: {
+    fontSize: 9,
+
+    color: color.slateTeal,
+
+    marginHorizontal: 10,
+
+    letterSpacing: 0.4,
   },
 });
 

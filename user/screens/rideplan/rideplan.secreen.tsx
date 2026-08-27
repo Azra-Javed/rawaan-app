@@ -1,85 +1,49 @@
 import {
-  View,
-  Text,
+  ActivityIndicator,
+  Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
-  TouchableOpacity,
   Pressable,
   ScrollView,
-  Image,
-  ActivityIndicator,
-  StyleSheet,
   StatusBar,
-  Keyboard,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useEffect, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 
-import { windowHeight, windowWidth } from "@/themes/app.constant";
+import { windowHeight } from "@/themes/app.constant";
 
-import MapView, { Marker, Polyline, UrlTile } from "react-native-maps";
 import { router } from "expo-router";
+import MapView, { Marker, Polyline, UrlTile } from "react-native-maps";
 
 import * as Location from "expo-location";
 import moment from "moment";
 
 import Button from "@/components/common/button";
-import { getRoute, type Coord } from "@/utils/osrm";
 import { reverseGeocode, type PlaceResult } from "@/utils/nominatim";
+import { getRoute, type Coord } from "@/utils/osrm";
 
-import { useUser } from "@/hooks/useUser";
 import PlaceSearchInput from "@/components/location/placeSearchInput";
+import { useUser } from "@/hooks/useUser";
 
 import {
   connectWebSocket,
-  sendWebSocketMessage,
   disconnectWebSocket,
+  sendWebSocketMessage,
 } from "@/utils/websocket";
 
-import { Toast } from "react-native-toast-notifications";
 import api from "@/api/client";
 import axios from "axios";
+import { Toast } from "react-native-toast-notifications";
 
-import { LinearGradient } from "expo-linear-gradient";
+import color from "@/themes/app.colors";
 import { Ionicons } from "@expo/vector-icons";
-
-// ============================================================
-// RAWAAN DESIGN TOKENS
-// ============================================================
-
-const palette = {
-  tealDark: "#0F4C4A",
-  teal: "#176B68",
-  tealLight: "#23817D",
-  tealSoft: "#E7F2F1",
-
-  amber: "#F5A524",
-  amberSoft: "#FFF4DD",
-
-  ivory: "#FBF8F2",
-  white: "#FFFFFF",
-
-  textDark: "#172525",
-  textMuted: "#7A8585",
-  textLight: "#A2AAAA",
-
-  border: "#E4EAEA",
-  borderTeal: "#D5E8E6",
-
-  coral: "#E85C4A",
-  coralSoft: "#FDECEA",
-
-  green: "#4C9A6A",
-  greenSoft: "#EAF5EE",
-
-  graySoft: "#F4F6F6",
-};
-
-// ============================================================
-// COMPONENT
-// ============================================================
+import styles from "./styles";
 
 export default function RidePlanScreen() {
   const { user } = useUser();
@@ -482,7 +446,7 @@ export default function RidePlanScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? insets.top : 0}
     >
-      <StatusBar barStyle="light-content" backgroundColor={palette.tealDark} />
+      <StatusBar barStyle="light-content" backgroundColor={color.tealDark} />
 
       {/* ======================================================
           MAP
@@ -523,7 +487,7 @@ export default function RidePlanScreen() {
                 longitude: dropoff.longitude,
               }}
               title="Dropoff"
-              pinColor={palette.coral}
+              pinColor={color.coral}
             />
           )}
 
@@ -531,7 +495,7 @@ export default function RidePlanScreen() {
             <Polyline
               coordinates={routeCoords}
               strokeWidth={5}
-              strokeColor={palette.teal}
+              strokeColor={color.teal}
             />
           )}
         </MapView>
@@ -580,11 +544,11 @@ export default function RidePlanScreen() {
                     <Ionicons
                       name="car-outline"
                       size={27}
-                      color={palette.tealDark}
+                      color={color.tealDark}
                     />
                   </View>
 
-                  <ActivityIndicator size="small" color={palette.teal} />
+                  <ActivityIndicator size="small" color={color.teal} />
 
                   <Text style={styles.loadingTitle}>Finding nearby rides</Text>
 
@@ -617,7 +581,7 @@ export default function RidePlanScreen() {
                       <Ionicons
                         name="arrow-back"
                         size={20}
-                        color={palette.tealDark}
+                        color={color.tealDark}
                       />
                     </Pressable>
 
@@ -635,7 +599,7 @@ export default function RidePlanScreen() {
                       <Ionicons
                         name="car-outline"
                         size={20}
-                        color={palette.tealDark}
+                        color={color.tealDark}
                       />
                     </View>
                   </View>
@@ -651,7 +615,7 @@ export default function RidePlanScreen() {
                           <Ionicons
                             name="navigate-outline"
                             size={17}
-                            color={palette.tealDark}
+                            color={color.tealDark}
                           />
                         </View>
 
@@ -671,7 +635,7 @@ export default function RidePlanScreen() {
                           <Ionicons
                             name="time-outline"
                             size={17}
-                            color={palette.tealDark}
+                            color={color.tealDark}
                           />
                         </View>
 
@@ -732,7 +696,7 @@ export default function RidePlanScreen() {
                               <Ionicons
                                 name="checkmark"
                                 size={13}
-                                color={palette.white}
+                                color={color.white}
                               />
                             </View>
                           )}
@@ -786,7 +750,7 @@ export default function RidePlanScreen() {
                                 <Ionicons
                                   name="time-outline"
                                   size={14}
-                                  color={palette.textMuted}
+                                  color={color.textMuted}
                                 />
 
                                 <Text style={styles.driverMetaText}>
@@ -798,7 +762,7 @@ export default function RidePlanScreen() {
                                 <Ionicons
                                   name="checkmark-circle-outline"
                                   size={14}
-                                  color={palette.green}
+                                  color={color.green}
                                 />
 
                                 <Text style={styles.driverMetaText}>
@@ -818,8 +782,8 @@ export default function RidePlanScreen() {
 
                   <View style={styles.bookingSection}>
                     <Button
-                      backgroundColor={palette.tealDark}
-                      textColor={palette.white}
+                      backgroundColor={color.tealDark}
+                      textColor={color.white}
                       title="Confirm Booking"
                       onPress={handleOrder}
                     />
@@ -828,7 +792,7 @@ export default function RidePlanScreen() {
                       <Ionicons
                         name="shield-checkmark-outline"
                         size={14}
-                        color={palette.teal}
+                        color={color.teal}
                       />
 
                       <Text style={styles.bookingSecureText}>
@@ -862,7 +826,7 @@ export default function RidePlanScreen() {
                   <Ionicons
                     name="arrow-back"
                     size={20}
-                    color={palette.tealDark}
+                    color={color.tealDark}
                   />
                 </TouchableOpacity>
 
@@ -880,7 +844,7 @@ export default function RidePlanScreen() {
                   <Ionicons
                     name="location-outline"
                     size={21}
-                    color={palette.tealDark}
+                    color={color.tealDark}
                   />
                 </View>
               </View>
@@ -897,7 +861,7 @@ export default function RidePlanScreen() {
                   <Ionicons
                     name="flash-outline"
                     size={16}
-                    color={palette.amber}
+                    color={color.amber}
                   />
                 </View>
 
@@ -910,7 +874,7 @@ export default function RidePlanScreen() {
                 <Ionicons
                   name="chevron-down"
                   size={17}
-                  color={palette.textMuted}
+                  color={color.textMuted}
                 />
               </TouchableOpacity>
 
@@ -932,7 +896,7 @@ export default function RidePlanScreen() {
                     <Ionicons
                       name="radio-button-on"
                       size={17}
-                      color={palette.tealDark}
+                      color={color.tealDark}
                     />
                   </View>
 
@@ -960,7 +924,7 @@ export default function RidePlanScreen() {
                       styles.destinationLocationIcon,
                     ]}
                   >
-                    <Ionicons name="location" size={17} color={palette.coral} />
+                    <Ionicons name="location" size={17} color={color.coral} />
                   </View>
 
                   <View style={styles.locationContent}>
@@ -987,7 +951,7 @@ export default function RidePlanScreen() {
                       <Ionicons
                         name="navigate-outline"
                         size={16}
-                        color={palette.tealDark}
+                        color={color.tealDark}
                       />
                     </View>
 
@@ -1007,7 +971,7 @@ export default function RidePlanScreen() {
                       <Ionicons
                         name="time-outline"
                         size={16}
-                        color={palette.tealDark}
+                        color={color.tealDark}
                       />
                     </View>
 
@@ -1040,7 +1004,7 @@ export default function RidePlanScreen() {
                       wsConnected ? "wifi-outline" : "cloud-offline-outline"
                     }
                     size={15}
-                    color={wsConnected ? palette.green : palette.textMuted}
+                    color={wsConnected ? color.green : color.textMuted}
                   />
                 </View>
 
@@ -1059,8 +1023,8 @@ export default function RidePlanScreen() {
                     styles.connectionStatusDot,
                     {
                       backgroundColor: wsConnected
-                        ? palette.green
-                        : palette.textLight,
+                        ? color.green
+                        : color.textLight,
                     },
                   ]}
                 />
@@ -1072,838 +1036,3 @@ export default function RidePlanScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-// ============================================================
-// STYLES
-// ============================================================
-
-const styles = StyleSheet.create({
-  // ==========================================================
-  // SCREEN
-  // ==========================================================
-
-  screen: {
-    flex: 1,
-    backgroundColor: palette.ivory,
-  },
-
-  // ==========================================================
-  // MAP
-  // ==========================================================
-
-  mapWrapper: {
-    width: "100%",
-    overflow: "hidden",
-    backgroundColor: "#E8EEEE",
-    position: "relative",
-  },
-
-  map: {
-    flex: 1,
-  },
-
-  mapStatus: {
-    position: "absolute",
-    top: windowHeight(12),
-    left: windowWidth(15),
-
-    flexDirection: "row",
-    alignItems: "center",
-
-    backgroundColor: "rgba(255,255,255,0.95)",
-
-    paddingHorizontal: windowWidth(10),
-
-    paddingVertical: windowHeight(7),
-
-    borderRadius: 14,
-
-    borderWidth: 1,
-    borderColor: palette.border,
-
-    elevation: 3,
-  },
-
-  mapStatusDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: palette.green,
-    marginRight: 6,
-  },
-
-  mapStatusText: {
-    fontSize: 9,
-    fontWeight: "700",
-    color: palette.textDark,
-  },
-
-  mapAttribution: {
-    position: "absolute",
-    bottom: 6,
-    right: 6,
-
-    backgroundColor: "rgba(255,255,255,0.90)",
-
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-
-    borderRadius: 6,
-
-    borderWidth: 1,
-    borderColor: palette.border,
-  },
-
-  mapAttributionText: {
-    fontSize: 7,
-    color: palette.textMuted,
-  },
-
-  // ==========================================================
-  // CONTENT
-  // ==========================================================
-
-  contentContainer: {
-    flex: 1,
-    backgroundColor: palette.ivory,
-  },
-
-  container: {
-    flex: 1,
-    paddingHorizontal: windowWidth(17),
-    paddingTop: windowHeight(14),
-  },
-
-  planScrollContent: {
-    paddingBottom: windowHeight(20),
-  },
-
-  // ==========================================================
-  // PLAN HEADER
-  // ==========================================================
-
-  planHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: windowHeight(14),
-  },
-
-  backButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-
-    backgroundColor: palette.white,
-
-    borderWidth: 1,
-    borderColor: palette.border,
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginRight: 10,
-
-    elevation: 1,
-  },
-
-  planHeaderText: {
-    flex: 1,
-  },
-
-  planEyebrow: {
-    fontSize: 9,
-    fontWeight: "800",
-    letterSpacing: 1.7,
-    color: palette.amber,
-    marginBottom: 2,
-  },
-
-  planTitle: {
-    fontSize: 21,
-    fontWeight: "800",
-    color: palette.textDark,
-  },
-
-  planSubtitle: {
-    fontSize: 11,
-    color: palette.textMuted,
-    marginTop: 2,
-  },
-
-  planIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
-    backgroundColor: palette.tealSoft,
-
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  // ==========================================================
-  // PICKUP TIME
-  // ==========================================================
-
-  pickupTimeCard: {
-    flexDirection: "row",
-    alignItems: "center",
-
-    backgroundColor: palette.white,
-
-    borderRadius: 17,
-
-    borderWidth: 1,
-    borderColor: palette.border,
-
-    padding: windowWidth(11),
-
-    marginBottom: windowHeight(11),
-
-    elevation: 1,
-  },
-
-  pickupTimeIcon: {
-    width: 37,
-    height: 37,
-    borderRadius: 12,
-
-    backgroundColor: palette.amberSoft,
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginRight: 10,
-  },
-
-  pickupTimeContent: {
-    flex: 1,
-  },
-
-  pickupTimeLabel: {
-    fontSize: 8,
-    fontWeight: "800",
-    letterSpacing: 1.2,
-    color: palette.textMuted,
-    marginBottom: 2,
-  },
-
-  pickupTimeTitle: {
-    fontSize: 13,
-    fontWeight: "800",
-    color: palette.textDark,
-  },
-
-  // ==========================================================
-  // LOCATION CARD
-  // ==========================================================
-
-  locationCard: {
-    backgroundColor: palette.white,
-
-    borderRadius: 20,
-
-    paddingHorizontal: windowWidth(13),
-
-    paddingVertical: windowHeight(13),
-
-    borderWidth: 1,
-    borderColor: palette.border,
-
-    marginBottom: windowHeight(11),
-
-    elevation: 3,
-
-    // Sits above the pickup-time card and below the destination
-    // dropdown (which uses zIndex 999 internally).
-    zIndex: 10,
-  },
-
-  locationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  locationIcon: {
-    width: 38,
-    height: 38,
-
-    borderRadius: 12,
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginRight: 10,
-  },
-
-  pickupLocationIcon: {
-    backgroundColor: palette.tealSoft,
-  },
-
-  destinationLocationIcon: {
-    backgroundColor: palette.coralSoft,
-  },
-
-  locationContent: {
-    flex: 1,
-    minHeight: 42,
-    justifyContent: "center",
-  },
-
-  locationLabel: {
-    fontSize: 8,
-    fontWeight: "800",
-    letterSpacing: 1.2,
-    color: palette.textMuted,
-    marginBottom: 2,
-  },
-
-  currentLocationText: {
-    fontSize: 13,
-    fontWeight: "700",
-    color: palette.textDark,
-  },
-
-  locationConnector: {
-    height: 16,
-    width: 38,
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    zIndex: 1,
-  },
-
-  connectorLine: {
-    height: 15,
-    width: 1.5,
-
-    backgroundColor: "#C8D8D7",
-  },
-
-  // ==========================================================
-  // TRIP INFO
-  // ==========================================================
-
-  tripInfoCard: {
-    flexDirection: "row",
-    alignItems: "center",
-
-    backgroundColor: palette.tealSoft,
-
-    borderRadius: 17,
-
-    borderWidth: 1,
-    borderColor: palette.borderTeal,
-
-    paddingHorizontal: windowWidth(12),
-
-    paddingVertical: windowHeight(10),
-
-    marginBottom: windowHeight(11),
-  },
-
-  tripInfoItem: {
-    flex: 1,
-
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  tripInfoIcon: {
-    width: 33,
-    height: 33,
-
-    borderRadius: 11,
-
-    backgroundColor: palette.white,
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginRight: 7,
-  },
-
-  tripInfoLabel: {
-    fontSize: 8,
-    fontWeight: "800",
-    letterSpacing: 1,
-    color: palette.textMuted,
-  },
-
-  tripInfoValue: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: palette.tealDark,
-    marginTop: 1,
-  },
-
-  tripInfoDivider: {
-    width: 1,
-    height: 29,
-
-    backgroundColor: "#C9DCDA",
-
-    marginHorizontal: 8,
-  },
-
-  // ==========================================================
-  // CONNECTION
-  // ==========================================================
-
-  connectionCard: {
-    flexDirection: "row",
-    alignItems: "center",
-
-    backgroundColor: palette.white,
-
-    borderRadius: 16,
-
-    borderWidth: 1,
-    borderColor: palette.border,
-
-    padding: windowWidth(10),
-
-    marginTop: 1,
-  },
-
-  connectionIcon: {
-    width: 34,
-    height: 34,
-
-    borderRadius: 11,
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginRight: 9,
-  },
-
-  connectionIconOnline: {
-    backgroundColor: palette.greenSoft,
-  },
-
-  connectionIconOffline: {
-    backgroundColor: "#F0F2F2",
-  },
-
-  connectionContent: {
-    flex: 1,
-  },
-
-  connectionTitle: {
-    fontSize: 11,
-    fontWeight: "800",
-    color: palette.textDark,
-  },
-
-  connectionSubtitle: {
-    fontSize: 9,
-    color: palette.textMuted,
-    marginTop: 2,
-  },
-
-  connectionStatusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginLeft: 7,
-  },
-
-  // ==========================================================
-  // OPTIONS
-  // ==========================================================
-
-  optionsScroll: {
-    flex: 1,
-  },
-
-  optionsScrollContent: {
-    paddingBottom: 20,
-  },
-
-  optionsHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-
-    marginBottom: windowHeight(12),
-  },
-
-  optionsHeaderText: {
-    flex: 1,
-  },
-
-  optionsEyebrow: {
-    fontSize: 8,
-    fontWeight: "800",
-    letterSpacing: 1.5,
-    color: palette.amber,
-    marginBottom: 2,
-  },
-
-  optionsTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: palette.textDark,
-  },
-
-  optionsSubtitle: {
-    fontSize: 10,
-    color: palette.textMuted,
-    marginTop: 2,
-  },
-
-  optionsHeaderIcon: {
-    width: 42,
-    height: 42,
-
-    borderRadius: 14,
-
-    backgroundColor: palette.tealSoft,
-
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  // ==========================================================
-  // ROUTE SUMMARY
-  // ==========================================================
-
-  routeSummaryCard: {
-    flexDirection: "row",
-    alignItems: "center",
-
-    backgroundColor: palette.white,
-
-    borderRadius: 17,
-
-    borderWidth: 1,
-    borderColor: palette.border,
-
-    padding: windowWidth(10),
-
-    marginBottom: windowHeight(14),
-  },
-
-  routeSummaryItem: {
-    flex: 1,
-
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  routeSummaryIcon: {
-    width: 34,
-    height: 34,
-
-    borderRadius: 11,
-
-    backgroundColor: palette.tealSoft,
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginRight: 7,
-  },
-
-  routeSummaryLabel: {
-    fontSize: 8,
-    fontWeight: "800",
-    letterSpacing: 1,
-
-    color: palette.textMuted,
-  },
-
-  routeSummaryValue: {
-    fontSize: 12,
-    fontWeight: "800",
-
-    color: palette.textDark,
-
-    marginTop: 2,
-  },
-
-  routeDivider: {
-    width: 1,
-    height: 29,
-
-    backgroundColor: palette.border,
-
-    marginHorizontal: 8,
-  },
-
-  // ==========================================================
-  // VEHICLE HEADER
-  // ==========================================================
-
-  vehicleSectionHeader: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    justifyContent: "space-between",
-
-    marginBottom: windowHeight(9),
-  },
-
-  vehicleEyebrow: {
-    fontSize: 8,
-    fontWeight: "800",
-    letterSpacing: 1.4,
-
-    color: palette.teal,
-
-    marginBottom: 2,
-  },
-
-  vehicleTitle: {
-    fontSize: 17,
-    fontWeight: "800",
-    color: palette.textDark,
-  },
-
-  availableBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-
-    backgroundColor: palette.greenSoft,
-
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-
-    borderRadius: 10,
-  },
-
-  availableDot: {
-    width: 6,
-    height: 6,
-
-    borderRadius: 3,
-
-    backgroundColor: palette.green,
-
-    marginRight: 5,
-  },
-
-  availableText: {
-    fontSize: 9,
-    fontWeight: "700",
-    color: palette.green,
-  },
-
-  // ==========================================================
-  // DRIVER CARDS
-  // ==========================================================
-
-  driverList: {
-    gap: windowHeight(8),
-  },
-
-  driverCard: {
-    position: "relative",
-
-    flexDirection: "row",
-    alignItems: "center",
-
-    backgroundColor: palette.white,
-
-    borderRadius: 18,
-
-    borderWidth: 1,
-    borderColor: palette.border,
-
-    padding: windowWidth(10),
-
-    minHeight: windowHeight(96),
-
-    elevation: 1,
-  },
-
-  driverCardSelected: {
-    borderWidth: 1.5,
-    borderColor: palette.teal,
-
-    backgroundColor: "#F7FBFA",
-  },
-
-  selectedBadge: {
-    position: "absolute",
-
-    right: 8,
-    top: 8,
-
-    width: 23,
-    height: 23,
-
-    borderRadius: 8,
-
-    backgroundColor: palette.teal,
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    zIndex: 5,
-  },
-
-  vehicleImageWrapper: {
-    width: 85,
-    height: 74,
-
-    borderRadius: 15,
-
-    backgroundColor: "#F5F7F7",
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginRight: 10,
-  },
-
-  vehicleImageWrapperSelected: {
-    backgroundColor: palette.tealSoft,
-  },
-
-  vehicleImage: {
-    width: 74,
-    height: 63,
-  },
-
-  driverInfo: {
-    flex: 1,
-    minWidth: 0,
-  },
-
-  driverTitleRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-  },
-
-  driverNameArea: {
-    flex: 1,
-    marginRight: 6,
-  },
-
-  driverName: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: palette.textDark,
-    paddingRight: 15,
-  },
-
-  vehicleTypeBadge: {
-    alignSelf: "flex-start",
-
-    backgroundColor: palette.tealSoft,
-
-    paddingHorizontal: 7,
-    paddingVertical: 3,
-
-    borderRadius: 7,
-
-    marginTop: 4,
-  },
-
-  vehicleTypeText: {
-    fontSize: 8,
-    fontWeight: "800",
-    color: palette.tealDark,
-    letterSpacing: 0.4,
-  },
-
-  driverPrice: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: palette.tealDark,
-  },
-
-  driverMetaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
-
-    marginTop: 7,
-  },
-
-  driverMetaItem: {
-    flexDirection: "row",
-    alignItems: "center",
-
-    marginRight: 10,
-  },
-
-  driverMetaText: {
-    fontSize: 8.5,
-    color: palette.textMuted,
-    marginLeft: 3,
-  },
-
-  // ==========================================================
-  // BOOKING
-  // ==========================================================
-
-  bookingSection: {
-    marginTop: windowHeight(15),
-
-    paddingTop: 2,
-  },
-
-  bookingSecure: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginTop: windowHeight(8),
-  },
-
-  bookingSecureText: {
-    fontSize: 9,
-    color: palette.textMuted,
-    marginLeft: 5,
-  },
-
-  // ==========================================================
-  // LOADING
-  // ==========================================================
-
-  loadingContainer: {
-    flex: 1,
-
-    minHeight: windowHeight(260),
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    paddingHorizontal: windowWidth(20),
-  },
-
-  loadingIcon: {
-    width: 60,
-    height: 60,
-
-    borderRadius: 19,
-
-    backgroundColor: palette.tealSoft,
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginBottom: windowHeight(11),
-  },
-
-  loadingTitle: {
-    fontSize: 16,
-    fontWeight: "800",
-
-    color: palette.textDark,
-
-    marginTop: windowHeight(10),
-  },
-
-  loadingSubtitle: {
-    fontSize: 10.5,
-
-    color: palette.textMuted,
-
-    textAlign: "center",
-
-    marginTop: 4,
-  },
-});

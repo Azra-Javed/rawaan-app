@@ -33,7 +33,10 @@ export type Color = {
   title: string;
   primary: string;
 
-  // New design-system colors
+  lightTeal: string;
+  softGray: string;
+  text: string;
+
   background: string;
   card: string;
   mutedText: string;
@@ -47,19 +50,30 @@ export type Color = {
   headerText: string;
   headerSubtitle: string;
 
-  // Shared screen-header aliases
   nightIndigo: string;
   nightIndigoLight: string;
   routeAmber: string;
   slateTeal: string;
   white: string;
+  muted: string;
+  tealDark: string;
+  tealSoft: string;
+  amberSoft: string;
+  textDark: string;
+  textMuted: string;
+  textLight: string;
+  borderTeal: string;
+  coralSoft: string;
+  green: string;
+  greenSoft: string;
+  graySoft: string;
 };
 
 const color: Color = {
-  // =========================================================
-  // BRAND
-  // =========================================================
-
+  muted: "#899595",
+  lightTeal: "#E7F2F1",
+  softGray: "#F4F7F7",
+  text: "#172525",
   primary: "#12605C",
   teal: "#12605C",
   buttonBg: "#12605C",
@@ -71,13 +85,36 @@ const color: Color = {
   selectPrimary: "#E7F3F0",
   lightGreen: "#E7F3F0",
   tealLight: "#E7F3F0",
+  tealDark: "#0F4C4A",
+  tealSoft: "#E7F2F1",
+
+  amber: "#F5A524",
+  amberSoft: "#FFF4DD",
+
+  ivory: "#FBF8F2",
+  white: "#FFFFFF",
+
+  textDark: "#172525",
+  textMuted: "#7A8585",
+  textLight: "#A2AAAA",
+
+  border: "#E4EAEA",
+  borderTeal: "#D5E8E6",
+
+  coral: "#E85C4A",
+  coralSoft: "#FDECEA",
+
+  green: "#4C9A6A",
+  greenSoft: "#EAF5EE",
+
+  graySoft: "#F4F6F6",
 
   // =========================================================
   // BACKGROUND
   // =========================================================
 
   background: "#F8F6F1",
-  ivory: "#F8F6F1",
+
   lightGray: "#F3F1EB",
 
   whiteColor: "#FFFFFF",
@@ -110,13 +147,11 @@ const color: Color = {
   nightIndigoLight: "#1B7771",
   routeAmber: "#E9A23B",
   slateTeal: "#657471",
-  white: "#FFFFFF",
 
   // =========================================================
   // BORDERS
   // =========================================================
 
-  border: "#E4E8E5",
   primaryGray: "#E4E8E5",
   darkBorder: "#B9C9C5",
 
@@ -127,11 +162,9 @@ const color: Color = {
   // ACCENTS
   // =========================================================
 
-  amber: "#E9A23B",
   categoryTitle: "#E9A23B",
   completeColor: "#E9A23B",
 
-  coral: "#E56B58",
   red: "#E56B58",
   alertRed: "#E56B58",
 

@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
-import { router, useLocalSearchParams } from "expo-router";
-import { useToast } from "react-native-toast-notifications";
-import axios from "axios";
 import api from "@/api/client";
 import { saveAuth } from "@/utils/authStorage";
+import axios from "axios";
+import { router, useLocalSearchParams } from "expo-router";
+import { useToast } from "react-native-toast-notifications";
 
 import Button from "@/components/common/button";
 
@@ -17,24 +17,11 @@ import {
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
 
-import { windowHeight, windowWidth } from "@/themes/app.constant";
-import { commonStyles } from "@/styles/common.style";
 import ScreenHeader from "@/components/common/screen-header";
+import color from "@/themes/app.colors";
+import styles from "./styles";
 
 const CELL_COUNT = 4;
-
-const palette = {
-  nightIndigo: "#0F4C4A",
-  nightIndigoLight: "#176B68",
-  routeAmber: "#F5A524",
-  slateTeal: "#5C6B73",
-  ivory: "#FBF8F2",
-  white: "#FFFFFF",
-  border: "#0F4C4A18",
-  lightTeal: "#E7F2F1",
-};
-
-const displayFont = "TT-Octosquares-Medium";
 
 const OtpVerificationScreen = () => {
   const [value, setValue] = useState("");
@@ -141,7 +128,7 @@ const OtpVerificationScreen = () => {
   };
 
   return (
-    <View style={localStyles.screen}>
+    <View style={styles.screen}>
       <ScreenHeader
         eyebrow="RAWAAN"
         title="OTP Verification"
@@ -149,16 +136,14 @@ const OtpVerificationScreen = () => {
         icon="shield-checkmark-outline"
       />
 
-      <View style={localStyles.content}>
-        <View style={localStyles.card}>
-          <View style={localStyles.cardHeader}>
-            <Text style={localStyles.cardTitle}>Enter verification code</Text>
+      <View style={styles.content}>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Enter verification code</Text>
 
-            <Text style={localStyles.cardSubtitle}>
-              We sent a 4-digit code to
-            </Text>
+            <Text style={styles.cardSubtitle}>We sent a 4-digit code to</Text>
 
-            <Text style={localStyles.email}>{email}</Text>
+            <Text style={styles.email}>{email}</Text>
           </View>
 
           <CodeField
@@ -170,21 +155,15 @@ const OtpVerificationScreen = () => {
             keyboardType="number-pad"
             textContentType="oneTimeCode"
             autoFocus={false}
-            rootStyle={localStyles.codeField}
+            rootStyle={styles.codeField}
             renderCell={({ index, symbol, isFocused }) => (
               <View
                 key={index}
                 onLayout={getCellOnLayoutHandler(index)}
-                style={[
-                  localStyles.otpCell,
-                  isFocused && localStyles.otpCellActive,
-                ]}
+                style={[styles.otpCell, isFocused && styles.otpCellActive]}
               >
                 <Text
-                  style={[
-                    localStyles.otpText,
-                    isFocused && localStyles.otpTextActive,
-                  ]}
+                  style={[styles.otpText, isFocused && styles.otpTextActive]}
                 >
                   {symbol || (isFocused ? <Cursor /> : null)}
                 </Text>
@@ -194,7 +173,7 @@ const OtpVerificationScreen = () => {
 
           {/* ================= VERIFY ================= */}
 
-          <View style={localStyles.buttonContainer}>
+          <View style={styles.buttonContainer}>
             <Button
               title={loading ? "Please wait..." : "Verify"}
               onPress={handleVerify}
@@ -204,8 +183,8 @@ const OtpVerificationScreen = () => {
 
           {/* ================= RESEND ================= */}
 
-          <View style={localStyles.resendContainer}>
-            <Text style={localStyles.resendText}>Didn't receive the code?</Text>
+          <View style={styles.resendContainer}>
+            <Text style={styles.resendText}>Didn't receive the code?</Text>
 
             <TouchableOpacity
               onPress={handleResend}
@@ -213,10 +192,7 @@ const OtpVerificationScreen = () => {
               activeOpacity={0.7}
             >
               <Text
-                style={[
-                  localStyles.resendButton,
-                  loading && localStyles.resendDisabled,
-                ]}
+                style={[styles.resendButton, loading && styles.resendDisabled]}
               >
                 Resend
               </Text>
@@ -226,20 +202,20 @@ const OtpVerificationScreen = () => {
 
         {/* ================= FOOTER ================= */}
 
-        <View style={localStyles.footer}>
-          <View style={localStyles.footerLine} />
+        <View style={styles.footer}>
+          <View style={styles.footerLine} />
 
-          <View style={localStyles.footerIcon}>
+          <View style={styles.footerIcon}>
             <Ionicons
               name="lock-closed-outline"
               size={11}
-              color={palette.slateTeal}
+              color={color.slateTeal}
             />
           </View>
 
-          <Text style={localStyles.footerText}>Secure verification</Text>
+          <Text style={styles.footerText}>Secure verification</Text>
 
-          <View style={localStyles.footerLine} />
+          <View style={styles.footerLine} />
         </View>
       </View>
     </View>
@@ -247,240 +223,3 @@ const OtpVerificationScreen = () => {
 };
 
 export default OtpVerificationScreen;
-
-const localStyles = StyleSheet.create({
-  // ================= SCREEN =================
-
-  screen: {
-    flex: 1,
-    backgroundColor: palette.ivory,
-  },
-
-  // ================= HEADER =================
-
-  header: {
-    paddingTop: windowHeight(70),
-    paddingHorizontal: windowWidth(20),
-    paddingBottom: windowHeight(32),
-
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-  },
-
-  eyebrow: {
-    fontFamily: displayFont,
-    color: palette.routeAmber,
-
-    fontSize: 11,
-    letterSpacing: 2,
-
-    marginBottom: windowHeight(14),
-  },
-
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  headerIcon: {
-    width: 46,
-    height: 46,
-
-    borderRadius: 14,
-
-    backgroundColor: "rgba(255,255,255,0.10)",
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginRight: 12,
-  },
-
-  headerText: {
-    flex: 1,
-  },
-
-  headerTitle: {
-    fontFamily: displayFont,
-
-    color: palette.white,
-
-    fontSize: 23,
-    lineHeight: 29,
-  },
-
-  headerSubtitle: {
-    color: "#D1DFDD",
-
-    fontSize: 12.5,
-
-    marginTop: 3,
-
-    lineHeight: 18,
-  },
-
-  // ================= CONTENT =================
-
-  content: {
-    flex: 1,
-
-    paddingHorizontal: windowWidth(20),
-    paddingTop: windowHeight(25),
-  },
-
-  // ================= CARD =================
-
-  card: {
-    backgroundColor: palette.white,
-
-    borderRadius: 20,
-
-    paddingHorizontal: windowWidth(18),
-    paddingVertical: windowHeight(23),
-
-    borderWidth: 1,
-    borderColor: palette.border,
-  },
-
-  cardHeader: {
-    marginBottom: windowHeight(23),
-  },
-
-  cardTitle: {
-    fontFamily: displayFont,
-
-    fontSize: 19,
-
-    color: palette.nightIndigo,
-
-    marginBottom: 6,
-  },
-
-  cardSubtitle: {
-    fontSize: 12.5,
-
-    lineHeight: 18,
-
-    color: palette.slateTeal,
-  },
-
-  email: {
-    fontFamily: displayFont,
-
-    fontSize: 12,
-
-    color: palette.nightIndigo,
-
-    marginTop: 4,
-  },
-
-  // ================= OTP =================
-
-  codeField: {
-    width: "100%",
-
-    justifyContent: "space-between",
-  },
-
-  otpCell: {
-    width: windowWidth(62),
-    height: windowWidth(62),
-
-    borderWidth: 1,
-    borderColor: "#DDE6E5",
-
-    borderRadius: 15,
-
-    backgroundColor: "#F7F9F9",
-
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  otpCellActive: {
-    borderColor: palette.nightIndigo,
-
-    backgroundColor: palette.lightTeal,
-  },
-
-  otpText: {
-    fontFamily: displayFont,
-
-    fontSize: 23,
-
-    color: "#172525",
-  },
-
-  otpTextActive: {
-    color: palette.nightIndigo,
-  },
-
-  // ================= BUTTON =================
-
-  buttonContainer: {
-    marginTop: windowHeight(22),
-  },
-
-  // ================= RESEND =================
-
-  resendContainer: {
-    flexDirection: "row",
-
-    justifyContent: "center",
-    alignItems: "center",
-
-    marginTop: windowHeight(20),
-  },
-
-  resendText: {
-    fontSize: 12,
-
-    color: palette.slateTeal,
-  },
-
-  resendButton: {
-    fontFamily: displayFont,
-
-    fontSize: 12,
-
-    color: palette.nightIndigo,
-
-    marginLeft: 5,
-  },
-
-  resendDisabled: {
-    opacity: 0.45,
-  },
-
-  // ================= FOOTER =================
-
-  footer: {
-    flexDirection: "row",
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginTop: windowHeight(25),
-  },
-
-  footerLine: {
-    width: 32,
-    height: 1,
-
-    backgroundColor: palette.border,
-  },
-
-  footerIcon: {
-    marginLeft: 9,
-  },
-
-  footerText: {
-    fontSize: 9,
-
-    color: palette.slateTeal,
-
-    marginHorizontal: 5,
-
-    letterSpacing: 0.3,
-  },
-});

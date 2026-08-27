@@ -3,19 +3,12 @@ import { StyleSheet } from "react-native";
 import appFonts from "@/themes/app.fonts";
 import color from "@/themes/app.colors";
 import { fontSizes, windowHeight, windowWidth } from "@/themes/app.constant";
+import fonts from "@/themes/app.fonts";
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-
   scrollContent: {
     paddingBottom: windowHeight(50),
   },
-
-  // =========================================================
-  // TOP / HEADER
-  // =========================================================
 
   topSection: {
     flexDirection: "row",
@@ -152,33 +145,6 @@ const styles = StyleSheet.create({
     backgroundColor: color.border,
   },
 
-  // =========================================================
-  // SECTION HEADER
-  // =========================================================
-
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-
-    marginHorizontal: windowWidth(20),
-    marginTop: windowHeight(30),
-    marginBottom: windowHeight(14),
-  },
-
-  sectionTitle: {
-    fontFamily: appFonts.semiBold,
-    fontSize: fontSizes.FONT19,
-    color: color.primaryText,
-  },
-
-  sectionSubtitle: {
-    marginTop: windowHeight(3),
-    fontFamily: appFonts.regular,
-    fontSize: fontSizes.FONT13,
-    color: color.mutedText,
-  },
-
   historyIcon: {
     width: windowWidth(36),
     height: windowWidth(36),
@@ -189,19 +155,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
-  // =========================================================
-  // RIDES
-  // =========================================================
-
-  ridesContainer: {
-    paddingHorizontal: windowWidth(20),
-    gap: windowHeight(12),
-  },
-
-  // =========================================================
-  // LOADING
-  // =========================================================
 
   loadingCard: {
     marginHorizontal: windowWidth(20),
@@ -225,51 +178,166 @@ const styles = StyleSheet.create({
     color: color.mutedText,
   },
 
-  // =========================================================
-  // EMPTY STATE
-  // =========================================================
+  container: {
+    flex: 1,
+  },
+
+  header: {
+    paddingTop: windowHeight(18),
+    paddingBottom: windowHeight(22),
+    paddingHorizontal: windowWidth(20),
+
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+  },
+
+  eyebrow: {
+    fontFamily: fonts.display,
+    color: color.routeAmber,
+    fontSize: 11,
+    letterSpacing: 2,
+    marginBottom: windowHeight(13),
+  },
+
+  headerTitle: {
+    fontFamily: fonts.display,
+    color: color.white,
+    fontSize: 28,
+    lineHeight: 34,
+  },
+
+  headerSubtitle: {
+    color: "#D1DFDD",
+    fontSize: 13,
+    marginTop: 5,
+    lineHeight: 19,
+  },
+
+  // ================= SEARCH =================
+
+  searchContainer: {
+    marginTop: windowHeight(18),
+
+    backgroundColor: color.white,
+
+    borderRadius: 16,
+
+    paddingHorizontal: windowWidth(5),
+    paddingVertical: windowHeight(4),
+  },
+
+  // ================= BODY =================
+
+  body: {
+    paddingHorizontal: windowWidth(20),
+    paddingTop: windowHeight(25),
+    paddingBottom: windowHeight(50),
+  },
+
+  // ================= SECTION =================
+
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+
+    marginBottom: windowHeight(16),
+  },
+
+  sectionTitle: {
+    fontFamily: fonts.display,
+    fontSize: 19,
+    color: color.nightIndigo,
+  },
+
+  sectionSubtitle: {
+    fontSize: 12.5,
+    color: color.slateTeal,
+
+    marginTop: 4,
+
+    lineHeight: 18,
+  },
+
+  sectionIcon: {
+    width: 40,
+    height: 40,
+
+    borderRadius: 12,
+
+    backgroundColor: "#0F4C4A12",
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // ================= RIDES =================
+
+  ridesContainer: {
+    gap: windowHeight(10),
+  },
+
+  rideWrapper: {
+    backgroundColor: color.white,
+
+    borderRadius: 16,
+
+    borderWidth: 1,
+    borderColor: color.ivoryLine,
+
+    overflow: "hidden",
+  },
+
+  // ================= EMPTY STATE =================
 
   emptyCard: {
-    marginHorizontal: windowWidth(20),
+    backgroundColor: color.white,
 
-    backgroundColor: color.whiteColor,
-    borderRadius: 20,
+    borderRadius: 18,
+
     borderWidth: 1,
-    borderColor: color.border,
+    borderColor: color.ivoryLine,
 
     alignItems: "center",
 
-    paddingHorizontal: windowWidth(28),
+    paddingHorizontal: windowWidth(25),
     paddingVertical: windowHeight(42),
+
+    marginTop: windowHeight(4),
   },
 
   emptyIcon: {
     width: windowWidth(60),
     height: windowWidth(60),
-    borderRadius: 20,
+    borderRadius: 18,
 
-    backgroundColor: color.tealLight,
+    backgroundColor: "#0F4C4A12",
 
     alignItems: "center",
     justifyContent: "center",
 
-    marginBottom: windowHeight(16),
+    marginBottom: windowHeight(14),
   },
 
   emptyTitle: {
-    fontFamily: appFonts.semiBold,
+    fontFamily: fonts.display,
+
     fontSize: fontSizes.FONT17,
-    color: color.primaryText,
+
+    color: color.nightIndigo,
+
     marginBottom: windowHeight(6),
   },
 
   emptySubtitle: {
-    fontFamily: appFonts.regular,
     fontSize: fontSizes.FONT13,
     lineHeight: windowHeight(19),
-    color: color.mutedText,
+
+    color: color.slateTeal,
+
     textAlign: "center",
-    maxWidth: windowWidth(280),
+
+    maxWidth: windowWidth(285),
   },
 });
 

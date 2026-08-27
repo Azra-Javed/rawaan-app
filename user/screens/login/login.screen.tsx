@@ -1,24 +1,14 @@
 import api from "@/api/client";
 import Button from "@/components/common/button";
 import EmailInput from "@/components/login/email.input";
-import { windowHeight } from "@/themes/app.constant";
+import localStyles from "./styles";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useToast } from "react-native-toast-notifications";
-
-const palette = {
-  nightIndigo: "#0F4C4A",
-  nightIndigoLight: "#176B68",
-  routeAmber: "#F5A524",
-  slateTeal: "#5C6B73",
-  ivory: "#FBF8F2",
-  white: "#FFFFFF",
-};
-
-const displayFont = "TT-Octosquares-Medium";
+import color from "@/themes/app.colors";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -60,7 +50,7 @@ const LoginScreen = () => {
   return (
     <View style={localStyles.screen}>
       <LinearGradient
-        colors={[palette.nightIndigo, palette.nightIndigoLight]}
+        colors={[color.nightIndigo, color.nightIndigoLight]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={localStyles.header}
@@ -72,7 +62,7 @@ const LoginScreen = () => {
             <Ionicons
               name="navigate-outline"
               size={21}
-              color={palette.routeAmber}
+              color={color.routeAmber}
             />
           </View>
 
@@ -122,158 +112,3 @@ const LoginScreen = () => {
 };
 
 export default LoginScreen;
-
-const localStyles = StyleSheet.create({
-  // ================= SCREEN =================
-
-  screen: {
-    flex: 1,
-    backgroundColor: palette.ivory,
-  },
-
-  // ================= HEADER =================
-
-  header: {
-    paddingTop: windowHeight(75),
-    paddingHorizontal: 24,
-    paddingBottom: windowHeight(45),
-
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-  },
-
-  eyebrow: {
-    fontFamily: displayFont,
-    color: palette.routeAmber,
-
-    fontSize: 11,
-    letterSpacing: 2,
-
-    marginBottom: windowHeight(15),
-  },
-
-  titleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  titleIcon: {
-    width: 46,
-    height: 46,
-
-    borderRadius: 14,
-
-    backgroundColor: "rgba(255,255,255,0.10)",
-
-    alignItems: "center",
-    justifyContent: "center",
-
-    marginRight: 12,
-  },
-
-  title: {
-    fontFamily: displayFont,
-
-    color: palette.white,
-
-    fontSize: 24,
-    lineHeight: 30,
-  },
-
-  subtitle: {
-    color: "#D1DFDD",
-
-    fontSize: 12.5,
-
-    marginTop: 3,
-
-    lineHeight: 18,
-  },
-
-  // ================= CONTENT =================
-
-  content: {
-    flex: 1,
-
-    paddingHorizontal: 20,
-    paddingTop: windowHeight(28),
-  },
-
-  // ================= FORM =================
-
-  formCard: {
-    backgroundColor: palette.white,
-
-    borderRadius: 20,
-
-    paddingHorizontal: 18,
-    paddingVertical: 22,
-
-    borderWidth: 1,
-    borderColor: "#0F4C4A12",
-  },
-
-  formHeader: {
-    marginBottom: windowHeight(22),
-  },
-
-  formTitle: {
-    fontFamily: displayFont,
-
-    fontSize: 20,
-
-    color: palette.nightIndigo,
-
-    marginBottom: 5,
-  },
-
-  formSubtitle: {
-    fontSize: 12.5,
-
-    lineHeight: 19,
-
-    color: palette.slateTeal,
-  },
-
-  // ================= INPUT =================
-
-  inputContainer: {
-    width: "100%",
-  },
-
-  // ================= BUTTON =================
-
-  buttonContainer: {
-    marginTop: windowHeight(20),
-  },
-
-  // ================= FOOTER =================
-
-  footer: {
-    flexDirection: "row",
-
-    alignItems: "center",
-
-    justifyContent: "center",
-
-    marginTop: windowHeight(25),
-  },
-
-  footerLine: {
-    height: 1,
-
-    width: 35,
-
-    backgroundColor: "#0F4C4A18",
-  },
-
-  footerText: {
-    fontSize: 9,
-
-    color: palette.slateTeal,
-
-    marginHorizontal: 10,
-
-    letterSpacing: 0.4,
-  },
-});
