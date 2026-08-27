@@ -46,6 +46,13 @@ export type Color = {
   moss: string;
   headerText: string;
   headerSubtitle: string;
+
+  // Shared screen-header aliases
+  nightIndigo: string;
+  nightIndigoLight: string;
+  routeAmber: string;
+  slateTeal: string;
+  white: string;
 };
 
 const color: Color = {
@@ -99,6 +106,11 @@ const color: Color = {
   darkPrimary: "#1B7771",
   headerText: "#FFFFFF",
   headerSubtitle: "#C8DDDA",
+  nightIndigo: "#12605C",
+  nightIndigoLight: "#1B7771",
+  routeAmber: "#E9A23B",
+  slateTeal: "#657471",
+  white: "#FFFFFF",
 
   // =========================================================
   // BORDERS

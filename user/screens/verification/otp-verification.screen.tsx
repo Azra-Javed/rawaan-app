@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 
 import { router, useLocalSearchParams } from "expo-router";
@@ -20,6 +19,7 @@ import {
 
 import { windowHeight, windowWidth } from "@/themes/app.constant";
 import { commonStyles } from "@/styles/common.style";
+import ScreenHeader from "@/components/common/screen-header";
 
 const CELL_COUNT = 4;
 
@@ -142,41 +142,15 @@ const OtpVerificationScreen = () => {
 
   return (
     <View style={localStyles.screen}>
-      {/* ================= HEADER ================= */}
-
-      <LinearGradient
-        colors={[palette.nightIndigo, palette.nightIndigoLight]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={localStyles.header}
-      >
-        <Text style={localStyles.eyebrow}>RAWAAN</Text>
-
-        <View style={localStyles.headerRow}>
-          <View style={localStyles.headerIcon}>
-            <Ionicons
-              name="shield-checkmark-outline"
-              size={21}
-              color={palette.routeAmber}
-            />
-          </View>
-
-          <View style={localStyles.headerText}>
-            <Text style={localStyles.headerTitle}>OTP Verification</Text>
-
-            <Text style={localStyles.headerSubtitle}>
-              Verify your account to continue
-            </Text>
-          </View>
-        </View>
-      </LinearGradient>
-
-      {/* ================= CONTENT ================= */}
+      <ScreenHeader
+        eyebrow="RAWAAN"
+        title="OTP Verification"
+        subtitle="Verify your account to continue"
+        icon="shield-checkmark-outline"
+      />
 
       <View style={localStyles.content}>
         <View style={localStyles.card}>
-          {/* ================= CARD HEADER ================= */}
-
           <View style={localStyles.cardHeader}>
             <Text style={localStyles.cardTitle}>Enter verification code</Text>
 
@@ -186,8 +160,6 @@ const OtpVerificationScreen = () => {
 
             <Text style={localStyles.email}>{email}</Text>
           </View>
-
-          {/* ================= OTP ================= */}
 
           <CodeField
             ref={ref}

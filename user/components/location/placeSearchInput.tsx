@@ -35,10 +35,6 @@ export default function PlaceSearchInput({ placeholder, onSelect }: Props) {
   const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inputRef = useRef<TextInput>(null);
 
-  /* --------------------------------------------------
-     SEARCH
-  -------------------------------------------------- */
-
   const handleChange = (text: string) => {
     setQuery(text);
 
@@ -67,10 +63,6 @@ export default function PlaceSearchInput({ placeholder, onSelect }: Props) {
     }, 350);
   };
 
-  /* --------------------------------------------------
-     MODAL
-  -------------------------------------------------- */
-
   const openSearchModal = () => {
     setIsModalVisible(true);
 
@@ -84,10 +76,6 @@ export default function PlaceSearchInput({ placeholder, onSelect }: Props) {
     setIsModalVisible(false);
   };
 
-  /* --------------------------------------------------
-     SELECT
-  -------------------------------------------------- */
-
   const handleSelectPlace = (place: PlaceResult) => {
     setQuery(place.description);
     setResults([]);
@@ -100,10 +88,6 @@ export default function PlaceSearchInput({ placeholder, onSelect }: Props) {
     }, 100);
   };
 
-  /* --------------------------------------------------
-     CLEAR
-  -------------------------------------------------- */
-
   const clearSearch = () => {
     setQuery("");
     setResults([]);
@@ -115,10 +99,6 @@ export default function PlaceSearchInput({ placeholder, onSelect }: Props) {
 
   return (
     <View style={styles.wrapper}>
-      {/* =================================================
-          MAIN DESTINATION FIELD
-      ================================================= */}
-
       <TouchableOpacity
         activeOpacity={0.85}
         onPress={openSearchModal}
@@ -155,10 +135,6 @@ export default function PlaceSearchInput({ placeholder, onSelect }: Props) {
         )}
       </TouchableOpacity>
 
-      {/* =================================================
-          DESTINATION SEARCH MODAL
-      ================================================= */}
-
       <Modal
         visible={isModalVisible}
         animationType="slide"
@@ -167,10 +143,6 @@ export default function PlaceSearchInput({ placeholder, onSelect }: Props) {
       >
         <SafeAreaView style={styles.modal}>
           <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-
-          {/* =================================================
-              HEADER
-          ================================================= */}
 
           <View style={styles.header}>
             <TouchableOpacity
@@ -187,10 +159,6 @@ export default function PlaceSearchInput({ placeholder, onSelect }: Props) {
               <Text style={styles.headerTitle}>Where to?</Text>
             </View>
           </View>
-
-          {/* =================================================
-              SEARCH BOX
-          ================================================= */}
 
           <View style={styles.searchSection}>
             <View
@@ -244,10 +212,6 @@ export default function PlaceSearchInput({ placeholder, onSelect }: Props) {
               </Text>
             </View>
           </View>
-
-          {/* =================================================
-              RESULTS
-          ================================================= */}
 
           <View style={styles.resultsArea}>
             {/* SEARCHING */}

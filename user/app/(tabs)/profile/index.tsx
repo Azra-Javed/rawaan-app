@@ -7,9 +7,9 @@ import {
   StyleSheet,
   StatusBar,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { windowHeight, windowWidth } from "@/themes/app.constant";
+import ScreenHeader from "@/components/common/screen-header";
 
 import Input from "@/components/common/input";
 
@@ -68,42 +68,13 @@ export default function Profile() {
           HEADER
       ====================================================== */}
 
-      <LinearGradient
-        colors={[palette.tealDark, palette.teal]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
-        {/* Decorative glow */}
-        <View style={styles.headerGlow} />
-
-        <View style={styles.headerTopRow}>
-          <View style={styles.headerIcon}>
-            <Ionicons
-              name="person-outline"
-              size={22}
-              color={palette.tealDark}
-            />
-          </View>
-
-          <View style={styles.headerTextContainer}>
-            <Text style={styles.eyebrow}>RAWAAN ACCOUNT</Text>
-
-            <Text style={styles.headerTitle}>Profile</Text>
-
-            <Text style={styles.headerSubtitle}>
-              Manage your account details
-            </Text>
-          </View>
-        </View>
-
-        {/* Small Rawaan route accent */}
-        <View style={styles.routeAccent}>
-          <View style={styles.routeDot} />
-          <View style={styles.routeLine} />
-          <View style={[styles.routeDot, styles.routeDotSmall]} />
-        </View>
-      </LinearGradient>
+      <ScreenHeader
+        eyebrow="RAWAAN ACCOUNT"
+        title="Profile"
+        subtitle="Manage your account details"
+        icon="person-outline"
+        showDots
+      />
 
       {/* ======================================================
           BODY

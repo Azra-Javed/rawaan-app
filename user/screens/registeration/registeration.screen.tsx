@@ -7,7 +7,6 @@ import color from "@/themes/app.colors";
 import { windowHeight, windowWidth } from "@/themes/app.constant";
 import { saveAuth } from "@/utils/authStorage";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
 import {
   parsePhoneNumberFromString,
@@ -16,6 +15,7 @@ import {
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useToast } from "react-native-toast-notifications";
+import ScreenHeader from "@/components/common/screen-header";
 
 const palette = {
   nightIndigo: "#0F4C4A",
@@ -134,50 +134,13 @@ const RegisteranScreen = () => {
         FIXED HEADER
     ====================================================== */}
 
-      <LinearGradient
-        colors={[palette.nightIndigo, palette.nightIndigoLight]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
-        {/* Ambient glow */}
-        <View style={styles.headerGlow} />
-
-        <Text style={styles.eyebrow}>RAWAAN</Text>
-
-        <View style={styles.headerTitleRow}>
-          <View style={styles.headerIcon}>
-            <Ionicons
-              name="person-add-outline"
-              size={23}
-              color={palette.routeAmber}
-            />
-          </View>
-
-          <View style={styles.headerTextContainer}>
-            <Text style={styles.headerTitle}>Create your account</Text>
-
-            <Text style={styles.headerSubtitle}>
-              Complete your profile to start riding
-            </Text>
-          </View>
-        </View>
-
-        {/* Route dots */}
-        <View style={styles.routeDotsContainer}>
-          {[0, 1, 2, 3, 4, 5].map((item) => (
-            <View
-              key={item}
-              style={[
-                styles.routeDot,
-                {
-                  opacity: 1 - (item / 6) * 0.75,
-                },
-              ]}
-            />
-          ))}
-        </View>
-      </LinearGradient>
+      <ScreenHeader
+        eyebrow="RAWAAN"
+        title="Create your account"
+        subtitle="Complete your profile to start riding"
+        icon="person-add-outline"
+        showDots
+      />
 
       {/* =====================================================
         SCROLLABLE CONTENT

@@ -41,10 +41,6 @@ export default function Input({
 
   return (
     <View style={styles.container}>
-      {/* =================================================
-          LABEL
-      ================================================== */}
-
       <Text
         style={[
           styles.title,
@@ -55,10 +51,6 @@ export default function Input({
       >
         {title}
       </Text>
-
-      {/* =================================================
-          INPUT
-      ================================================== */}
 
       <View
         style={[
@@ -92,10 +84,6 @@ export default function Input({
           cursorColor="#176B68"
         />
       </View>
-
-      {/* =================================================
-          WARNING
-      ================================================== */}
 
       {showWarning && warning !== "" && (
         <View style={styles.warningContainer}>

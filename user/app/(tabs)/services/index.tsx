@@ -9,29 +9,16 @@ import {
   TextInput,
   StyleSheet,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { windowHeight, windowWidth } from "@/themes/app.constant";
 import { Toast } from "react-native-toast-notifications";
 import api from "@/api/client";
-
-// ---------------------------------------------------------------------------
-// Design tokens -- see chat for the full rationale. Keep every color/type
-// decision on this screen sourced from these constants, not one-off values.
-// ---------------------------------------------------------------------------
-const palette = {
-  nightIndigo: "#0F4C4A",
-  nightIndigoLight: "#176B68",
-  routeAmber: "#F5A524",
-  slateTeal: "#5C6B73",
-  ivory: "#FBF8F2",
-  ivoryLine: "#0F4C4A14",
-  coral: "#E85C4A",
-  moss: "#4C9A6A",
-  white: "#FFFFFF",
-};
+import ScreenHeader from "@/components/common/screen-header";
+import RouteDots from "@/components/common/route-dots";
+import color from "@/themes/app.colors";
 
 const displayFont = "TT-Octosquares-Medium";
+const palette = color;
 type FAQItem = {
   question: string;
   answer: string;
@@ -64,28 +51,6 @@ const FAQ_DATA: FAQItem[] = [
       "Head to Profile → Saved Addresses to add, edit, or remove locations.",
   },
 ];
-
-function RouteDots({
-  color = palette.routeAmber,
-  count = 6,
-}: {
-  color?: string;
-  count?: number;
-}) {
-  return (
-    <View style={styles.routeDotsRow}>
-      {Array.from({ length: count }).map((_, i) => (
-        <View
-          key={i}
-          style={[
-            styles.routeDot,
-            { backgroundColor: color, opacity: 1 - (i / count) * 0.75 },
-          ]}
-        />
-      ))}
-    </View>
-  );
-}
 
 export default function ServicesScreen() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
@@ -142,24 +107,13 @@ export default function ServicesScreen() {
 
   return (
     <View style={styles.screen}>
-      {/* ---------------- Header ---------------- */}
-      <LinearGradient
-        colors={[palette.nightIndigo, palette.nightIndigoLight]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
-        {/* Ambient glow, standing in for a distant streetlight */}
-        <View style={styles.headerGlow} />
-
-        <Text style={styles.eyebrow}>RAWAAN CARE</Text>
-        <Text style={styles.headerTitle}>How can we help?</Text>
-        <Text style={styles.headerSubtitle}>
-          We usually reply within the hour
-        </Text>
-
-        <RouteDots />
-      </LinearGradient>
+      <ScreenHeader
+        eyebrow="RAWAAN CARE"
+        title="How can we help?"
+        subtitle="We usually reply within the hour"
+        icon="help-circle-outline"
+        showDots
+      />
 
       <ScrollView
         contentContainerStyle={styles.body}
@@ -223,7 +177,7 @@ export default function ServicesScreen() {
         {/* ---------------- FAQ ---------------- */}
         <View style={styles.sectionHeaderRow}>
           <Text style={styles.sectionTitle}>Frequently asked</Text>
-          <RouteDots color={palette.ivoryLine} count={4} />
+          <RouteDots colorValue={color.ivoryLine} count={4} />
         </View>
 
         {FAQ_DATA.map((item, index) => {

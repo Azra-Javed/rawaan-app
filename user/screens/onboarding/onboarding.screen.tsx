@@ -40,8 +40,6 @@ const OnBoardingScreen = () => {
       >
         {slides.map((slide: Slide, index) => (
           <View style={localStyles.slideContainer} key={index}>
-            {/* ================= IMAGE ================= */}
-
             <View style={localStyles.imageContainer}>
               <Image
                 style={localStyles.image}
@@ -49,25 +47,17 @@ const OnBoardingScreen = () => {
                 resizeMode="cover"
               />
 
-              {/* RAWAAN BRAND */}
-
               <View style={localStyles.brand}>
                 <Text style={localStyles.brandText}>RAWAAN</Text>
               </View>
             </View>
 
-            {/* ================= INFORMATION ================= */}
-
             <View style={localStyles.infoContainer}>
-              {/* Small accent */}
-
               <View style={localStyles.accentLine} />
 
               <Text style={localStyles.title}>{slide.text}</Text>
 
               <Text style={localStyles.description}>{slide.description}</Text>
-
-              {/* ================= CONTINUE ================= */}
 
               <TouchableOpacity
                 activeOpacity={0.8}

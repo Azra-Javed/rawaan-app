@@ -12,7 +12,7 @@ export default function index() {
     const getData = async () => {
       try {
         const res = await api.get("/user/me");
-        if (!res.data.user) setIsLoaggedIn(false);
+        if (res.data.user) setIsLoaggedIn(true);
         else setIsLoaggedIn(false);
       } catch (error: any) {
         Toast.show(error.message.response.data, { type: "danger" });

@@ -53,3 +53,12 @@ export const fontSizes = {
   FONT28: windowWidth(28),
   FONT30: windowWidth(30),
 };
+
+export const space = {
+  xs: windowHeight(4),
+  sm: windowHeight(8),
+  md: windowHeight(12),
+  lg: windowHeight(16),
+  xl: windowHeight(24),
+  xxl: windowHeight(32),
+};

@@ -1,51 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 
 import { windowHeight, windowWidth } from "@/themes/app.constant";
 import RideCard from "@/components/ride/ride.card";
+import ScreenHeader from "@/components/common/screen-header";
+import RouteDots from "@/components/common/route-dots";
 import api from "@/api/client";
-
-// ---------------------------------------------------------------------------
-// Design tokens — matched with Services screen
-// ---------------------------------------------------------------------------
-const palette = {
-  nightIndigo: "#0F4C4A",
-  nightIndigoLight: "#176B68",
-  routeAmber: "#F5A524",
-  slateTeal: "#5C6B73",
-  ivory: "#FBF8F2",
-  ivoryLine: "#0F4C4A14",
-  white: "#FFFFFF",
-};
+import color from "@/themes/app.colors";
 
 const displayFont = "TT-Octosquares-Medium";
-
-function RouteDots({
-  color = palette.routeAmber,
-  count = 6,
-}: {
-  color?: string;
-  count?: number;
-}) {
-  return (
-    <View style={styles.routeDotsRow}>
-      {Array.from({ length: count }).map((_, i) => (
-        <View
-          key={i}
-          style={[
-            styles.routeDot,
-            {
-              backgroundColor: color,
-              opacity: 1 - (i / count) * 0.75,
-            },
-          ]}
-        />
-      ))}
-    </View>
-  );
-}
+const palette = color;
 
 export default function History() {
   const [recentRides, setrecentRides] = useState([]);
@@ -61,50 +26,18 @@ export default function History() {
 
   return (
     <View style={styles.screen}>
-      {/* ================= HEADER ================= */}
-
-      <LinearGradient
-        colors={[palette.nightIndigo, palette.nightIndigoLight]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.header}
-      >
-        {/* Ambient glow */}
-        <View style={styles.headerGlow} />
-
-        <Text style={styles.eyebrow}>RAWAAN RIDES</Text>
-
-        <View style={styles.headerTitleRow}>
-          <View style={styles.headerIcon}>
-            <Ionicons
-              name="time-outline"
-              size={22}
-              color={palette.routeAmber}
-            />
-          </View>
-
-          <View style={styles.headerTextContainer}>
-            <Text style={styles.headerTitle}>Ride History</Text>
-
-            <Text style={styles.headerSubtitle}>
-              View your previous rides and journeys
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.headerBottom}>
-          <RouteDots />
-        </View>
-      </LinearGradient>
-
-      {/* ================= CONTENT ================= */}
+      <ScreenHeader
+        eyebrow="RAWAAN RIDES"
+        title="Ride History"
+        subtitle="View your previous rides and journeys"
+        icon="time-outline"
+        showDots
+      />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.body}
       >
-        {/* ================= SECTION HEADER ================= */}
-
         <View style={styles.sectionHeader}>
           <View>
             <Text style={styles.sectionTitle}>Previous rides</Text>
@@ -123,8 +56,6 @@ export default function History() {
           </View>
         </View>
 
-        {/* ================= RIDES ================= */}
-
         {recentRides?.length > 0 ? (
           <View style={styles.ridesContainer}>
             {recentRides.map((item: any, index: number) => (
@@ -134,8 +65,6 @@ export default function History() {
             ))}
           </View>
         ) : (
-          /* ================= EMPTY STATE ================= */
-
           <View style={styles.emptyCard}>
             <View style={styles.emptyIcon}>
               <Ionicons
@@ -153,7 +82,7 @@ export default function History() {
             </Text>
 
             <View style={styles.emptyDots}>
-              <RouteDots color={palette.ivoryLine} count={4} />
+              <RouteDots colorValue={color.ivoryLine} count={4} />
             </View>
           </View>
         )}
@@ -169,90 +98,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: palette.ivory,
   },
-
-  // ================= HEADER =================
-
-  header: {
-    paddingTop: windowHeight(56),
-    paddingBottom: windowHeight(26),
-    paddingHorizontal: windowWidth(22),
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    overflow: "hidden",
-  },
-
-  headerGlow: {
-    position: "absolute",
-    top: -60,
-    right: -40,
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    backgroundColor: palette.routeAmber,
-    opacity: 0.14,
-  },
-
-  eyebrow: {
-    color: palette.routeAmber,
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 2.5,
-    marginBottom: 9,
-  },
-
-  headerTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  headerIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 15,
-    backgroundColor: "rgba(255,255,255,0.10)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 13,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
-  },
-
-  headerTextContainer: {
-    flex: 1,
-  },
-
-  headerTitle: {
-    fontFamily: displayFont,
-    color: palette.white,
-    fontSize: 25,
-    lineHeight: 31,
-  },
-
-  headerSubtitle: {
-    color: "#C7D8D6",
-    fontSize: 13,
-    marginTop: 4,
-  },
-
-  headerBottom: {
-    marginTop: windowHeight(18),
-  },
-
-  // ================= ROUTE DOTS =================
-
-  routeDotsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  routeDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 8,
-  },
-
-  // ================= BODY =================
 
   body: {
     padding: windowWidth(20),
