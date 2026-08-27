@@ -9,11 +9,11 @@ export type PlaceResult = {
 };
 
 export async function searchPlaces(query: string): Promise<PlaceResult[]> {
-  if (!query || query.length < 3) return [];
+  if (!query || query.length < 1) return [];
 
   try {
     const res = await fetch(
-      `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=6`,
+      `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=50`,
     );
     const data = await res.json();
 

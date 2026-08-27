@@ -1,60 +1,36 @@
-import { View, Text, TextInput, Pressable } from "react-native";
-import { styles } from "./styles";
-import color from "@/themes/app.colors";
-import { Clock, Search } from "@/utils/icons";
-import { windowHeight, windowWidth } from "@/themes/app.constant";
-import DownArrow from "@/assets/icons/downArrow";
+import React from "react";
+import { Pressable, Text, View } from "react-native";
 import { router } from "expo-router";
+
+import color from "@/themes/app.colors";
+import { windowHeight, windowWidth } from "@/themes/app.constant";
+import { Search, Clock } from "@/utils/icons";
+import DownArrow from "@/assets/icons/downArrow";
+
+import { styles } from "./styles";
 
 export default function LocationSearchBar() {
   return (
     <Pressable
-      style={[
-        styles.container,
-        { backgroundColor: color.lightGray },
-        { flexDirection: "row" },
-        { justifyContent: "space-around" },
-        { paddingHorizontal: windowWidth(18) },
-        { paddingRight: windowWidth(40) },
-      ]}
+      style={styles.container}
       onPress={() => router.push("/(routes)/rideplan")}
     >
-      <View style={{ flexDirection: "row", paddingLeft: windowWidth(30) }}>
+      <View style={styles.searchIcon}>
         <Search />
-        <Text
-          style={[
-            styles.textInputStyle,
-            { fontSize: 20, fontWeight: "500", color: "#000" },
-          ]}
-        >
-          Where to?
-        </Text>
       </View>
-      <View>
-        <View
-          style={{
-            width: windowWidth(130),
-            height: windowHeight(28),
-            borderRadius: 20,
-            backgroundColor: "#fff",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Clock />
-            <Text
-              style={{
-                fontSize: windowHeight(12),
-                fontWeight: "600",
-                paddingHorizontal: 8,
-              }}
-            >
-              Now
-            </Text>
-            <DownArrow />
-          </View>
-        </View>
+
+      <View style={styles.destination}>
+        <Text style={styles.label}>DESTINATION</Text>
+
+        <Text style={styles.placeholder}>Where would you like to go?</Text>
+      </View>
+
+      <View style={styles.timeButton}>
+        <Clock />
+
+        <Text style={styles.timeText}>Now</Text>
+
+        <DownArrow />
       </View>
     </Pressable>
   );

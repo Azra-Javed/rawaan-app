@@ -1,31 +1,77 @@
-import { commonStyles } from "@/styles/common.style";
-import { external } from "@/styles/external.style";
-import color from "@/themes/app.colors";
-import { fontSizes, windowHeight, windowWidth } from "@/themes/app.constant";
 import { StyleSheet } from "react-native";
 
-const styles = StyleSheet.create({
+import color from "@/themes/app.colors";
+import { fontSizes, windowHeight, windowWidth } from "@/themes/app.constant";
+import fonts from "@/themes/app.fonts";
+
+export const styles = StyleSheet.create({
   container: {
-    backgroundColor: color.whiteColor,
-    height: windowHeight(38),
-    borderRadius: windowHeight(20),
-    marginTop: windowHeight(10),
-    alignItems: "center",
+    minHeight: windowHeight(70),
+
     flexDirection: "row",
-    paddingHorizontal: windowHeight(8),
-    overflow:"hidden"
+    alignItems: "center",
+
+    backgroundColor: color.whiteColor,
+
+    borderRadius: 16,
+
+    paddingHorizontal: windowWidth(12),
   },
-  textInputStyle: {
-    ...commonStyles.regularText,
-    ...external.ph_8,
-    flexGrow: 0.95,
-    fontSize: fontSizes.FONT19,
+
+  searchIcon: {
+    width: 42,
+    height: 42,
+
+    borderRadius: 13,
+
+    backgroundColor: color.tealLight,
+
+    alignItems: "center",
+    justifyContent: "center",
   },
-  calenderStyle: {
-    height: "65%",
-    width: windowWidth(2),
-    backgroundColor: color.primaryGray,
-    marginHorizontal: windowHeight(8),
+
+  destination: {
+    flex: 1,
+
+    marginLeft: windowWidth(11),
+  },
+
+  label: {
+    fontFamily: fonts.medium,
+    fontSize: fontSizes.FONT10,
+
+    letterSpacing: 0.8,
+
+    color: color.mutedText,
+  },
+
+  placeholder: {
+    marginTop: windowHeight(3),
+
+    fontFamily: fonts.medium,
+    fontSize: fontSizes.FONT14,
+
+    color: color.primaryText,
+  },
+
+  timeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    backgroundColor: color.lightGray,
+
+    borderRadius: 12,
+
+    paddingHorizontal: windowWidth(10),
+    paddingVertical: windowHeight(9),
+
+    gap: windowWidth(4),
+  },
+
+  timeText: {
+    fontFamily: fonts.medium,
+    fontSize: fontSizes.FONT12,
+
+    color: color.primaryText,
   },
 });
-export { styles };

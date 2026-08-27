@@ -1,6 +1,8 @@
+import api from "@/api/client";
 import { clearAuth, getToken } from "@/utils/authStorage";
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
+import { Toast } from "react-native-toast-notifications";
 
 export default function index() {
   const [isLoggedIn, setIsLoaggedIn] = useState(false);
@@ -9,14 +11,11 @@ export default function index() {
   useEffect(() => {
     const getData = async () => {
       try {
-        const token = await getToken();
-        if (token) {
-          setIsLoaggedIn(true);
-        } else {
-          setIsLoaggedIn(false);
-        }
-      } catch (error) {
-        console.log("failed to retirve the token");
+        const res = await api.get("/user/me");
+        if (!res.data.user) setIsLoaggedIn(false);
+        else setIsLoaggedIn(false);
+      } catch (error: any) {
+        Toast.show(error.message.response.data, { type: "danger" });
       } finally {
         setLoading(false);
       }

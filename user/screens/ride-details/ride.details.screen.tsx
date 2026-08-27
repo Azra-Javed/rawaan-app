@@ -5,9 +5,12 @@ import {
   Linking,
   ActivityIndicator,
   TouchableOpacity,
+  StyleSheet,
 } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import MapView, { Marker, Polyline, UrlTile, Region } from "react-native-maps";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
 import { fontSizes, windowHeight, windowWidth } from "@/themes/app.constant";
 import color from "@/themes/app.colors";
@@ -15,8 +18,8 @@ import { getRoute, type Coord } from "@/utils/osrm";
 
 type RideData = {
   user?: any;
-  currentLocation?: Coord; // pickup, matches your driver's rideData.currentLocation
-  dropoff?: Coord; // matches your driver's rideData.dropoff
+  currentLocation?: Coord;
+  dropoff?: Coord;
   driver?: {
     id?: string;
     name?: string;
@@ -28,6 +31,22 @@ type RideData = {
   distance?: number | string;
   ride?: any;
 };
+
+const palette = {
+  nightIndigo: "#0F4C4A",
+  nightIndigoLight: "#176B68",
+  routeAmber: "#F5A524",
+  slateTeal: "#5C6B73",
+  ivory: "#FBF8F2",
+  ivoryLine: "#0F4C4A14",
+  white: "#FFFFFF",
+  lightTeal: "#E7F2F1",
+  softGray: "#F4F7F7",
+  text: "#172525",
+  muted: "#899595",
+};
+
+const displayFont = "TT-Octosquares-Medium";
 
 const DEFAULT_REGION: Region = {
   latitude: 31.5497,
@@ -64,7 +83,7 @@ const RideDetailsScreen = () => {
     }
   }, [orderDataParam]);
 
-  // currentLocation = pickup, dropoff = destination -- matches your driver's acceptRideHandler shape
+  // currentLocation = pickup, dropoff = destination
   const pickup = useMemo<Coord | null>(() => {
     if (
       orderData?.currentLocation?.latitude !== undefined &&
@@ -107,7 +126,7 @@ const RideDetailsScreen = () => {
     });
   }, [pickup, dropoff]);
 
-  // Real road route via your OSRM utility -- not Google Directions, matching your existing stack
+  // Real road route via your OSRM utility
   useEffect(() => {
     let cancelled = false;
 
@@ -119,12 +138,15 @@ const RideDetailsScreen = () => {
 
       try {
         setRouteLoading(true);
+
         const result = await getRoute(pickup, dropoff);
+
         if (cancelled) return;
 
         setRouteCoords(result?.coords?.length ? result.coords : []);
       } catch (error) {
         console.log("Ride route error:", error);
+
         if (!cancelled) setRouteCoords([]);
       } finally {
         if (!cancelled) setRouteLoading(false);
@@ -132,6 +154,7 @@ const RideDetailsScreen = () => {
     };
 
     loadRoute();
+
     return () => {
       cancelled = true;
     };
@@ -139,6 +162,7 @@ const RideDetailsScreen = () => {
 
   const distance = Number(orderData?.distance ?? 0);
   const driver = orderData?.driver;
+
   const payableAmount =
     driver?.rate !== undefined ? distance * Number(driver.rate) : 0;
 
@@ -147,6 +171,7 @@ const RideDetailsScreen = () => {
       console.log("Driver phone number unavailable");
       return;
     }
+
     try {
       await Linking.openURL(`tel:${driver.phone_number}`);
     } catch (error) {
@@ -156,37 +181,35 @@ const RideDetailsScreen = () => {
 
   if (!orderData) {
     return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 20,
-        }}
-      >
-        <Text style={{ fontSize: fontSizes.FONT18, marginBottom: 15 }}>
+      <SafeAreaView style={localStyles.emptyScreen}>
+        <View style={localStyles.emptyLoadingIcon}>
+          <Ionicons name="car-outline" size={30} color={palette.nightIndigo} />
+        </View>
+
+        <Text style={localStyles.emptyScreenTitle}>
           Ride information could not be loaded.
         </Text>
-        <TouchableOpacity onPress={() => router.back()}>
-          <Text
-            style={{
-              color: color.buttonBg,
-              fontSize: fontSizes.FONT16,
-              fontWeight: "600",
-            }}
-          >
-            Go Back
-          </Text>
+
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={localStyles.backButtonEmpty}
+          activeOpacity={0.8}
+        >
+          <Text style={localStyles.backButtonText}>Go Back</Text>
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <View style={{ height: windowHeight(450) }}>
+    <View style={localStyles.container}>
+      {/* =====================================================
+          MAP
+      ===================================================== */}
+
+      <View style={localStyles.mapContainer}>
         <MapView
-          style={{ width: "100%", height: "100%" }}
+          style={localStyles.map}
           region={region}
           onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
           rotateEnabled
@@ -208,6 +231,7 @@ const RideDetailsScreen = () => {
               description="Ride pickup location"
             />
           )}
+
           {dropoff && (
             <Marker
               coordinate={dropoff}
@@ -216,6 +240,7 @@ const RideDetailsScreen = () => {
               pinColor="red"
             />
           )}
+
           {routeCoords.length > 0 && (
             <Polyline
               coordinates={routeCoords}
@@ -225,143 +250,723 @@ const RideDetailsScreen = () => {
           )}
         </MapView>
 
-        <View
-          style={{
-            position: "absolute",
-            bottom: 5,
-            right: 5,
-            backgroundColor: "rgba(255,255,255,0.85)",
-            paddingHorizontal: 5,
-            paddingVertical: 2,
-          }}
+        {/* BACK BUTTON */}
+
+        <TouchableOpacity
+          style={localStyles.mapBackButton}
+          onPress={() => router.back()}
+          activeOpacity={0.8}
         >
-          <Text style={{ fontSize: 9 }}>
+          <Ionicons name="arrow-back" size={21} color={palette.nightIndigo} />
+        </TouchableOpacity>
+
+        {/* MAP LABEL */}
+
+        <View style={localStyles.mapLabel}>
+          <Ionicons
+            name="navigate-outline"
+            size={14}
+            color={palette.nightIndigo}
+          />
+
+          <Text style={localStyles.mapLabelText}>Your route</Text>
+        </View>
+
+        {/* MAPTILER ATTRIBUTION */}
+
+        <View style={localStyles.attribution}>
+          <Text style={localStyles.attributionText}>
             © MapTiler © OpenStreetMap contributors
           </Text>
         </View>
 
+        {/* ROUTE LOADING */}
+
         {routeLoading && (
-          <View
-            style={{
-              position: "absolute",
-              top: 15,
-              alignSelf: "center",
-              backgroundColor: "white",
-              borderRadius: 20,
-              paddingHorizontal: 15,
-              paddingVertical: 8,
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
-            <ActivityIndicator size="small" />
-            <Text style={{ marginLeft: 8, fontSize: fontSizes.FONT12 }}>
-              Loading route...
-            </Text>
+          <View style={localStyles.routeLoading}>
+            <ActivityIndicator size="small" color={palette.nightIndigo} />
+
+            <Text style={localStyles.routeLoadingText}>Loading route...</Text>
           </View>
         )}
       </View>
 
-      <View
-        style={{
-          flex: 1,
-          paddingHorizontal: windowWidth(20),
-          paddingTop: windowHeight(15),
-        }}
-      >
-        <Text
-          style={{
-            fontSize: fontSizes.FONT20,
-            fontWeight: "600",
-            paddingVertical: windowHeight(5),
-          }}
-        >
-          Ride Details
-        </Text>
+      {/* =====================================================
+          DETAILS
+      ===================================================== */}
 
-        <Text
-          style={{
-            fontSize: fontSizes.FONT18,
-            fontWeight: "500",
-            paddingVertical: windowHeight(5),
-          }}
-        >
-          Driver: {driver?.name || "Driver"}
-        </Text>
+      <SafeAreaView edges={["bottom"]} style={localStyles.detailsContainer}>
+        <View style={localStyles.detailsContent}>
+          {/* HEADER */}
 
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Text style={{ fontSize: fontSizes.FONT16, fontWeight: "500" }}>
-            Phone:
-          </Text>
-          <TouchableOpacity
-            disabled={!driver?.phone_number}
-            onPress={callDriver}
-          >
-            <Text
-              style={{
-                color: color.buttonBg,
-                paddingLeft: 8,
-                fontSize: fontSizes.FONT16,
-                fontWeight: "500",
-              }}
+          <View style={localStyles.detailsHeader}>
+            <View>
+              <Text style={localStyles.eyebrow}>RAWAAN</Text>
+
+              <Text style={localStyles.title}>Ride Details</Text>
+            </View>
+
+            <View style={localStyles.rideIcon}>
+              <Ionicons
+                name="car-outline"
+                size={21}
+                color={palette.nightIndigo}
+              />
+            </View>
+          </View>
+
+          {/* DRIVER CARD */}
+
+          <View style={localStyles.driverCard}>
+            <View style={localStyles.driverIcon}>
+              <Ionicons
+                name="person-outline"
+                size={22}
+                color={palette.nightIndigo}
+              />
+            </View>
+
+            <View style={localStyles.driverInfo}>
+              <Text style={localStyles.smallLabel}>DRIVER</Text>
+
+              <Text style={localStyles.driverName}>
+                {driver?.name || "Driver"}
+              </Text>
+            </View>
+
+            <TouchableOpacity
+              style={[
+                localStyles.callButton,
+                !driver?.phone_number && localStyles.callButtonDisabled,
+              ]}
+              disabled={!driver?.phone_number}
+              onPress={callDriver}
+              activeOpacity={0.8}
             >
-              {driver?.phone_number || "Unavailable"}
-            </Text>
-          </TouchableOpacity>
+              <Ionicons
+                name="call-outline"
+                size={19}
+                color={driver?.phone_number ? palette.white : palette.muted}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* RIDE INFORMATION */}
+
+          <View style={localStyles.infoCard}>
+            {/* PHONE */}
+
+            <View style={localStyles.infoRow}>
+              <View style={localStyles.infoIcon}>
+                <Ionicons
+                  name="call-outline"
+                  size={17}
+                  color={palette.nightIndigo}
+                />
+              </View>
+
+              <View style={localStyles.infoContent}>
+                <Text style={localStyles.infoLabel}>PHONE</Text>
+
+                <Text
+                  style={[
+                    localStyles.infoValue,
+                    driver?.phone_number && localStyles.phoneValue,
+                  ]}
+                >
+                  {driver?.phone_number || "Unavailable"}
+                </Text>
+              </View>
+            </View>
+
+            <View style={localStyles.divider} />
+
+            {/* VEHICLE */}
+
+            <View style={localStyles.infoRow}>
+              <View style={localStyles.infoIcon}>
+                <Ionicons
+                  name="car-outline"
+                  size={17}
+                  color={palette.nightIndigo}
+                />
+              </View>
+
+              <View style={localStyles.infoContent}>
+                <Text style={localStyles.infoLabel}>VEHICLE</Text>
+
+                <Text style={localStyles.infoValue}>
+                  {driver?.vehicle_type || "N/A"}
+                </Text>
+              </View>
+
+              <View style={localStyles.vehicleColorContainer}>
+                <View
+                  style={[
+                    localStyles.colorDot,
+                    {
+                      backgroundColor:
+                        driver?.vehicle_color?.toLowerCase() || "#AAB5B5",
+                    },
+                  ]}
+                />
+
+                <Text style={localStyles.vehicleColorText}>
+                  {driver?.vehicle_color || "N/A"}
+                </Text>
+              </View>
+            </View>
+
+            <View style={localStyles.divider} />
+
+            {/* DISTANCE */}
+
+            <View style={localStyles.infoRow}>
+              <View style={localStyles.infoIcon}>
+                <Ionicons
+                  name="navigate-outline"
+                  size={17}
+                  color={palette.nightIndigo}
+                />
+              </View>
+
+              <View style={localStyles.infoContent}>
+                <Text style={localStyles.infoLabel}>DISTANCE</Text>
+
+                <Text style={localStyles.infoValue}>
+                  {distance.toFixed(2)} km
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* PAYMENT */}
+
+          <View style={localStyles.paymentCard}>
+            <View>
+              <Text style={localStyles.paymentLabel}>PAYABLE AMOUNT</Text>
+
+              <Text style={localStyles.paymentHint}>
+                Pay your driver after reaching your destination.
+              </Text>
+            </View>
+
+            <View style={localStyles.amountContainer}>
+              <Text style={localStyles.amount}>{payableAmount.toFixed(2)}</Text>
+
+              <Text style={localStyles.currency}>PKR</Text>
+            </View>
+          </View>
         </View>
-
-        <Text
-          style={{
-            fontSize: fontSizes.FONT16,
-            fontWeight: "500",
-            paddingVertical: windowHeight(7),
-          }}
-        >
-          Vehicle: {driver?.vehicle_type || "N/A"}
-        </Text>
-
-        <Text
-          style={{
-            fontSize: fontSizes.FONT16,
-            fontWeight: "500",
-            paddingVertical: windowHeight(3),
-          }}
-        >
-          Color: {driver?.vehicle_color || "N/A"}
-        </Text>
-
-        <Text
-          style={{
-            fontSize: fontSizes.FONT16,
-            fontWeight: "500",
-            paddingVertical: windowHeight(7),
-          }}
-        >
-          Distance: {distance.toFixed(2)} km
-        </Text>
-
-        <Text
-          style={{
-            fontSize: fontSizes.FONT18,
-            fontWeight: "600",
-            paddingVertical: windowHeight(5),
-          }}
-        >
-          Payable Amount: {payableAmount.toFixed(2)} PKR
-        </Text>
-
-        <Text
-          style={{
-            fontSize: fontSizes.FONT14,
-            fontWeight: "400",
-            paddingVertical: windowHeight(8),
-          }}
-        >
-          Pay your driver after reaching your destination.
-        </Text>
-      </View>
+      </SafeAreaView>
     </View>
   );
 };
 
 export default RideDetailsScreen;
+
+/* ============================================================
+   STYLES
+============================================================ */
+
+const localStyles = StyleSheet.create({
+  // ============================================================
+  // CONTAINER
+  // ============================================================
+
+  container: {
+    flex: 1,
+    backgroundColor: palette.ivory,
+  },
+
+  // ============================================================
+  // MAP
+  // ============================================================
+
+  mapContainer: {
+    height: windowHeight(390),
+    position: "relative",
+    overflow: "hidden",
+  },
+
+  map: {
+    width: "100%",
+    height: "100%",
+  },
+
+  mapBackButton: {
+    position: "absolute",
+    top: windowHeight(18),
+    left: windowWidth(18),
+
+    width: 42,
+    height: 42,
+
+    borderRadius: 14,
+
+    backgroundColor: palette.white,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.12,
+    shadowRadius: 5,
+
+    elevation: 4,
+  },
+
+  mapLabel: {
+    position: "absolute",
+
+    top: windowHeight(18),
+    right: windowWidth(18),
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    backgroundColor: palette.white,
+
+    borderRadius: 14,
+
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+
+    elevation: 3,
+  },
+
+  mapLabelText: {
+    marginLeft: 6,
+
+    fontFamily: "TT-Octosquares-Medium",
+    fontSize: 11,
+
+    color: palette.nightIndigo,
+  },
+
+  attribution: {
+    position: "absolute",
+
+    bottom: 5,
+    right: 5,
+
+    backgroundColor: "rgba(255,255,255,0.88)",
+
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+
+    borderRadius: 3,
+  },
+
+  attributionText: {
+    fontSize: 8,
+    color: "#596666",
+  },
+
+  routeLoading: {
+    position: "absolute",
+
+    top: windowHeight(70),
+    alignSelf: "center",
+
+    flexDirection: "row",
+    alignItems: "center",
+
+    backgroundColor: palette.white,
+
+    borderRadius: 18,
+
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+
+    elevation: 3,
+  },
+
+  routeLoadingText: {
+    marginLeft: 7,
+
+    fontSize: fontSizes.FONT11,
+    color: palette.slateTeal,
+  },
+
+  // ============================================================
+  // DETAILS
+  // ============================================================
+
+  detailsContainer: {
+    flex: 1,
+    backgroundColor: palette.ivory,
+  },
+
+  detailsContent: {
+    flex: 1,
+
+    paddingHorizontal: windowWidth(20),
+    paddingTop: windowHeight(17),
+    paddingBottom: windowHeight(10),
+  },
+
+  // ============================================================
+  // HEADER
+  // ============================================================
+
+  detailsHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+
+    marginBottom: windowHeight(14),
+  },
+
+  eyebrow: {
+    fontFamily: displayFont,
+
+    color: palette.routeAmber,
+
+    fontSize: 9,
+
+    letterSpacing: 1.8,
+
+    marginBottom: 3,
+  },
+
+  title: {
+    fontFamily: displayFont,
+
+    fontSize: 21,
+
+    color: palette.nightIndigo,
+  },
+
+  rideIcon: {
+    width: 42,
+    height: 42,
+
+    borderRadius: 13,
+
+    backgroundColor: "#0F4C4A12",
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // ============================================================
+  // DRIVER
+  // ============================================================
+
+  driverCard: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    backgroundColor: palette.white,
+
+    borderRadius: 17,
+
+    borderWidth: 1,
+    borderColor: palette.ivoryLine,
+
+    paddingHorizontal: 13,
+    paddingVertical: 12,
+
+    marginBottom: windowHeight(10),
+  },
+
+  driverIcon: {
+    width: 46,
+    height: 46,
+
+    borderRadius: 14,
+
+    backgroundColor: palette.lightTeal,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginRight: 11,
+  },
+
+  driverInfo: {
+    flex: 1,
+  },
+
+  smallLabel: {
+    fontFamily: displayFont,
+
+    fontSize: 8,
+
+    letterSpacing: 1.1,
+
+    color: palette.slateTeal,
+
+    marginBottom: 3,
+  },
+
+  driverName: {
+    fontFamily: displayFont,
+
+    fontSize: 16,
+
+    color: palette.text,
+  },
+
+  callButton: {
+    width: 40,
+    height: 40,
+
+    borderRadius: 13,
+
+    backgroundColor: palette.nightIndigo,
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  callButtonDisabled: {
+    backgroundColor: "#E8EEEE",
+  },
+
+  // ============================================================
+  // INFORMATION CARD
+  // ============================================================
+
+  infoCard: {
+    backgroundColor: palette.white,
+
+    borderRadius: 17,
+
+    borderWidth: 1,
+    borderColor: palette.ivoryLine,
+
+    paddingHorizontal: 13,
+    paddingVertical: 4,
+
+    marginBottom: windowHeight(10),
+  },
+
+  infoRow: {
+    minHeight: 52,
+
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  infoIcon: {
+    width: 34,
+    height: 34,
+
+    borderRadius: 10,
+
+    backgroundColor: "#0F4C4A12",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginRight: 10,
+  },
+
+  infoContent: {
+    flex: 1,
+  },
+
+  infoLabel: {
+    fontFamily: displayFont,
+
+    fontSize: 8,
+
+    letterSpacing: 1,
+
+    color: palette.slateTeal,
+
+    marginBottom: 2,
+  },
+
+  infoValue: {
+    fontFamily: displayFont,
+
+    fontSize: 13,
+
+    color: palette.text,
+  },
+
+  phoneValue: {
+    color: palette.nightIndigo,
+  },
+
+  divider: {
+    height: 1,
+
+    backgroundColor: "#EDF1F1",
+
+    marginLeft: 44,
+  },
+
+  vehicleColorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+
+    borderRadius: 10,
+
+    backgroundColor: palette.softGray,
+  },
+
+  colorDot: {
+    width: 8,
+    height: 8,
+
+    borderRadius: 4,
+
+    marginRight: 5,
+  },
+
+  vehicleColorText: {
+    fontFamily: displayFont,
+
+    fontSize: 9,
+
+    color: palette.slateTeal,
+
+    maxWidth: 65,
+  },
+
+  // ============================================================
+  // PAYMENT
+  // ============================================================
+
+  paymentCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+
+    backgroundColor: palette.nightIndigo,
+
+    borderRadius: 18,
+
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+
+  paymentLabel: {
+    fontFamily: displayFont,
+
+    fontSize: 9,
+
+    letterSpacing: 1.1,
+
+    color: palette.routeAmber,
+
+    marginBottom: 4,
+  },
+
+  paymentHint: {
+    fontSize: 10,
+
+    lineHeight: 14,
+
+    color: "#C7D8D6",
+
+    maxWidth: windowWidth(190),
+  },
+
+  amountContainer: {
+    alignItems: "flex-end",
+  },
+
+  amount: {
+    fontFamily: displayFont,
+
+    fontSize: 20,
+
+    color: palette.white,
+  },
+
+  currency: {
+    fontFamily: displayFont,
+
+    fontSize: 9,
+
+    color: palette.routeAmber,
+
+    marginTop: 1,
+  },
+
+  // ============================================================
+  // EMPTY
+  // ============================================================
+
+  emptyScreen: {
+    flex: 1,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    backgroundColor: palette.ivory,
+
+    paddingHorizontal: windowWidth(25),
+  },
+
+  emptyLoadingIcon: {
+    width: 64,
+    height: 64,
+
+    borderRadius: 20,
+
+    backgroundColor: "#0F4C4A12",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginBottom: 15,
+  },
+
+  emptyScreenTitle: {
+    fontFamily: displayFont,
+
+    fontSize: fontSizes.FONT16,
+
+    color: palette.nightIndigo,
+
+    textAlign: "center",
+
+    marginBottom: 16,
+  },
+
+  backButtonEmpty: {
+    backgroundColor: palette.nightIndigo,
+
+    borderRadius: 13,
+
+    paddingHorizontal: 22,
+    paddingVertical: 11,
+  },
+
+  backButtonText: {
+    fontFamily: displayFont,
+
+    fontSize: fontSizes.FONT13,
+
+    color: palette.white,
+  },
+});

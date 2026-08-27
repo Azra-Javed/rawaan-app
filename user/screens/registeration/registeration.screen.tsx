@@ -2,27 +2,42 @@ import api from "@/api/client";
 import Button from "@/components/common/button";
 import Input from "@/components/common/input";
 import SelectInput from "@/components/common/select-input";
-import TitleView from "@/components/signup/title.view";
+import { countryItems } from "@/configs/country-list";
 import color from "@/themes/app.colors";
 import { windowHeight, windowWidth } from "@/themes/app.constant";
-import { useTheme } from "@react-navigation/native";
+import { saveAuth } from "@/utils/authStorage";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
-import { useToast } from "react-native-toast-notifications";
-import { countryItems } from "@/configs/country-list";
 import {
   parsePhoneNumberFromString,
   type CountryCode,
 } from "libphonenumber-js";
+import React, { useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useToast } from "react-native-toast-notifications";
+
+const palette = {
+  nightIndigo: "#0F4C4A",
+  nightIndigoLight: "#176B68",
+  routeAmber: "#F5A524",
+  slateTeal: "#5C6B73",
+  ivory: "#FBF8F2",
+  ivoryLine: "#0F4C4A14",
+  white: "#FFFFFF",
+  inputBg: "#F4F7F7",
+  inputBorder: "#E1E8E8",
+};
+
+const displayFont = "TT-Octosquares-Medium";
 
 const RegisteranScreen = () => {
-  const { colors } = useTheme();
   const toast = useToast();
 
-  const { email, userId } = useLocalSearchParams<{
+  const { email, userId, token } = useLocalSearchParams<{
     userId: string;
     email: string;
+    token: string;
   }>();
 
   const emailValue = Array.isArray(email) ? email[0] : email;
@@ -95,11 +110,11 @@ const RegisteranScreen = () => {
         phone_number: fullPhoneNumber,
       });
 
-      console.log("Registration:", response.data);
-
       toast.show("Account created successfully!", {
         type: "success",
       });
+
+      await saveAuth(token, response.data.user);
 
       router.replace("/(tabs)/home");
     } catch (error: any) {
@@ -112,41 +127,94 @@ const RegisteranScreen = () => {
       setLoading(false);
     }
   };
+
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View>
-        {/* Logo */}
-        <Text
-          style={{
-            fontFamily: "TT-Octosquares-Medium",
-            fontSize: windowHeight(25),
-            paddingTop: windowHeight(50),
-            textAlign: "center",
-            color: colors.text,
-          }}
-        >
-          Manzil App
-        </Text>
+    <View style={styles.screen}>
+      {/* =====================================================
+        FIXED HEADER
+    ====================================================== */}
 
-        <View style={{ padding: windowWidth(20) }}>
-          <View
-            style={[
-              styles.subView,
-              {
-                backgroundColor: colors.background,
-              },
-            ]}
-          >
-            <View style={styles.space}>
-              <TitleView
-                title="Create your account"
-                subTitle="Enjoy your life by joining Manzil app"
-              />
+      <LinearGradient
+        colors={[palette.nightIndigo, palette.nightIndigoLight]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.header}
+      >
+        {/* Ambient glow */}
+        <View style={styles.headerGlow} />
 
-              {/* Name */}
+        <Text style={styles.eyebrow}>RAWAAN</Text>
+
+        <View style={styles.headerTitleRow}>
+          <View style={styles.headerIcon}>
+            <Ionicons
+              name="person-add-outline"
+              size={23}
+              color={palette.routeAmber}
+            />
+          </View>
+
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerTitle}>Create your account</Text>
+
+            <Text style={styles.headerSubtitle}>
+              Complete your profile to start riding
+            </Text>
+          </View>
+        </View>
+
+        {/* Route dots */}
+        <View style={styles.routeDotsContainer}>
+          {[0, 1, 2, 3, 4, 5].map((item) => (
+            <View
+              key={item}
+              style={[
+                styles.routeDot,
+                {
+                  opacity: 1 - (item / 6) * 0.75,
+                },
+              ]}
+            />
+          ))}
+        </View>
+      </LinearGradient>
+
+      {/* =====================================================
+        SCROLLABLE CONTENT
+    ====================================================== */}
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.formWrapper}>
+          <View style={styles.formCard}>
+            {/* Section heading */}
+
+            <View style={styles.formHeader}>
+              <View>
+                <Text style={styles.formTitle}>Your details</Text>
+
+                <Text style={styles.formSubtitle}>
+                  Tell us a little about yourself
+                </Text>
+              </View>
+
+              <View style={styles.formIcon}>
+                <Ionicons
+                  name="person-outline"
+                  size={19}
+                  color={palette.nightIndigo}
+                />
+              </View>
+            </View>
+
+            {/* =================================================
+              NAME
+          ================================================== */}
+
+            <View style={styles.inputSection}>
               <Input
                 title="Name"
                 placeholder="Enter your name"
@@ -155,8 +223,13 @@ const RegisteranScreen = () => {
                 showWarning={showWarning && !formData.name.trim()}
                 warning="Please enter your name"
               />
+            </View>
 
-              {/* Email */}
+            {/* =================================================
+              EMAIL
+          ================================================== */}
+
+            <View style={styles.inputSection}>
               <Input
                 title="Email"
                 placeholder="Verified email"
@@ -164,19 +237,25 @@ const RegisteranScreen = () => {
                 disabled={true}
               />
 
-              {/* Country Code */}
-              <Text
-                style={[
-                  styles.label,
-                  {
-                    color: colors.text,
-                  },
-                ]}
-              >
-                Country
-              </Text>
+              <View style={styles.verifiedRow}>
+                <Ionicons
+                  name="checkmark-circle"
+                  size={14}
+                  color={palette.nightIndigoLight}
+                />
 
-              <View style={styles.countryContainer}>
+                <Text style={styles.verifiedText}>Email verified</Text>
+              </View>
+            </View>
+
+            {/* =================================================
+              COUNTRY
+          ================================================== */}
+
+            <View style={styles.countrySection}>
+              <Text style={styles.label}>Country</Text>
+
+              <View style={styles.selectWrapper}>
                 <SelectInput
                   placeholder="Select country"
                   value={formData.countryCode}
@@ -186,8 +265,13 @@ const RegisteranScreen = () => {
                   items={countryItems}
                 />
               </View>
+            </View>
 
-              {/* Phone */}
+            {/* =================================================
+              PHONE
+          ================================================== */}
+
+            <View style={styles.inputSection}>
               <Input
                 title="Phone Number"
                 placeholder="3001234567"
@@ -205,48 +289,376 @@ const RegisteranScreen = () => {
                 }
                 warning={phoneWarning || "Please enter your phone number"}
               />
+            </View>
 
-              {/* Submit */}
-              <View style={styles.margin}>
-                <Button
-                  title={loading ? "Creating..." : "Next"}
-                  backgroundColor={color.buttonBg}
-                  textColor={color.whiteColor}
-                  onPress={handleSubmit}
-                  disabled={loading}
+            {/* =================================================
+              INFO CARD
+          ================================================== */}
+
+            <View style={styles.infoCard}>
+              <View style={styles.infoIcon}>
+                <Ionicons
+                  name="shield-checkmark-outline"
+                  size={17}
+                  color={palette.nightIndigoLight}
                 />
               </View>
+
+              <Text style={styles.infoText}>
+                Your information is kept secure and will only be used to manage
+                your Rawaan account.
+              </Text>
+            </View>
+
+            {/* =================================================
+              SUBMIT
+          ================================================== */}
+
+            <View style={styles.buttonContainer}>
+              <Button
+                title={loading ? "Creating..." : "Next"}
+                backgroundColor={color.buttonBg}
+                textColor={color.whiteColor}
+                onPress={handleSubmit}
+                disabled={loading}
+              />
+            </View>
+
+            <View style={styles.bottomTextContainer}>
+              <Text style={styles.bottomText}>
+                Almost there — let's get you on the road.
+              </Text>
             </View>
           </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
+export default RegisteranScreen;
+
+/* ============================================================
+   STYLES
+============================================================ */
+
 const styles = StyleSheet.create({
-  subView: {
+  /* =========================================================
+     SCREEN
+  ========================================================= */
+
+  screen: {
+    flex: 1,
+    backgroundColor: palette.ivory,
+  },
+
+  scrollContent: {
+    paddingBottom: windowHeight(35),
+  },
+
+  /* =========================================================
+     HEADER
+  ========================================================= */
+
+  header: {
+    paddingTop: windowHeight(52),
+    paddingBottom: windowHeight(28),
+    paddingHorizontal: windowWidth(20),
+
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+
+    overflow: "hidden",
+  },
+
+  headerGlow: {
+    position: "absolute",
+
+    top: -80,
+    right: -50,
+
+    width: 200,
+    height: 200,
+
+    borderRadius: 100,
+
+    backgroundColor: palette.routeAmber,
+
+    opacity: 0.13,
+  },
+
+  eyebrow: {
+    fontFamily: displayFont,
+
+    color: palette.routeAmber,
+
+    fontSize: 11,
+
+    letterSpacing: 2.2,
+
+    marginBottom: windowHeight(13),
+  },
+
+  headerTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  headerIcon: {
+    width: 48,
+    height: 48,
+
+    borderRadius: 15,
+
+    backgroundColor: "rgba(255,255,255,0.10)",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginRight: 13,
+
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.10)",
+  },
+
+  headerTextContainer: {
     flex: 1,
   },
 
-  space: {
-    marginHorizontal: windowWidth(4),
+  headerTitle: {
+    fontFamily: displayFont,
+
+    color: palette.white,
+
+    fontSize: 23,
+
+    lineHeight: 30,
   },
+
+  headerSubtitle: {
+    color: "#D1DFDD",
+
+    fontSize: 13,
+
+    marginTop: 4,
+
+    lineHeight: 19,
+  },
+
+  /* =========================================================
+     ROUTE DOTS
+  ========================================================= */
+
+  routeDotsContainer: {
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    marginTop: windowHeight(19),
+  },
+
+  routeDot: {
+    width: 6,
+    height: 6,
+
+    borderRadius: 3,
+
+    backgroundColor: palette.routeAmber,
+
+    marginRight: 8,
+  },
+
+  /* =========================================================
+     FORM
+  ========================================================= */
+
+  formWrapper: {
+    paddingHorizontal: windowWidth(20),
+
+    marginTop: -2,
+  },
+
+  formCard: {
+    backgroundColor: palette.white,
+
+    borderRadius: 20,
+
+    borderWidth: 1,
+
+    borderColor: palette.ivoryLine,
+
+    paddingHorizontal: windowWidth(18),
+
+    paddingTop: windowHeight(21),
+
+    paddingBottom: windowHeight(18),
+  },
+
+  formHeader: {
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    justifyContent: "space-between",
+
+    marginBottom: windowHeight(18),
+  },
+
+  formTitle: {
+    fontFamily: displayFont,
+
+    fontSize: 18,
+
+    color: palette.nightIndigo,
+  },
+
+  formSubtitle: {
+    fontSize: 12.5,
+
+    color: palette.slateTeal,
+
+    marginTop: 4,
+
+    lineHeight: 18,
+  },
+
+  formIcon: {
+    width: 40,
+    height: 40,
+
+    borderRadius: 12,
+
+    backgroundColor: "#0F4C4A12",
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  /* =========================================================
+     INPUT SECTIONS
+  ========================================================= */
+
+  inputSection: {
+    marginBottom: windowHeight(10),
+  },
+
+  /* =========================================================
+     LABEL
+  ========================================================= */
 
   label: {
-    fontSize: windowWidth(16),
-    marginTop: windowHeight(10),
-    marginBottom: windowHeight(6),
-    fontWeight: "500",
+    fontFamily: displayFont,
+
+    fontSize: 12,
+
+    color: palette.nightIndigo,
+
+    marginBottom: windowHeight(7),
   },
 
-  countryContainer: {
-    marginBottom: windowHeight(8),
+  countrySection: {
+    marginBottom: windowHeight(10),
   },
 
-  margin: {
-    marginVertical: windowHeight(12),
+  selectWrapper: {
+    borderRadius: 14,
+
+    overflow: "hidden",
+  },
+
+  /* =========================================================
+     VERIFIED EMAIL
+  ========================================================= */
+
+  verifiedRow: {
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    marginTop: 6,
+
+    paddingLeft: 3,
+  },
+
+  verifiedText: {
+    fontSize: 10.5,
+
+    color: palette.nightIndigoLight,
+
+    marginLeft: 5,
+  },
+
+  /* =========================================================
+     INFO
+  ========================================================= */
+
+  infoCard: {
+    flexDirection: "row",
+
+    alignItems: "center",
+
+    backgroundColor: "#F4F8F7",
+
+    borderRadius: 14,
+
+    borderWidth: 1,
+
+    borderColor: "#E0EBE9",
+
+    paddingHorizontal: 11,
+
+    paddingVertical: 10,
+
+    marginTop: windowHeight(7),
+  },
+
+  infoIcon: {
+    width: 30,
+    height: 30,
+
+    borderRadius: 9,
+
+    backgroundColor: "#E4F0EE",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginRight: 9,
+  },
+
+  infoText: {
+    flex: 1,
+
+    fontSize: 10.5,
+
+    lineHeight: 15,
+
+    color: palette.slateTeal,
+  },
+
+  /* =========================================================
+     BUTTON
+  ========================================================= */
+
+  buttonContainer: {
+    marginTop: windowHeight(19),
+  },
+
+  /* =========================================================
+     BOTTOM
+  ========================================================= */
+
+  bottomTextContainer: {
+    alignItems: "center",
+
+    marginTop: windowHeight(13),
+  },
+
+  bottomText: {
+    fontSize: 10.5,
+
+    color: "#8A9696",
+
+    textAlign: "center",
   },
 });
-
-export default RegisteranScreen;

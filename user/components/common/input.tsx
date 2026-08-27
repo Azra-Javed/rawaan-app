@@ -41,62 +41,139 @@ export default function Input({
 
   return (
     <View style={styles.container}>
-      {/* Label */}
-      <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+      {/* =================================================
+          LABEL
+      ================================================== */}
 
-      {/* Input */}
-      <TextInput
+      <Text
         style={[
-          styles.input,
+          styles.title,
           {
-            backgroundColor: disabled ? color.lightGray : color.whiteColor,
-            borderColor: showWarning ? color.red : colors.border,
             color: colors.text,
           },
         ]}
-        placeholder={placeholder}
-        placeholderTextColor={color.secondaryFont}
-        keyboardType={keyboardType}
-        value={value}
-        editable={!disabled}
-        onChangeText={onChangeText}
-        autoCapitalize={autoCapitalize}
-        autoCorrect={autoCorrect}
-        secureTextEntry={secureTextEntry}
-      />
+      >
+        {title}
+      </Text>
 
-      {/* Warning */}
+      {/* =================================================
+          INPUT
+      ================================================== */}
+
+      <View
+        style={[
+          styles.inputWrapper,
+          {
+            backgroundColor: disabled ? "#EEF2F2" : "#F4F7F7",
+            borderColor: showWarning
+              ? color.red
+              : disabled
+                ? "#E1E7E7"
+                : "#E1E8E8",
+          },
+        ]}
+      >
+        <TextInput
+          style={[
+            styles.input,
+            {
+              color: colors.text,
+            },
+          ]}
+          placeholder={placeholder}
+          placeholderTextColor="#9AA5A5"
+          keyboardType={keyboardType}
+          value={value}
+          editable={!disabled}
+          onChangeText={onChangeText}
+          autoCapitalize={autoCapitalize}
+          autoCorrect={autoCorrect}
+          secureTextEntry={secureTextEntry}
+          cursorColor="#176B68"
+        />
+      </View>
+
+      {/* =================================================
+          WARNING
+      ================================================== */}
+
       {showWarning && warning !== "" && (
-        <Text style={styles.warning}>{warning}</Text>
+        <View style={styles.warningContainer}>
+          <Text style={styles.warning}>{warning}</Text>
+        </View>
       )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  /* =====================================================
+     CONTAINER
+  ====================================================== */
+
   container: {
-    marginBottom: windowHeight(8),
+    marginBottom: windowHeight(9),
   },
+
+  /* =====================================================
+     LABEL
+  ====================================================== */
 
   title: {
     fontFamily: fonts.medium,
-    fontSize: windowWidth(16),
-    marginBottom: windowHeight(6),
+
+    fontSize: windowWidth(12),
+
+    marginBottom: windowHeight(7),
   },
 
-  input: {
-    height: windowHeight(45),
-    borderRadius: 8,
+  /* =====================================================
+     INPUT WRAPPER
+  ====================================================== */
+
+  inputWrapper: {
+    height: windowHeight(48),
+
+    borderRadius: 14,
+
     borderWidth: 1,
+
     paddingHorizontal: windowWidth(12),
+
+    justifyContent: "center",
+  },
+
+  /* =====================================================
+     INPUT
+  ====================================================== */
+
+  input: {
+    flex: 1,
+
     fontFamily: fonts.regular,
-    fontSize: windowWidth(15),
+
+    fontSize: windowWidth(13.5),
+
+    paddingVertical: 0,
+  },
+
+  /* =====================================================
+     WARNING
+  ====================================================== */
+
+  warningContainer: {
+    paddingLeft: windowWidth(3),
+
+    marginTop: windowHeight(4),
   },
 
   warning: {
     color: color.red,
+
     fontFamily: fonts.regular,
-    fontSize: windowWidth(12),
-    marginTop: windowHeight(4),
+
+    fontSize: windowWidth(10.5),
+
+    lineHeight: windowHeight(15),
   },
 });
