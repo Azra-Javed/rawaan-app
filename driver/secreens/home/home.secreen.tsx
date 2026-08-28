@@ -37,19 +37,19 @@ import {
 } from "@/utils/websocket";
 import { Ionicons } from "@expo/vector-icons";
 
-// import * as Notifications from "expo-notifications";
-// import * as Device from "expo-device";
-// import Constants from "expo-constants";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import Constants from "expo-constants";
 
-// // Set up how notifications behave when they arrive -- runs once at module load, not on every render
-// Notifications.setNotificationHandler({
-//   handleNotification: async () => ({
-//     shouldShowBanner: true,
-//     shouldShowList: true,
-//     shouldPlaySound: true,
-//     shouldSetBadge: false,
-//   }),
-// });
+// Set up how notifications behave when they arrive -- runs once at module load, not on every render
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 // Only send a location update once the driver has moved at least this far -- keeps WebSocket traffic low
 const MIN_DISTANCE_METERS = 200;
@@ -57,9 +57,9 @@ const MIN_DISTANCE_METERS = 200;
 const HomeScreen = () => {
   const { colors } = useTheme();
   const { driver } = useDriver();
-  // const notificationListener = useRef<Notifications.EventSubscription | null>(
-  //   null,
-  // );
+  const notificationListener = useRef<Notifications.EventSubscription | null>(
+    null,
+  );
 
   // Map region shown in the "incoming ride" modal
   const [region, setRegion] = useState<any>({
@@ -360,69 +360,69 @@ const HomeScreen = () => {
   };
 
   // Listen for incoming push notifications about new ride requests
-  // useEffect(() => {
-  //   notificationListener.current =
-  //     Notifications.addNotificationReceivedListener((notification) => {
-  //       try {
-  //         const orderData = JSON.parse(
-  //           notification?.request?.content?.data?.orderData as string,
-  //         );
+  useEffect(() => {
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        try {
+          const orderData = JSON.parse(
+            notification?.request?.content?.data?.orderData as string,
+          );
 
-  //         console.log("Ride notification data:", orderData);
+          console.log("Ride notification data:", orderData);
 
-  //         setIsModalVisible(true);
+          setIsModalVisible(true);
 
-  //         //  currentLocation (the rider's live position) maps to pickup,
-  //         // and marker (the rider's chosen destination) maps to dropoff -- not the other way around.
-  //         setPickup({
-  //           latitude: orderData.currentLocation.latitude,
-  //           longitude: orderData.currentLocation.longitude,
-  //         });
+          //  currentLocation (the rider's live position) maps to pickup,
+          // and marker (the rider's chosen destination) maps to dropoff -- not the other way around.
+          setPickup({
+            latitude: orderData.currentLocation.latitude,
+            longitude: orderData.currentLocation.longitude,
+          });
 
-  //         setDropoff({
-  //           latitude: orderData.marker.latitude,
-  //           longitude: orderData.marker.longitude,
-  //         });
+          setDropoff({
+            latitude: orderData.marker.latitude,
+            longitude: orderData.marker.longitude,
+          });
 
-  //         const latDiff = Math.abs(
-  //           orderData.currentLocation.latitude - orderData.marker.latitude,
-  //         );
-  //         const lngDiff = Math.abs(
-  //           orderData.currentLocation.longitude - orderData.marker.longitude,
-  //         );
+          const latDiff = Math.abs(
+            orderData.currentLocation.latitude - orderData.marker.latitude,
+          );
+          const lngDiff = Math.abs(
+            orderData.currentLocation.longitude - orderData.marker.longitude,
+          );
 
-  //         setRegion({
-  //           latitude:
-  //             (orderData.currentLocation.latitude + orderData.marker.latitude) /
-  //             2,
-  //           longitude:
-  //             (orderData.currentLocation.longitude +
-  //               orderData.marker.longitude) /
-  //             2,
-  //           latitudeDelta: latDiff > 0.005 ? latDiff * 1.5 : 0.01,
-  //           longitudeDelta: lngDiff > 0.005 ? lngDiff * 1.5 : 0.01,
-  //         });
+          setRegion({
+            latitude:
+              (orderData.currentLocation.latitude + orderData.marker.latitude) /
+              2,
+            longitude:
+              (orderData.currentLocation.longitude +
+                orderData.marker.longitude) /
+              2,
+            latitudeDelta: latDiff > 0.005 ? latDiff * 1.5 : 0.01,
+            longitudeDelta: lngDiff > 0.005 ? lngDiff * 1.5 : 0.01,
+          });
 
-  //         //  coerce whatever the rider app sent into a real number
-  //         setDistance(
-  //           orderData.distance !== undefined && orderData.distance !== null
-  //             ? Number(orderData.distance)
-  //             : null,
-  //         );
+          //  coerce whatever the rider app sent into a real number
+          setDistance(
+            orderData.distance !== undefined && orderData.distance !== null
+              ? Number(orderData.distance)
+              : null,
+          );
 
-  //         setCurrentLocationName(orderData.currentLocationName);
-  //         setDestinationLocationName(orderData.destinationLocation);
-  //         setUserData(orderData.user);
-  //       } catch (error) {
-  //         console.log("Failed to process ride notification:", error);
-  //       }
-  //     });
+          setCurrentLocationName(orderData.currentLocationName);
+          setDestinationLocationName(orderData.destinationLocation);
+          setUserData(orderData.user);
+        } catch (error) {
+          console.log("Failed to process ride notification:", error);
+        }
+      });
 
-  //   return () => {
-  //     notificationListener.current?.remove();
-  //     notificationListener.current = null;
-  //   };
-  // }, []);
+    return () => {
+      notificationListener.current?.remove();
+      notificationListener.current = null;
+    };
+  }, []);
 
   //  fetch the actual route between pickup and dropoff whenever both are known,
   // so the modal's Polyline has something real to draw instead of staying empty.
@@ -439,67 +439,67 @@ const HomeScreen = () => {
   }, [pickup, dropoff]);
 
   // Ask for push notification permission and register this device for ride-request pushes
-  // async function registerForPushNotificationsAsync() {
-  //   if (Device.isDevice) {
-  //     const { status: existingStatus } =
-  //       await Notifications.getPermissionsAsync();
-  //     let finalStatus = existingStatus;
+  async function registerForPushNotificationsAsync() {
+    if (Device.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
 
-  //     if (existingStatus !== "granted") {
-  //       const { status } = await Notifications.requestPermissionsAsync();
-  //       finalStatus = status;
-  //     }
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
 
-  //     if (finalStatus !== "granted") {
-  //       Toast.show("Failed to get push token for push notification!", {
-  //         type: "danger",
-  //       });
-  //       return;
-  //     }
+      if (finalStatus !== "granted") {
+        Toast.show("Failed to get push token for push notification!", {
+          type: "danger",
+        });
+        return;
+      }
 
-  //     const projectId =
-  //       Constants?.expoConfig?.extra?.eas?.projectId ??
-  //       Constants?.easConfig?.projectId;
+      const projectId =
+        Constants?.expoConfig?.extra?.eas?.projectId ??
+        Constants?.easConfig?.projectId;
 
-  //     if (!projectId) {
-  //       Toast.show("Failed to get project id for push notification!", {
-  //         type: "danger",
-  //       });
-  //       return;
-  //     }
+      if (!projectId) {
+        Toast.show("Failed to get project id for push notification!", {
+          type: "danger",
+        });
+        return;
+      }
 
-  //     try {
-  //       const pushTokenString = (
-  //         await Notifications.getExpoPushTokenAsync({ projectId })
-  //       ).data;
-  //       console.log(pushTokenString);
+      try {
+        const pushTokenString = (
+          await Notifications.getExpoPushTokenAsync({ projectId })
+        ).data;
+        console.log(pushTokenString);
 
-  //       await api.put("/driver/update-push-token", {
-  //         pushToken: pushTokenString,
-  //       });
-  //       console.log("Push token saved to backend");
-  //     } catch (e: unknown) {
-  //       Toast.show(`${e}`, { type: "danger" });
-  //     }
-  //   } else {
-  //     Toast.show("Must use physical device for Push Notifications", {
-  //       type: "danger",
-  //     });
-  //   }
+        await api.put("/driver/update-push-token", {
+          pushToken: pushTokenString,
+        });
+        console.log("Push token saved to backend");
+      } catch (e: unknown) {
+        Toast.show(`${e}`, { type: "danger" });
+      }
+    } else {
+      Toast.show("Must use physical device for Push Notifications", {
+        type: "danger",
+      });
+    }
 
-  //   if (Platform.OS === "android") {
-  //     Notifications.setNotificationChannelAsync("default", {
-  //       name: "default",
-  //       importance: Notifications.AndroidImportance.MAX,
-  //       vibrationPattern: [0, 250, 250, 250],
-  //       lightColor: "#FF231F7C",
-  //     });
-  //   }
-  // }
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+  }
 
-  // useEffect(() => {
-  //   registerForPushNotificationsAsync();
-  // }, []);
+  useEffect(() => {
+    registerForPushNotificationsAsync();
+  }, []);
 
   //get recent rides
 

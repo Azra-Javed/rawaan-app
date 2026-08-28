@@ -15,7 +15,8 @@
         "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.azrajaved.driver"
     },
     "web": {
       "output": "static",
@@ -44,8 +45,9 @@
       "reactCompiler": true
     },
     "extra": {
+      "router": {},
       "eas": {
-        "projectId": "91935a5e-9d23-4495-a76d-a2e0f1b7dba5"
+        "projectId": "0c161b42-222b-4795-b9be-a0b02e2c1800"
       }
     }
   }

@@ -1,71 +1,71 @@
 import {
-  ActivityIndicator,
-  Image,
-  Keyboard,
+  View,
+  Text,
   KeyboardAvoidingView,
   Platform,
+  TouchableOpacity,
+  Dimensions,
   Pressable,
   ScrollView,
+  Image,
+  ActivityIndicator,
   StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
 } from "react-native";
 
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useEffect, useState } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import styles from "./styles";
+import { useEffect, useRef, useState } from "react";
+import { external } from "@/styles/external.style";
+import { windowHeight, windowWidth } from "@/themes/app.constant";
 
-import { windowHeight } from "@/themes/app.constant";
-
-import { router } from "expo-router";
 import MapView, { Marker, Polyline, UrlTile } from "react-native-maps";
+import { router } from "expo-router";
+
+import { Clock, LeftArrow, PickLocation } from "@/utils/icons";
+import color from "@/themes/app.colors";
+import DownArrow from "@/assets/icons/downArrow";
+import PlaceHolder from "@/assets/icons/placeHolder";
 
 import * as Location from "expo-location";
 import moment from "moment";
 
 import Button from "@/components/common/button";
-import { reverseGeocode, type PlaceResult } from "@/utils/nominatim";
 import { getRoute, type Coord } from "@/utils/osrm";
-
-import PlaceSearchInput from "@/components/location/placeSearchInput";
+import { reverseGeocode, type PlaceResult } from "@/utils/nominatim";
 import { useUser } from "@/hooks/useUser";
+import PlaceSearchInput from "@/components/location/placeSearchInput";
 
 import {
   connectWebSocket,
-  disconnectWebSocket,
   sendWebSocketMessage,
+  disconnectWebSocket,
 } from "@/utils/websocket";
-
+import { Toast } from "react-native-toast-notifications";
 import api from "@/api/client";
 import axios from "axios";
-import { Toast } from "react-native-toast-notifications";
-
-import color from "@/themes/app.colors";
 import { Ionicons } from "@expo/vector-icons";
-import styles from "./styles";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
+
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import Constants from "expo-constants";
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 export default function RidePlanScreen() {
   const { user } = useUser();
-
-  const insets = useSafeAreaInsets();
-
-  let tabBarHeight = 0;
-
-  try {
-    tabBarHeight = useBottomTabBarHeight();
-  } catch {
-    tabBarHeight = 0;
-  }
-
-  const bottomSafeSpace = Math.max(
-    insets.bottom,
-    tabBarHeight,
-    windowHeight(12),
+  const notificationListener = useRef<Notifications.EventSubscription | null>(
+    null,
   );
 
   const [wsConnected, setWsConnected] = useState(false);
-
   const [region, setRegion] = useState({
     latitude: 31.5497,
     longitude: 74.3436,
@@ -74,55 +74,23 @@ export default function RidePlanScreen() {
   });
 
   const [currentLocation, setCurrentLocation] = useState<Coord | null>(null);
-
   const [pickup, setPickup] = useState<Coord | null>(null);
-
   const [dropoff, setDropoff] = useState<PlaceResult | null>(null);
-
   const [routeCoords, setRouteCoords] = useState<Coord[]>([]);
-
   const [distance, setDistance] = useState<number | null>(null);
-
   const [travelTime, setTravelTime] = useState<number | null>(null);
 
   const [locationSelected, setLocationSelected] = useState(false);
-
   const [selectedVehicle, setSelectedVehicle] = useState("Car");
-
   const [keyboardAvoidingHeight, setKeyboardAvoidingHeight] = useState(false);
 
   const [driverLists, setDriverLists] = useState<any[]>([]);
-
   const [driverLoader, setDriverLoader] = useState(false);
-
   const [currentLocationName, setCurrentLocationName] =
     useState("Current Location");
-
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
 
-  // ============================================================
-  // KEYBOARD
-  // ============================================================
-
-  useEffect(() => {
-    const keyboardShow = Keyboard.addListener("keyboardDidShow", () => {
-      setKeyboardAvoidingHeight(true);
-    });
-
-    const keyboardHide = Keyboard.addListener("keyboardDidHide", () => {
-      setKeyboardAvoidingHeight(false);
-    });
-
-    return () => {
-      keyboardShow.remove();
-      keyboardHide.remove();
-    };
-  }, []);
-
-  // ============================================================
-  // WEBSOCKET LIFECYCLE
-  // ============================================================
-
+  // WebSocket lifecycle
   useEffect(() => {
     connectWebSocket(
       (message) => {
@@ -141,10 +109,7 @@ export default function RidePlanScreen() {
     };
   }, []);
 
-  // ============================================================
-  // LOCATION INITIALIZATION
-  // ============================================================
-
+  // Location initialization with unmount protection
   useEffect(() => {
     let isMounted = true;
 
@@ -159,7 +124,6 @@ export default function RidePlanScreen() {
               type: "danger",
             },
           );
-
           return;
         }
 
@@ -170,15 +134,10 @@ export default function RidePlanScreen() {
         if (!isMounted) return;
 
         const { latitude, longitude } = location.coords;
-
-        const current = {
-          latitude,
-          longitude,
-        };
+        const current = { latitude, longitude };
 
         setCurrentLocation(current);
         setPickup(current);
-
         setRegion({
           latitude,
           longitude,
@@ -197,66 +156,47 @@ export default function RidePlanScreen() {
     };
   }, []);
 
-  // ============================================================
-  // REVERSE GEOCODING
-  // ============================================================
-
+  // Reverse geocoding
   useEffect(() => {
     if (currentLocation) {
       reverseGeocode(currentLocation.latitude, currentLocation.longitude).then(
         (name) => {
-          if (name) {
-            setCurrentLocationName(name);
-          }
+          if (name) setCurrentLocationName(name);
         },
       );
     }
   }, [currentLocation]);
 
-  // ============================================================
-  // DESTINATION SELECTION
-  // ============================================================
-
+  // Destination selection
   const handlePlaceSelect = async (place: PlaceResult) => {
     try {
-      Keyboard.dismiss();
-
       const destination = {
         latitude: place.latitude,
         longitude: place.longitude,
       };
 
       setDropoff(place);
-
       setRegion((prev) => ({
         ...prev,
         latitude: place.latitude,
         longitude: place.longitude,
       }));
-
       setKeyboardAvoidingHeight(false);
-
       setLocationSelected(true);
 
       if (pickup) {
         const result = await getRoute(pickup, destination);
-
         if (result) {
           setRouteCoords(result.coords);
           setDistance(result.distanceKm);
           setTravelTime(result.durationMin);
         }
       }
-
       requestNearbyDrivers();
     } catch (error) {
       console.log("Place selection error:", error);
     }
   };
-
-  // ============================================================
-  // REQUEST NEARBY DRIVERS
-  // ============================================================
 
   const requestNearbyDrivers = () => {
     if (!currentLocation || !wsConnected) {
@@ -275,18 +215,11 @@ export default function RidePlanScreen() {
 
     setTimeout(() => {
       setDriverLoader((prev) => {
-        if (prev) {
-          console.log("No driver response in time");
-        }
-
+        if (prev) console.log("No driver response in time");
         return false;
       });
     }, 8000);
   };
-
-  // ============================================================
-  // DRIVER DATA
-  // ============================================================
 
   const getDriversData = async (drivers: any[]) => {
     try {
@@ -297,11 +230,8 @@ export default function RidePlanScreen() {
       }
 
       const driverIds = drivers.map((driver) => driver.id).join(",");
-
       const response = await api.get(`/driver/get-drivers-data`, {
-        params: {
-          ids: driverIds,
-        },
+        params: { ids: driverIds },
       });
 
       setDriverLists(response.data);
@@ -312,10 +242,6 @@ export default function RidePlanScreen() {
     }
   };
 
-  // ============================================================
-  // DISTANCE
-  // ============================================================
-
   const calculateDistance = (
     lat1: number,
     lon1: number,
@@ -323,9 +249,7 @@ export default function RidePlanScreen() {
     lon2: number,
   ) => {
     const p = 0.017453292519943295;
-
     const c = Math.cos;
-
     const a =
       0.5 -
       c((lat2 - lat1) * p) / 2 +
@@ -342,26 +266,39 @@ export default function RidePlanScreen() {
         dropoff.latitude,
         dropoff.longitude,
       );
-
       setDistance(dist);
     }
   }, [pickup, dropoff]);
 
-  // ============================================================
-  // ARRIVAL TIME
-  // ============================================================
-
   const getEstimatedArrivalTime = () => {
-    if (travelTime === null) {
-      return "--";
-    }
-
+    if (travelTime === null) return "--";
     return moment().add(travelTime, "minutes").format("hh:mm A");
   };
 
-  // ============================================================
-  // PUSH NOTIFICATION
-  // ============================================================
+  // Push Notifications Listener
+  useEffect(() => {
+    notificationListener.current =
+      Notifications.addNotificationReceivedListener((notification) => {
+        try {
+          const payload = JSON.parse(
+            notification?.request?.content?.data?.orderData as string,
+          );
+
+          if (payload.type === "rideAccepted") {
+            router.push({
+              pathname: "/(routes)/ride-details",
+              params: { orderData: JSON.stringify(payload) },
+            });
+          }
+        } catch (error) {
+          console.log("Failed to process rider notification:", error);
+        }
+      });
+
+    return () => {
+      notificationListener.current?.remove();
+    };
+  }, []);
 
   const sendPushNotification = async (expoPushToken: string, data: any) => {
     const message = {
@@ -369,9 +306,7 @@ export default function RidePlanScreen() {
       sound: "default",
       title: "New Ride Request",
       body: "You have a new ride request.",
-      data: {
-        orderData: data,
-      },
+      data: { orderData: data },
     };
 
     await axios
@@ -379,14 +314,68 @@ export default function RidePlanScreen() {
       .catch((error) => console.log(error));
   };
 
-  // ============================================================
-  // ORDER
-  // ============================================================
+  async function registerForPushNotificationsAsync() {
+    if (Device.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== "granted") {
+        Toast.show("Failed to get push token for push notification!", {
+          type: "danger",
+        });
+        return;
+      }
+
+      const projectId =
+        Constants?.expoConfig?.extra?.eas?.projectId ??
+        Constants?.easConfig?.projectId;
+
+      if (!projectId) {
+        Toast.show("Failed to get project id for push notification!", {
+          type: "danger",
+        });
+        return;
+      }
+
+      try {
+        const pushTokenString = (
+          await Notifications.getExpoPushTokenAsync({ projectId })
+        ).data;
+
+        await api.put("/user/update-push-token", {
+          pushToken: pushTokenString,
+        });
+      } catch (e: unknown) {
+        Toast.show(`${e}`, { type: "danger" });
+      }
+    } else {
+      Toast.show("Must use physical device for Push Notifications", {
+        type: "danger",
+      });
+    }
+
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+  }
+
+  useEffect(() => {
+    registerForPushNotificationsAsync();
+  }, []);
 
   const handleOrder = async () => {
-    if (!currentLocation || !dropoff || distance === null) {
-      return;
-    }
+    if (!currentLocation || !dropoff || distance === null) return;
 
     const selectedDriver = driverLists.find((d) => d.id === selectedDriverId);
 
@@ -394,7 +383,6 @@ export default function RidePlanScreen() {
       Toast.show("Selected driver is not available for notifications", {
         type: "danger",
       });
-
       return;
     }
 
@@ -402,18 +390,13 @@ export default function RidePlanScreen() {
       const data = {
         user,
         currentLocation,
-
         marker: {
           latitude: dropoff.latitude,
           longitude: dropoff.longitude,
         },
-
         distance: distance.toFixed(2),
-
         currentLocationName,
-
         destinationLocation: dropoff.description,
-
         vehicleType: selectedVehicle,
       };
 
@@ -426,19 +409,21 @@ export default function RidePlanScreen() {
     }
   };
 
-  // ============================================================
-  // RESPONSIVE MAP HEIGHT
-  // ============================================================
+  const insets = useSafeAreaInsets();
 
-  const mapHeight = keyboardAvoidingHeight
-    ? windowHeight(250)
-    : locationSelected
-      ? windowHeight(330)
-      : windowHeight(390);
+  let tabBarHeight = 0;
 
-  // ============================================================
-  // UI
-  // ============================================================
+  try {
+    tabBarHeight = useBottomTabBarHeight();
+  } catch {
+    tabBarHeight = 0;
+  }
+
+  const bottomSafeSpace = Math.max(
+    insets.bottom,
+    tabBarHeight,
+    windowHeight(12),
+  );
 
   return (
     <KeyboardAvoidingView
@@ -446,20 +431,7 @@ export default function RidePlanScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={Platform.OS === "ios" ? insets.top : 0}
     >
-      <StatusBar barStyle="light-content" backgroundColor={color.tealDark} />
-
-      {/* ======================================================
-          MAP
-      ====================================================== */}
-
-      <View
-        style={[
-          styles.mapWrapper,
-          {
-            height: mapHeight,
-          },
-        ]}
-      >
+      <View style={[styles.mapWrapper]}>
         <MapView
           style={styles.map}
           region={region}
