@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import { windowHeight, windowWidth } from "@/themes/app.constant";
 import { useTheme } from "@react-navigation/native";
 import { router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
 
 import ProgressBar from "@/components/common/progress.bar";
 import styles from "./styles";
@@ -17,6 +19,7 @@ import {
   type CountryCode,
 } from "libphonenumber-js";
 import { Toast } from "react-native-toast-notifications";
+import ScreenHeader from "@/components/common/screen-header";
 
 const SignupScreen = () => {
   const { colors } = useTheme();
@@ -28,7 +31,7 @@ const SignupScreen = () => {
   const [formData, setFormData] = useState({
     name: "",
     country: "",
-    countryValue: "", // raw `value` from countryItems, used for reliable lookup
+    countryValue: "",
     countryCode: "",
     phoneNumber: "",
     email: "",
@@ -51,21 +54,12 @@ const SignupScreen = () => {
 
     setFormData((prev) => ({
       ...prev,
-
-      // Country name
       country: selectedCountry.countryName,
-
-      // Keep the original `value` so we can look this country back up later
       countryValue: selectedCountry.value,
-
-      // Country dialing code
       countryCode: selectedCountry.countryCode,
-
-      // Clear phone when country changes
       phoneNumber: "",
     }));
 
-    // Clear previous phone warning
     setPhoneWarning("");
   };
 
@@ -77,13 +71,11 @@ const SignupScreen = () => {
 
     const isEmailInvalid = !isEmailEmpty && emailFormatWarning !== "";
 
-    // Find selected country -- FIXED: look up by countryValue, not countryCode
     const selectedCountry = countryItems.find(
       (item) => item.value === formData.countryValue,
     );
 
     if (!selectedCountry?.isoCode) {
-      // FIXED: also flag other empty fields instead of returning silently
       setShowWarning(true);
       Toast.show("Please select a valid country", {
         type: "warning",
@@ -126,10 +118,8 @@ const SignupScreen = () => {
     setShowWarning(false);
     setPhoneWarning("");
 
-    // This gives proper international format
     const fullPhoneNumber = phoneNumber.number;
 
-    // Data that will be sent to backend
     const signupData = {
       name: formData.name.trim(),
       country: formData.country,
@@ -145,203 +135,172 @@ const SignupScreen = () => {
   };
 
   return (
-    <ScrollView
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View>
-        {/* Logo */}
-        <Text
-          style={{
-            fontFamily: "TT-Octosquares-Medium",
-            fontSize: windowHeight(22),
-            paddingTop: windowHeight(50),
-            textAlign: "center",
-          }}
-        >
-          Rawaan App
-        </Text>
+    <View style={styles.screen}>
+      {/* Header */}
+      <ScreenHeader
+        eyebrow="RAWAAN"
+        title="Create your account"
+        subtitle="Start your journey with Rawaan"
+        icon="person-add-outline"
+        showDots
+      />
+      {/* Form */}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.formCard}>
+          {/* Progress */}
+          <View style={styles.progressContainer}>
+            <ProgressBar fill={1} />
+          </View>
 
-        <View style={{ padding: windowWidth(20) }}>
-          <ProgressBar fill={1} />
+          {/* Form heading */}
+          <View style={styles.formHeader}>
+            <TitleView
+              title="Personal details"
+              subTitle="Tell us a little about yourself"
+            />
+          </View>
 
-          <View
-            style={[
-              styles.subView,
-              {
-                backgroundColor: colors.background,
-              },
-            ]}
-          >
-            <View style={styles.space}>
-              <TitleView
-                title="Create your account"
-                subTitle="Explore your life by joining Rawaan App"
-              />
+          {/* Name */}
+          <Input
+            title="Name"
+            placeholder="Enter your name"
+            value={formData.name}
+            onChangeText={(text) => handleChange("name", text)}
+            showWarning={showWarning && formData.name.trim() === ""}
+            warning="Please enter your name"
+          />
 
-              {/* NAME */}
-              <Input
-                title="Name"
-                placeholder="Enter your name"
-                value={formData.name}
-                onChangeText={(text) => handleChange("name", text)}
-                showWarning={showWarning && formData.name.trim() === ""}
-                warning="Please enter your name"
-              />
+          {/* Country */}
+          <View style={styles.fieldSpacing}>
+            <SelectInput
+              title="Country"
+              placeholder="Select your country"
+              value={formData.countryValue}
+              onValueChange={handleCountryChange}
+              showWarning={showWarning && formData.country.trim() === ""}
+              items={countryItems}
+            />
+          </View>
 
-              {/* COUNTRY */}
-              <SelectInput
-                title="Country"
-                placeholder="Select your country"
-                value={formData.countryValue}
-                onValueChange={handleCountryChange}
-                showWarning={showWarning && formData.country.trim() === ""}
-                items={countryItems}
-              />
+          {/* Phone */}
+          <View style={styles.phoneSection}>
+            <Text style={styles.fieldLabel}>Phone Number</Text>
 
-              {/* PHONE NUMBER */}
-              <View>
-                <Text
-                  style={{
-                    color: colors.text,
-                    fontSize: windowHeight(14),
-                    marginBottom: windowHeight(8),
-                  }}
-                >
-                  Phone Number
+            <View
+              style={[
+                styles.phoneInput,
+                {
+                  borderColor:
+                    showWarning &&
+                    (formData.phoneNumber.trim() === "" || phoneWarning !== "")
+                      ? color.red
+                      : colors.border,
+                },
+              ]}
+            >
+              <View style={styles.countryCode}>
+                <Ionicons
+                  name="call-outline"
+                  size={17}
+                  color={color.nightIndigo}
+                />
+
+                <Text style={styles.countryCodeText}>
+                  {formData.countryCode ? `+${formData.countryCode}` : "+__"}
                 </Text>
-
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    borderWidth: 1,
-                    borderColor:
-                      showWarning &&
-                      (formData.phoneNumber.trim() === "" ||
-                        phoneWarning !== "")
-                        ? "red"
-                        : colors.border,
-                    borderRadius: 8,
-                    height: windowHeight(48),
-                    overflow: "hidden",
-                  }}
-                >
-                  {/* COUNTRY CODE */}
-                  <View
-                    style={{
-                      paddingHorizontal: windowWidth(12),
-                      justifyContent: "center",
-                      height: "100%",
-                      borderRightWidth: 1,
-                      borderRightColor: colors.border,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: colors.text,
-                        fontSize: windowHeight(15),
-                      }}
-                    >
-                      {formData.countryCode
-                        ? `+${formData.countryCode}`
-                        : "+__"}
-                    </Text>
-                  </View>
-
-                  {/* PHONE */}
-                  <TextInput
-                    style={{
-                      flex: 1,
-                      height: "100%",
-                      paddingHorizontal: windowWidth(12),
-                      color: colors.text,
-                      fontSize: windowHeight(15),
-                    }}
-                    placeholder={
-                      formData.countryCode
-                        ? "Enter phone number"
-                        : "Select country first"
-                    }
-                    placeholderTextColor={colors.text + "80"}
-                    value={formData.phoneNumber}
-                    onChangeText={(text) => {
-                      setFormData((prev) => ({
-                        ...prev,
-                        phoneNumber: text.replace(/[^0-9]/g, ""),
-                      }));
-
-                      // Clear warning when user starts typing
-                      setPhoneWarning("");
-                    }}
-                    keyboardType="phone-pad"
-                    editable={!!formData.countryCode}
-                  />
-                </View>
-
-                {/* PHONE WARNING */}
-                {showWarning &&
-                  (formData.phoneNumber.trim() === "" ||
-                    phoneWarning !== "") && (
-                    <Text
-                      style={{
-                        color: "red",
-                        fontSize: windowHeight(12),
-                        marginTop: windowHeight(5),
-                      }}
-                    >
-                      {phoneWarning || "Please enter your phone number!"}
-                    </Text>
-                  )}
               </View>
 
-              {/* EMAIL */}
-              <Input
-                title="Email Address"
-                placeholder="Enter your email address"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={formData.email}
+              <TextInput
+                style={styles.phoneTextInput}
+                placeholder={
+                  formData.countryCode
+                    ? "Enter phone number"
+                    : "Select country first"
+                }
+                placeholderTextColor="#929E9E"
+                value={formData.phoneNumber}
                 onChangeText={(text) => {
-                  handleChange("email", text);
+                  setFormData((prev) => ({
+                    ...prev,
+                    phoneNumber: text.replace(/[^0-9]/g, ""),
+                  }));
 
-                  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-                  if (text.trim() === "") {
-                    setEmailFormatWarning("");
-                  } else if (!emailRegex.test(text.trim())) {
-                    setEmailFormatWarning("invalid");
-                  } else {
-                    setEmailFormatWarning("");
-                  }
+                  setPhoneWarning("");
                 }}
-                showWarning={
-                  showWarning &&
-                  (formData.email.trim() === "" || emailFormatWarning !== "")
-                }
-                warning={
-                  formData.email.trim() === ""
-                    ? "Please enter your email!"
-                    : "Please enter a valid email!"
-                }
-                emailFormatWarning={emailFormatWarning}
+                keyboardType="phone-pad"
+                editable={!!formData.countryCode}
               />
             </View>
 
-            {/* NEXT */}
-            <View style={styles.margin}>
-              <Button
-                onPress={gotoDocument}
-                height={windowHeight(30)}
-                title="Next"
-                backgroundColor={color.buttonBg}
-                textColor={color.whiteColor}
-              />
-            </View>
+            {/* Phone warning */}
+            {showWarning &&
+              (formData.phoneNumber.trim() === "" || phoneWarning !== "") && (
+                <Text style={styles.warning}>
+                  {phoneWarning || "Please enter your phone number!"}
+                </Text>
+              )}
+          </View>
+
+          {/* Email */}
+          <View style={styles.fieldSpacing}>
+            <Input
+              title="Email Address"
+              placeholder="Enter your email address"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={formData.email}
+              onChangeText={(text) => {
+                handleChange("email", text);
+
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                if (text.trim() === "") {
+                  setEmailFormatWarning("");
+                } else if (!emailRegex.test(text.trim())) {
+                  setEmailFormatWarning("invalid");
+                } else {
+                  setEmailFormatWarning("");
+                }
+              }}
+              showWarning={
+                showWarning &&
+                (formData.email.trim() === "" || emailFormatWarning !== "")
+              }
+              warning={
+                formData.email.trim() === ""
+                  ? "Please enter your email!"
+                  : "Please enter a valid email!"
+              }
+              emailFormatWarning={emailFormatWarning}
+            />
+          </View>
+
+          {/* Next */}
+          <View style={styles.buttonContainer}>
+            <Button
+              onPress={gotoDocument}
+              height={windowHeight(45)}
+              title="Next"
+              backgroundColor={color.buttonBg}
+              textColor={color.whiteColor}
+            />
           </View>
         </View>
-      </View>
-    </ScrollView>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <View style={styles.footerLine} />
+
+          <Text style={styles.footerText}>Secure signup with RAWAAN</Text>
+
+          <View style={styles.footerLine} />
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 

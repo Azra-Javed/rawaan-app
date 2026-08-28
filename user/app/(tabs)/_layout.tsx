@@ -2,7 +2,7 @@ import { Person } from "@/assets/icons/person";
 import color from "@/themes/app.colors";
 import { Car, CarPrimary, Category, Home, HomeLight } from "@/utils/icons";
 import { Tabs } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { StatusBar, StyleSheet, View } from "react-native";
 
 const palette = {
   nightIndigo: "#0F4C4A",
@@ -36,31 +36,34 @@ const getTabIcon = (routeName: string, focused: boolean) => {
 
 export default function _layout() {
   return (
-    <Tabs
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarShowLabel: false,
+    <>
+      <StatusBar barStyle="light-content" backgroundColor={color.tealDark} />
+      <Tabs
+        screenOptions={({ route }) => ({
+          headerShown: false,
+          tabBarShowLabel: false,
 
-        // Keep icon positions exactly as normal tab navigation
-        tabBarIcon: ({ focused }) => (
-          <View style={[styles.iconWrapper, focused && styles.activeIcon]}>
-            {getTabIcon(route.name, focused)}
-          </View>
-        ),
+          // Keep icon positions exactly as normal tab navigation
+          tabBarIcon: ({ focused }) => (
+            <View style={[styles.iconWrapper, focused && styles.activeIcon]}>
+              {getTabIcon(route.name, focused)}
+            </View>
+          ),
 
-        // Move the bar above the Android navigation buttons
-        tabBarStyle: styles.tabBar,
+          // Move the bar above the Android navigation buttons
+          tabBarStyle: styles.tabBar,
 
-        tabBarItemStyle: styles.tabItem,
+          tabBarItemStyle: styles.tabItem,
 
-        tabBarHideOnKeyboard: true,
-      })}
-    >
-      <Tabs.Screen name="home" />
-      <Tabs.Screen name="services/index" />
-      <Tabs.Screen name="history/index" />
-      <Tabs.Screen name="profile/index" />
-    </Tabs>
+          tabBarHideOnKeyboard: true,
+        })}
+      >
+        <Tabs.Screen name="home" />
+        <Tabs.Screen name="services/index" />
+        <Tabs.Screen name="history/index" />
+        <Tabs.Screen name="profile/index" />
+      </Tabs>
+    </>
   );
 }
 

@@ -270,3 +270,18 @@ export const getAllRides = async (req: Request, res: Response) => {
     });
   }
 };
+
+// @desc   get driver info
+// @route  PUT /api/v1/driver/me
+export const getDriverInfo = async (req: Request, res: Response) => {
+  try {
+    const driver = req.driver;
+
+    res.status(200).json({
+      success: true,
+      driver,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};

@@ -1,12 +1,8 @@
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
-import AuthContainer from "@/utils/container/auth.container";
-import { windowHeight } from "@/themes/app.constant";
-import SignInText from "@/components/login/signin.text";
 import Button from "@/components/common/button";
-import { external } from "@/styles/external.style";
-import { router, useLocalSearchParams } from "expo-router";
 import color from "@/themes/app.colors";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useState } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 
 import {
   CodeField,
@@ -15,11 +11,12 @@ import {
   useClearByFocusCell,
 } from "react-native-confirmation-code-field";
 
-import { commonStyles } from "@/styles/common.style";
-import { styles } from "./styles";
-import { useToast } from "react-native-toast-notifications";
 import api from "@/api/client";
+import ScreenHeader from "@/components/common/screen-header";
 import { saveAuth } from "@/utils/authStorage";
+import { Ionicons } from "@expo/vector-icons";
+import { useToast } from "react-native-toast-notifications";
+import styles from "./styles";
 
 const CELL_COUNT = 4;
 
@@ -74,10 +71,6 @@ const OtpVerificationScreen = () => {
         toast.show(response.data.message || "Registration successful!", {
           type: "success",
         });
-
-        // IMPORTANT:
-        // Registration does NOT save JWT
-        // Registration does NOT go to Home
 
         router.replace("/(routes)/login");
 
@@ -157,15 +150,24 @@ const OtpVerificationScreen = () => {
   };
 
   return (
-    <AuthContainer
-      topSpace={windowHeight(240)}
-      showImage={true}
-      container={
-        <View>
-          <SignInText
-            title="OTP Verification"
-            subtitle={`Enter the OTP sent to ${email}`}
-          />
+    <View style={styles.screen}>
+      <ScreenHeader
+        eyebrow="RAWAAN"
+        title="OTP Verification"
+        subtitle="Verify your account to continue"
+        icon="shield-checkmark-outline"
+        showDots
+      />
+
+      <View style={styles.content}>
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Enter verification code</Text>
+
+            <Text style={styles.cardSubtitle}>We sent a 4-digit code to</Text>
+
+            <Text style={styles.email}>{email}</Text>
+          </View>
 
           <CodeField
             ref={ref}
@@ -176,30 +178,15 @@ const OtpVerificationScreen = () => {
             keyboardType="number-pad"
             textContentType="oneTimeCode"
             autoFocus={false}
-            rootStyle={{
-              marginTop: 25,
-              justifyContent: "space-between",
-            }}
+            rootStyle={styles.codeField}
             renderCell={({ index, symbol, isFocused }) => (
               <View
                 key={index}
                 onLayout={getCellOnLayoutHandler(index)}
-                style={{
-                  width: 55,
-                  height: 55,
-                  borderWidth: 1,
-                  borderColor: isFocused ? color.activeColor : color.subtitle,
-                  borderRadius: 10,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
+                style={[styles.otpCell, isFocused && styles.otpCellActive]}
               >
                 <Text
-                  style={{
-                    fontSize: 22,
-                    color: color.title,
-                    fontWeight: "600",
-                  }}
+                  style={[styles.otpText, isFocused && styles.otpTextActive]}
                 >
                   {symbol || (isFocused ? <Cursor /> : null)}
                 </Text>
@@ -207,7 +194,9 @@ const OtpVerificationScreen = () => {
             )}
           />
 
-          <View style={[external.mt_30]}>
+          {/* ================= VERIFY ================= */}
+
+          <View style={styles.buttonContainer}>
             <Button
               title={loading ? "Please wait..." : "Verify"}
               onPress={handleVerify}
@@ -215,30 +204,44 @@ const OtpVerificationScreen = () => {
             />
           </View>
 
-          <View style={[external.mb_15]}>
-            <View
-              style={[
-                external.pt_10,
-                external.Pb_10,
-                {
-                  flexDirection: "row",
-                  gap: 5,
-                  justifyContent: "center",
-                },
-              ]}
-            >
-              <Text style={commonStyles.regularText}>Not Received Yet?</Text>
+          {/* ================= RESEND ================= */}
 
-              <TouchableOpacity onPress={handleResend} disabled={loading}>
-                <Text style={[styles.signUpText, { color: "#000" }]}>
-                  Resend it
-                </Text>
-              </TouchableOpacity>
-            </View>
+          <View style={styles.resendContainer}>
+            <Text style={styles.resendText}>Didn't receive the code?</Text>
+
+            <TouchableOpacity
+              onPress={handleResend}
+              disabled={loading}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={[styles.resendButton, loading && styles.resendDisabled]}
+              >
+                Resend
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
-      }
-    />
+
+        {/* ================= FOOTER ================= */}
+
+        <View style={styles.footer}>
+          <View style={styles.footerLine} />
+
+          <View style={styles.footerIcon}>
+            <Ionicons
+              name="lock-closed-outline"
+              size={11}
+              color={color.slateTeal}
+            />
+          </View>
+
+          <Text style={styles.footerText}>Secure verification</Text>
+
+          <View style={styles.footerLine} />
+        </View>
+      </View>
+    </View>
   );
 };
 

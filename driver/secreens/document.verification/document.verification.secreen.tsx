@@ -1,25 +1,25 @@
-import { View, Text, ScrollView } from "react-native";
-import React, { useState } from "react";
-import { windowHeight, windowWidth } from "@/themes/app.constant";
-import ProgressBar from "@/components/common/progress.bar";
-
-import { useTheme } from "@react-navigation/native";
-import TitleView from "@/components/common/title.view";
-import Input from "@/components/common/input";
-import SelectInput from "@/components/common/select-input";
-import { countryItems } from "@/configs/country-list";
-import Button from "@/components/common/button";
-import color from "@/themes/app.colors";
-import { router, useLocalSearchParams } from "expo-router";
-import styles from "../signup/styles";
 import api from "@/api/client";
+import Button from "@/components/common/button";
+import Input from "@/components/common/input";
+import ProgressBar from "@/components/common/progress.bar";
+import ScreenHeader from "@/components/common/screen-header";
+import SelectInput from "@/components/common/select-input";
+import TitleView from "@/components/common/title.view";
+import color from "@/themes/app.colors";
+import { windowHeight, windowWidth } from "@/themes/app.constant";
+import { Ionicons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useState } from "react";
+import { ScrollView, Text, View } from "react-native";
 import { Toast } from "react-native-toast-notifications";
+import styles from "./styles";
 
 const DocumentVerificationSecreen = () => {
   const signupData = useLocalSearchParams();
-  const { colors } = useTheme();
+
   const [showWarning, setShowWarning] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     vehicleType: "Car",
     registrationNumber: "",
@@ -38,6 +38,7 @@ const DocumentVerificationSecreen = () => {
 
   const handleSubmit = async () => {
     setLoading(true);
+
     const driver = {
       ...signupData,
       vehicle_type: formData.vehicleType,
@@ -54,9 +55,11 @@ const DocumentVerificationSecreen = () => {
       })
       .then((res) => {
         setLoading(false);
+
         Toast.show(res.data.message, {
           type: "success",
         });
+
         router.push({
           pathname: "/(routes)/otp-verification",
           params: {
@@ -70,7 +73,12 @@ const DocumentVerificationSecreen = () => {
       })
       .catch((error) => {
         setLoading(false);
-        console.log(error);
+        if (
+          error.response?.data?.message ===
+          "Driver already registered. Please login."
+        )
+          router.push("/(routes)/login");
+
         Toast.show(error.response?.data?.message || "Something went wrong", {
           type: "danger",
         });
@@ -78,122 +86,149 @@ const DocumentVerificationSecreen = () => {
   };
 
   return (
-    <ScrollView>
-      <View>
-        {/* Logo */}
-        <Text
-          style={{
-            fontFamily: "TT-Octosquares-Medium",
-            fontSize: windowHeight(22),
-            paddingTop: windowHeight(50),
-            textAlign: "center",
-          }}
-        >
-          Rawaan App
-        </Text>
+    <View style={{ flex: 1, backgroundColor: color.ivory }}>
+      <ScreenHeader
+        eyebrow="RAWAAN"
+        title="Vehicle registration"
+        subtitle="Add your vehicle details to continue"
+        icon="car-outline"
+        showDots
+      />
 
-        <View style={{ padding: windowWidth(20) }}>
-          <ProgressBar fill={2} />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={{
+          paddingHorizontal: windowWidth(20),
+          paddingTop: windowHeight(22),
+          paddingBottom: windowHeight(40),
+        }}
+      >
+        <View style={styles.formCard}>
+          {/* Progress */}
+          <View style={styles.progressContainer}>
+            <ProgressBar fill={2} />
+          </View>
 
-          <View
-            style={[
-              styles.subView,
-              {
-                backgroundColor: colors.background,
-              },
-            ]}
-          >
-            <View style={styles.space}>
-              <TitleView
-                title="Vehicle Registeration"
-                subTitle="Explore your life by joining Rawaan App"
-              />
-              <SelectInput
-                title="Vehicle Type"
-                placeholder="Choose your vehicle type"
-                value={formData.vehicleType}
-                onValueChange={(text) => handleChange("vehicleType", text)}
-                showWarning={showWarning && formData.vehicleType === ""}
-                warning={"Please choose your vehicle type!"}
-                items={[
-                  { label: "Car", value: "Car" },
-                  { label: "Motorcycle", value: "Motorcycle" },
-                  { label: "cng", value: "cng" },
-                ]}
-              />
+          {/* Form heading */}
+          <View style={styles.formHeader}>
+            <TitleView
+              title="Vehicle details"
+              subTitle="Tell us a little about the vehicle you will use for rides."
+            />
+          </View>
 
-              <Input
-                title="Registration Number"
-                placeholder="Enter your vehicle registration number"
-                keyboardType="number-pad"
-                value={formData.registrationNumber}
-                onChangeText={(text) =>
-                  handleChange("registrationNumber", text)
-                }
-                showWarning={showWarning && formData.registrationNumber === ""}
-                warning={"Please enter your vehicle registration number!"}
-              />
+          {/* Vehicle type */}
+          <View style={styles.field}>
+            <SelectInput
+              title="Vehicle Type"
+              placeholder="Choose your vehicle type"
+              value={formData.vehicleType}
+              onValueChange={(text) => handleChange("vehicleType", text)}
+              showWarning={showWarning && formData.vehicleType === ""}
+              warning="Please choose your vehicle type!"
+              items={[
+                { label: "Car", value: "Car" },
+                { label: "Motorcycle", value: "Motorcycle" },
+                { label: "cng", value: "cng" },
+              ]}
+            />
+          </View>
 
-              <Input
-                title="Vehicle Registration Date"
-                placeholder="Enter your vehicle registration date"
-                value={formData.registrationDate}
-                onChangeText={(text) => handleChange("registrationDate", text)}
-                showWarning={showWarning && formData.registrationDate === ""}
-                warning={"Please enter your vehicle Registration Date number!"}
-              />
+          {/* Registration number */}
+          <View style={styles.field}>
+            <Input
+              title="Registration Number"
+              placeholder="Enter your vehicle registration number"
+              keyboardType="number-pad"
+              value={formData.registrationNumber}
+              onChangeText={(text) => handleChange("registrationNumber", text)}
+              showWarning={showWarning && formData.registrationNumber === ""}
+              warning="Please enter your vehicle registration number!"
+            />
+          </View>
 
-              <Input
-                title={"Driving License Number"}
-                placeholder={"Enter your driving license number"}
-                keyboardType="number-pad"
-                value={formData.drivingLicenseNumber}
-                onChangeText={(text) =>
-                  handleChange("drivingLicenseNumber", text)
-                }
-                showWarning={
-                  showWarning && formData.drivingLicenseNumber === ""
-                }
-                warning={"Please enter your driving license number!"}
-              />
+          {/* Registration date */}
+          <View style={styles.field}>
+            <Input
+              title="Vehicle Registration Date"
+              placeholder="Enter your vehicle registration date"
+              value={formData.registrationDate}
+              onChangeText={(text) => handleChange("registrationDate", text)}
+              showWarning={showWarning && formData.registrationDate === ""}
+              warning="Please enter your vehicle Registration Date number!"
+            />
+          </View>
 
-              <Input
-                title={"Vehicle Color"}
-                placeholder={"Enter your vehicle color"}
-                value={formData.color}
-                onChangeText={(text) => handleChange("color", text)}
-                showWarning={showWarning && formData.color === ""}
-                warning={"Please enter your vehicle color!"}
-              />
-              <Input
-                title={"Rate per km"}
-                placeholder={
-                  "How much you want to charge from your passenger per km."
-                }
-                keyboardType="number-pad"
-                value={formData.rate}
-                onChangeText={(text) => handleChange("rate", text)}
-                showWarning={showWarning && formData.rate === ""}
-                warning={
-                  "Please enter how much you want to charge from your customer per km."
-                }
-              />
+          {/* Driving license */}
+          <View style={styles.field}>
+            <Input
+              title="Driving License Number"
+              placeholder="Enter your driving license number"
+              keyboardType="number-pad"
+              value={formData.drivingLicenseNumber}
+              onChangeText={(text) =>
+                handleChange("drivingLicenseNumber", text)
+              }
+              showWarning={showWarning && formData.drivingLicenseNumber === ""}
+              warning="Please enter your driving license number!"
+            />
+          </View>
 
-              {/* Next Button */}
-              <View style={styles.margin}>
-                <Button
-                  onPress={() => handleSubmit()}
-                  title={"Submit"}
-                  height={windowHeight(30)}
-                  backgroundColor={color.buttonBg}
-                  textColor={color.whiteColor}
-                />
-              </View>
-            </View>
+          {/* Vehicle color */}
+          <View style={styles.field}>
+            <Input
+              title="Vehicle Color"
+              placeholder="Enter your vehicle color"
+              value={formData.color}
+              onChangeText={(text) => handleChange("color", text)}
+              showWarning={showWarning && formData.color === ""}
+              warning="Please enter your vehicle color!"
+            />
+          </View>
+
+          {/* Rate */}
+          <View style={styles.field}>
+            <Input
+              title="Rate per km"
+              placeholder="Amount you want to charge per km"
+              keyboardType="number-pad"
+              value={formData.rate}
+              onChangeText={(text) => handleChange("rate", text)}
+              showWarning={showWarning && formData.rate === ""}
+              warning="Please enter how much you want to charge from your customer per km."
+            />
+          </View>
+
+          {/* Submit */}
+          <View style={styles.buttonContainer}>
+            <Button
+              onPress={() => handleSubmit()}
+              title={loading ? "Submitting..." : "Submit"}
+              height={windowHeight(30)}
+              backgroundColor={color.buttonBg}
+              textColor={color.whiteColor}
+              disabled={loading}
+            />
           </View>
         </View>
-      </View>
-    </ScrollView>
+
+        {/* Bottom information */}
+        <View style={styles.bottomInfo}>
+          <View style={styles.bottomIcon}>
+            <Ionicons
+              name="shield-checkmark-outline"
+              size={17}
+              color={color.buttonBg}
+            />
+          </View>
+
+          <Text style={styles.bottomText}>
+            Your vehicle information is kept secure.
+          </Text>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 

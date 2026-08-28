@@ -15,11 +15,14 @@ export default function RenderRideItem({ item, colors }: any) {
       <View
         style={[
           styles.card,
-          { borderColor: colors.border, backgroundColor: colors.card },
+          {
+            borderColor: color.ivoryLine,
+            backgroundColor: color.white,
+          },
         ]}
       >
         <View style={styles.cardTop}>
-          <View>
+          <View style={styles.valueContainer}>
             <Text style={styles.data}>
               {item.title === "Total Earning"
                 ? driver?.totalEarning + " Pkr"
@@ -32,26 +35,15 @@ export default function RenderRideItem({ item, colors }: any) {
                       : 0}
             </Text>
           </View>
-          <View
-            style={[
-              styles.iconContain,
-              {
-                backgroundColor: colors.background,
-                borderColor: colors.border,
-              },
-            ]}
-          >
-            {icon}
-          </View>
+
+          <View style={styles.iconContain}>{icon}</View>
         </View>
+
         <View style={styles.cardBottom}>
-          <View>
-            <Text style={[styles.title, { color: colors.text }]}>
-              {item.title}
-            </Text>
-          </View>
+          <Text style={styles.title}>{item.title}</Text>
         </View>
       </View>
+
       <View style={styles.bottomBorder} />
     </View>
   );
@@ -60,54 +52,80 @@ export default function RenderRideItem({ item, colors }: any) {
 const styles = StyleSheet.create({
   main: {
     flex: 1,
-    marginVertical: windowHeight(10),
-    marginHorizontal: windowWidth(15),
+    marginVertical: windowHeight(7),
+    marginHorizontal: windowWidth(8),
   },
+
   card: {
     minHeight: windowHeight(90),
-    height: "auto",
-    width: windowWidth(205),
-    padding: windowWidth(5),
+    width: "100%",
+
+    paddingHorizontal: windowWidth(13),
+    paddingVertical: windowHeight(12),
+
     borderWidth: 1,
-    borderRadius: 5,
+    borderRadius: 17,
+
     overflow: "hidden",
-    position: "relative",
   },
+
   cardTop: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginHorizontal: windowWidth(10),
-    marginVertical: windowHeight(5),
+    alignItems: "flex-start",
   },
-  cardBottom: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginHorizontal: windowWidth(5),
+
+  valueContainer: {
+    flex: 1,
+    paddingTop: windowHeight(2),
   },
+
   data: {
-    color: color.primary,
-    fontWeight: "600",
+    color: color.nightIndigo,
+
+    fontFamily: "TT-Octosquares-Medium",
+
     fontSize: fontSizes.FONT22,
   },
+
   iconContain: {
-    height: windowHeight(30),
-    width: windowWidth(40),
-    borderRadius: 100,
+    width: windowWidth(38),
+    height: windowWidth(38),
+
+    borderRadius: 12,
+
     justifyContent: "center",
     alignItems: "center",
+
+    backgroundColor: "#0F4C4A12",
+
     borderWidth: 1,
+    borderColor: color.ivoryLine,
   },
+
+  cardBottom: {
+    marginTop: windowHeight(13),
+  },
+
   title: {
-    width: windowWidth(100),
-    fontSize: fontSizes.FONT20,
-    fontWeight: "500",
+    fontFamily: "TT-Octosquares-Medium",
+
+    fontSize: windowHeight(12.5),
+
+    color: color.slateTeal,
   },
+
   bottomBorder: {
     position: "absolute",
+
     bottom: 0,
-    left: 0,
-    right: 5,
-    height: windowHeight(4),
-    backgroundColor: color.primary,
+    left: windowWidth(15),
+    right: windowWidth(15),
+
+    height: windowHeight(3),
+
+    borderRadius: 10,
+
+    backgroundColor: color.routeAmber,
   },
 });

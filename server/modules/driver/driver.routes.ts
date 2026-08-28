@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getAllRides,
+  getDriverInfo,
   getDriversById,
   newRide,
   updatePushToken,
@@ -24,3 +25,4 @@ driverRouter.put(
 );
 driverRouter.get("/get-rides", driverAuthMiddleware, getAllRides);
 export default driverRouter;
+driverRouter.get("/me", driverAuthMiddleware, getDriverInfo);

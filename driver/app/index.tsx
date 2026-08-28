@@ -1,3 +1,4 @@
+import api from "@/api/client";
 import { clearAuth, getToken } from "@/utils/authStorage";
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
@@ -9,12 +10,10 @@ export default function index() {
   useEffect(() => {
     const getData = async () => {
       try {
-        const token = await getToken();
-        if (token) {
-          setIsLoaggedIn(true);
-        } else {
-          setIsLoaggedIn(false);
-        }
+        const res = await api.get("/driver/me");
+        console.log(res.data.driver);
+        if (res.data.driver) setIsLoaggedIn(true);
+        else setIsLoaggedIn(false);
       } catch (error) {
         console.log("failed to retirve the token");
       } finally {

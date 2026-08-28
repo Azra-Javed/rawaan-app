@@ -16,29 +16,7 @@ import Input from "@/components/common/input";
 import { useUser } from "@/hooks/useUser";
 import { clearAuth } from "@/utils/authStorage";
 import { router } from "expo-router";
-
-// ============================================================
-// RAWAAN DESIGN TOKENS
-// Same visual language as Support screen
-// ============================================================
-
-const palette = {
-  tealDark: "#0F4C4A",
-  teal: "#176B68",
-  tealSoft: "#E7F2F1",
-
-  amber: "#F5A524",
-
-  ivory: "#FBF8F2",
-  white: "#FFFFFF",
-
-  textDark: "#172525",
-  textMuted: "#7A8585",
-
-  border: "#E4EAEA",
-
-  coral: "#E85C4A",
-};
+import color from "@/themes/app.colors";
 
 export default function Profile() {
   const { user, loading } = useUser();
@@ -62,11 +40,7 @@ export default function Profile() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar barStyle="light-content" backgroundColor={palette.tealDark} />
-
-      {/* ======================================================
-          HEADER
-      ====================================================== */}
+      <StatusBar barStyle="light-content" backgroundColor={color.tealDark} />
 
       <ScreenHeader
         eyebrow="RAWAAN ACCOUNT"
@@ -106,7 +80,7 @@ export default function Profile() {
           </View>
 
           <View style={styles.profileBadge}>
-            <Ionicons name="checkmark" size={15} color={palette.tealDark} />
+            <Ionicons name="checkmark" size={15} color={color.tealDark} />
           </View>
         </View>
 
@@ -130,7 +104,7 @@ export default function Profile() {
               <Ionicons
                 name="person-circle-outline"
                 size={21}
-                color={palette.tealDark}
+                color={color.tealDark}
               />
             </View>
           </View>
@@ -170,7 +144,7 @@ export default function Profile() {
             <Ionicons
               name="shield-checkmark-outline"
               size={21}
-              color={palette.tealDark}
+              color={color.tealDark}
             />
           </View>
 
@@ -193,7 +167,7 @@ export default function Profile() {
           activeOpacity={0.85}
         >
           <View style={styles.logoutIcon}>
-            <Ionicons name="log-out-outline" size={21} color={palette.coral} />
+            <Ionicons name="log-out-outline" size={21} color={color.coral} />
           </View>
 
           <View style={styles.logoutContent}>
@@ -205,7 +179,7 @@ export default function Profile() {
           </View>
 
           <View style={styles.logoutArrow}>
-            <Ionicons name="chevron-forward" size={18} color={palette.coral} />
+            <Ionicons name="chevron-forward" size={18} color={color.coral} />
           </View>
         </TouchableOpacity>
       </ScrollView>
@@ -220,7 +194,7 @@ const styles = StyleSheet.create({
 
   screen: {
     flex: 1,
-    backgroundColor: palette.ivory,
+    backgroundColor: color.ivory,
   },
 
   // ==========================================================
@@ -243,7 +217,7 @@ const styles = StyleSheet.create({
     borderRadius: 90,
     right: -55,
     top: -70,
-    backgroundColor: palette.amber,
+    backgroundColor: color.amber,
     opacity: 0.12,
   },
 
@@ -256,7 +230,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 15,
-    backgroundColor: palette.white,
+    backgroundColor: color.white,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 13,
@@ -267,7 +241,7 @@ const styles = StyleSheet.create({
   },
 
   eyebrow: {
-    color: palette.amber,
+    color: color.amber,
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 2,
@@ -277,7 +251,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 25,
     fontWeight: "800",
-    color: palette.white,
+    color: color.white,
   },
 
   headerSubtitle: {
@@ -300,7 +274,7 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 4,
-    backgroundColor: palette.amber,
+    backgroundColor: color.amber,
   },
 
   routeDotSmall: {
@@ -312,7 +286,7 @@ const styles = StyleSheet.create({
   routeLine: {
     width: 42,
     height: 2,
-    backgroundColor: palette.amber,
+    backgroundColor: color.amber,
     opacity: 0.45,
     marginHorizontal: 7,
   },
@@ -334,11 +308,11 @@ const styles = StyleSheet.create({
   summaryCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: palette.white,
+    backgroundColor: color.white,
     borderRadius: 20,
     padding: windowWidth(16),
     borderWidth: 1,
-    borderColor: palette.border,
+    borderColor: color.border,
     marginBottom: windowHeight(28),
   },
 
@@ -351,7 +325,7 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 19,
-    backgroundColor: palette.tealSoft,
+    backgroundColor: color.tealSoft,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
@@ -361,7 +335,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 20,
     fontWeight: "800",
-    color: palette.tealDark,
+    color: color.tealDark,
   },
 
   onlineDot: {
@@ -373,7 +347,7 @@ const styles = StyleSheet.create({
     bottom: -1,
     backgroundColor: "#4C9A6A",
     borderWidth: 2,
-    borderColor: palette.white,
+    borderColor: color.white,
   },
 
   summaryTextContainer: {
@@ -384,19 +358,19 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: "800",
     letterSpacing: 1.2,
-    color: palette.textMuted,
+    color: color.textMuted,
     marginBottom: 3,
   },
 
   summaryName: {
     fontSize: 17,
     fontWeight: "800",
-    color: palette.textDark,
+    color: color.textDark,
   },
 
   summaryEmail: {
     fontSize: 12,
-    color: palette.textMuted,
+    color: color.textMuted,
     marginTop: 3,
   },
 
@@ -404,7 +378,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 10,
-    backgroundColor: palette.tealSoft,
+    backgroundColor: color.tealSoft,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -432,19 +406,19 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: "800",
     letterSpacing: 1.5,
-    color: palette.teal,
+    color: color.teal,
     marginBottom: 3,
   },
 
   sectionTitle: {
     fontSize: 19,
     fontWeight: "800",
-    color: palette.textDark,
+    color: color.textDark,
   },
 
   sectionSubtitle: {
     fontSize: 12,
-    color: palette.textMuted,
+    color: color.textMuted,
     marginTop: 3,
   },
 
@@ -452,7 +426,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 13,
-    backgroundColor: palette.tealSoft,
+    backgroundColor: color.tealSoft,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -462,11 +436,11 @@ const styles = StyleSheet.create({
   // ==========================================================
 
   detailsCard: {
-    backgroundColor: palette.white,
+    backgroundColor: color.white,
     borderRadius: 18,
     padding: windowWidth(15),
     borderWidth: 1,
-    borderColor: palette.border,
+    borderColor: color.border,
   },
 
   // ==========================================================
@@ -476,7 +450,7 @@ const styles = StyleSheet.create({
   infoCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: palette.tealSoft,
+    backgroundColor: color.tealSoft,
     borderRadius: 17,
     padding: windowWidth(14),
     marginBottom: windowHeight(20),
@@ -488,7 +462,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 13,
-    backgroundColor: palette.white,
+    backgroundColor: color.white,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 11,
@@ -501,12 +475,12 @@ const styles = StyleSheet.create({
   infoTitle: {
     fontSize: 13,
     fontWeight: "800",
-    color: palette.tealDark,
+    color: color.tealDark,
   },
 
   infoText: {
     fontSize: 11,
-    color: palette.textMuted,
+    color: color.textMuted,
     marginTop: 3,
     lineHeight: 16,
   },
@@ -518,7 +492,7 @@ const styles = StyleSheet.create({
   logoutCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: palette.white,
+    backgroundColor: color.white,
     borderRadius: 18,
     padding: windowWidth(14),
     borderWidth: 1,
@@ -542,12 +516,12 @@ const styles = StyleSheet.create({
   logoutTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: palette.textDark,
+    color: color.textDark,
   },
 
   logoutSubtitle: {
     fontSize: 10,
-    color: palette.textMuted,
+    color: color.textMuted,
     marginTop: 3,
     lineHeight: 15,
   },

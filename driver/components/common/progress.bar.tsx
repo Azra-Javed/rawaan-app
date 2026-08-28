@@ -31,25 +31,31 @@ export default ProgressBar;
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+
     marginHorizontal: windowWidth(4),
-    marginVertical: windowHeight(5),
+    marginVertical: windowHeight(7),
+
+    gap: windowWidth(6),
   },
 
   filledBar: {
-    backgroundColor: color.primary,
     flex: 1,
-    height: windowHeight(1),
-    borderRadius: 8,
-    marginHorizontal: windowWidth(0.3),
+
+    height: windowHeight(4),
+
+    backgroundColor: color.primary,
+
+    borderRadius: 10,
   },
 
   emptyBar: {
-    backgroundColor: color.subPrimary,
     flex: 1,
-    height: windowHeight(1),
-    borderRadius: 8,
-    marginHorizontal: windowWidth(0.3),
+
+    height: windowHeight(4),
+
+    backgroundColor: color.graySoft,
+
+    borderRadius: 10,
   },
 });

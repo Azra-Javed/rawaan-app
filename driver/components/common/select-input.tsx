@@ -5,6 +5,7 @@ import { useTheme } from "@react-navigation/native";
 import React from "react";
 import { Text, View, StyleSheet } from "react-native";
 import RNPickerSelect from "react-native-picker-select";
+import { Ionicons } from "@expo/vector-icons";
 
 interface InputProps {
   title?: string;
@@ -26,41 +27,60 @@ const Select = ({
   showWarning,
 }: InputProps) => {
   const { colors } = useTheme();
+
   return (
-    <View>
+    <View style={styles.container}>
+      {/* LABEL */}
       {title && (
         <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
       )}
 
-      <RNPickerSelect
-        value={value}
-        onValueChange={(value) => {
-          console.log("Selected:", value);
-          onValueChange(value);
-        }}
-        items={items}
-        placeholder={{
-          label: placeholder,
-          value: null,
-        }}
-        useNativeAndroidPickerStyle={false}
-        style={{
-          inputIOS: {
-            ...styles.input,
-            backgroundColor: color.lightGray,
-            borderColor: color.border,
-            height: windowHeight(39),
+      {/* COUNTRY SELECT */}
+      <View
+        style={[
+          styles.selectWrapper,
+          {
+            borderColor: showWarning ? color.red : "#DDE7E6",
+            backgroundColor: color.whiteColor,
           },
-          inputAndroid: {
-            ...styles.input,
-            backgroundColor: color.lightGray,
-            borderColor: color.border,
-            height: windowHeight(39),
-          },
-        }}
-      />
+        ]}
+      >
+        {/* COUNTRY ICON */}
+        <View style={styles.iconContainer} pointerEvents="none">
+          <Ionicons name="globe-outline" size={18} color="#176B68" />
+        </View>
 
-      {showWarning && <Text style={styles.warning}>{warning}</Text>}
+        {/* PICKER */}
+        <RNPickerSelect
+          value={value}
+          onValueChange={(selectedValue) => {
+            console.log("Selected:", selectedValue);
+            onValueChange(selectedValue);
+          }}
+          items={items}
+          placeholder={{
+            label: placeholder,
+            value: null,
+          }}
+          useNativeAndroidPickerStyle={false}
+          style={{
+            inputIOS: styles.input,
+            inputAndroid: styles.input,
+
+            placeholder: {
+              color: "#929E9E",
+            },
+
+            iconContainer: styles.arrowContainer,
+          }}
+          Icon={() => (
+            <Ionicons name="chevron-down" size={18} color="#7C8989" />
+          )}
+        />
+      </View>
+
+      {/* WARNING */}
+      {showWarning && warning && <Text style={styles.warning}>{warning}</Text>}
     </View>
   );
 };
@@ -68,21 +88,83 @@ const Select = ({
 export default Select;
 
 const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    marginBottom: windowHeight(10),
+  },
+
   title: {
     fontFamily: fonts.medium,
-    fontSize: windowWidth(20),
-    marginVertical: windowHeight(8),
+    fontSize: windowWidth(14),
+
+    marginBottom: windowHeight(7),
+
+    color: "#172525",
   },
-  input: {
-    borderRadius: 5,
+
+  selectWrapper: {
+    width: "100%",
+    height: windowHeight(48),
+
     borderWidth: 1,
-    marginBottom: 5,
-    height: windowHeight(30),
-    color: color.secondaryFont,
-    paddingHorizontal: 10,
+    borderRadius: 14,
+
+    position: "relative",
+
+    overflow: "hidden",
   },
+
+  iconContainer: {
+    position: "absolute",
+
+    left: windowWidth(9),
+    top: windowHeight(7),
+
+    width: 32,
+    height: 32,
+
+    borderRadius: 10,
+
+    backgroundColor: "#E7F2F1",
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    zIndex: 1,
+  },
+
+  input: {
+    width: "100%",
+    height: windowHeight(48),
+
+    paddingLeft: windowWidth(58),
+
+    paddingRight: windowWidth(42),
+
+    fontFamily: fonts.regular,
+    fontSize: windowWidth(14),
+
+    color: "#172525",
+
+    backgroundColor: "transparent",
+  },
+
+  arrowContainer: {
+    position: "absolute",
+
+    right: windowWidth(12),
+    top: windowHeight(15),
+
+    zIndex: 2,
+  },
+
   warning: {
     color: color.red,
-    marginTop: 3,
+
+    fontFamily: fonts.regular,
+    fontSize: windowWidth(12),
+
+    marginTop: windowHeight(4),
+    marginLeft: windowWidth(2),
   },
 });

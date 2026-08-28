@@ -1,17 +1,15 @@
+import api from "@/api/client";
 import Button from "@/components/common/button";
-
-import SignInText from "@/components/login/signin.text";
-import { external } from "@/styles/external.style";
-import { windowHeight, windowWidth } from "@/themes/app.constant";
-import Images from "@/utils/images";
+import EmailInput from "@/components/login/email.input";
+import localStyles from "./styles";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
-import AuthContainer from "../../utils/container/auth.container";
-import styles from "./styles";
+import { Text, View } from "react-native";
 import { useToast } from "react-native-toast-notifications";
-import EmailInput from "@/components/login/email.input";
-import api from "@/api/client";
+import color from "@/themes/app.colors";
+import RouteDots from "@/components/common/route-dots";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -29,10 +27,13 @@ const LoginScreen = () => {
 
     try {
       setLoading(true);
+
       const response = await api.post(`/driver/auth/send-otp`, {
         email: email.trim(),
       });
+
       setLoading(false);
+
       toast.show(response.data.message || "OTP sent successfully", {
         type: "success",
       });
@@ -46,6 +47,7 @@ const LoginScreen = () => {
       });
     } catch (error: any) {
       setLoading(false);
+
       toast.show(error.response?.data?.message || "Something went wrong.", {
         type: "danger",
       });
@@ -53,53 +55,84 @@ const LoginScreen = () => {
   };
 
   return (
-    <AuthContainer
-      topSpace={windowHeight(150)}
-      showImage={true}
-      container={
-        <View>
+    <View style={localStyles.screen}>
+      {/* Header */}
+      <LinearGradient
+        colors={[color.nightIndigo, color.nightIndigoLight]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={localStyles.header}
+      >
+        <Text style={localStyles.eyebrow}>RAWAAN</Text>
+        <View style={localStyles.titleRow}>
+          <View style={localStyles.titleIcon}>
+            <Ionicons name="car-outline" size={21} color={color.routeAmber} />
+          </View>
           <View>
-            <View>
-              <Image style={styles.transformLine} source={Images.line} />
-              <SignInText />
-              <View style={[external.mt_25, external.Pb_10]}>
-                <EmailInput width={700} email={email} setEmail={setEmail} />
+            <Text style={localStyles.title}>Welcome, Driver</Text>
 
-                <View style={[external.mt_25, external.Pb_15]}>
-                  <Button
-                    title="Get OTP"
-                    onPress={() => handleSubmit()}
-                    height={windowHeight(35)}
-                    disabled={loading}
-                  />
-                </View>
+            <Text style={localStyles.subtitle}>
+              Sign in to start your journey
+            </Text>
+          </View>{" "}
+        </View>{" "}
+        <View style={{ marginTop: 10 }}>
+          <RouteDots />
+        </View>
+      </LinearGradient>
 
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    gap: windowWidth(15),
-                    paddingBottom: windowHeight(15),
-                  }}
-                >
-                  <Text style={{ fontSize: windowHeight(12) }}>
-                    Don't have any rider account?
-                  </Text>
+      {/* Login form */}
+      <View style={localStyles.content}>
+        <View style={localStyles.formCard}>
+          <View style={localStyles.formHeader}>
+            <Text style={localStyles.formTitle}>Driver Sign in</Text>
 
-                  <TouchableOpacity
-                    onPress={() => router.push("/(routes)/signup")}
-                  >
-                    <Text style={{ color: "blue", fontSize: windowHeight(12) }}>
-                      Sign Up
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
+            <Text style={localStyles.formSubtitle}>
+              Enter your email address to receive a one-time password.
+            </Text>
+          </View>
+
+          {/* Email */}
+          <View style={localStyles.inputContainer}>
+            <EmailInput width="100%" email={email} setEmail={setEmail} />
+          </View>
+
+          {/* Login button */}
+          <View style={localStyles.buttonContainer}>
+            <Button
+              title={loading ? "Please wait..." : "Get OTP"}
+              onPress={() => handleSubmit()}
+              disabled={loading}
+            />
+          </View>
+
+          {/* Driver signup */}
+          <View style={localStyles.signupContainer}>
+            <Text style={localStyles.signupText}>
+              Don't have a driver account?
+            </Text>
+
+            <Text
+              style={localStyles.signupLink}
+              onPress={() => router.push("/(routes)/signup")}
+            >
+              Sign Up
+            </Text>
           </View>
         </View>
-      }
-    ></AuthContainer>
+
+        {/* Footer */}
+        <View style={localStyles.footer}>
+          <View style={localStyles.footerLine} />
+
+          <Text style={localStyles.footerText}>
+            Secure driver login with RAWAAN
+          </Text>
+
+          <View style={localStyles.footerLine} />
+        </View>
+      </View>
+    </View>
   );
 };
 

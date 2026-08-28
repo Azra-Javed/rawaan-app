@@ -35,6 +35,7 @@ import {
   sendWebSocketMessage,
   disconnectWebSocket,
 } from "@/utils/websocket";
+import { Ionicons } from "@expo/vector-icons";
 
 // import * as Notifications from "expo-notifications";
 // import * as Device from "expo-device";
@@ -512,30 +513,73 @@ const HomeScreen = () => {
   }, []);
 
   return (
-    <View style={[external.fx_1]}>
+    <View style={[external.fx_1, { backgroundColor: color.ivory }]}>
       <View style={styles.spaceBelow}>
-        <Header isOn={isOn} toggleSwitch={() => handleStatusChange()} />
+        {/* Driver header and online status */}
+        <View style={styles.headerWrapper}>
+          <Header isOn={isOn} toggleSwitch={() => handleStatusChange()} />
+        </View>
 
-        <FlatList
-          data={rideData}
-          numColumns={2}
-          renderItem={({ item }) => (
-            <RenderRideItem item={item} colors={colors} />
-          )}
-        />
+        {/* Dashboard cards */}
+        <View style={styles.dashboardSection}>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionTitle}>Driver dashboard</Text>
 
-        <View style={[styles.rideContainer, { backgroundColor: colors.card }]}>
-          <Text
-            style={[styles.rideTitle, { color: colors.text }]}
-            onPress={() => setIsModalVisible(true)}
-          >
-            Recent Rides
-          </Text>
+              <Text style={styles.sectionSubtitle}>
+                Your ride activity at a glance
+              </Text>
+            </View>
+
+            <View style={styles.sectionIcon}>
+              <Ionicons
+                name="speedometer-outline"
+                size={19}
+                color={color.nightIndigo}
+              />
+            </View>
+          </View>
+
+          <FlatList
+            data={rideData}
+            numColumns={2}
+            columnWrapperStyle={styles.columnWrapper}
+            renderItem={({ item }) => (
+              <RenderRideItem item={item} colors={colors} />
+            )}
+          />
+        </View>
+
+        {/* Recent rides */}
+        <View style={styles.rideContainer}>
+          <View style={styles.rideHeader}>
+            <View>
+              <Text
+                style={styles.rideTitle}
+                onPress={() => setIsModalVisible(true)}
+              >
+                Recent rides
+              </Text>
+
+              <Text style={styles.rideSubtitle}>
+                Your latest passenger journeys
+              </Text>
+            </View>
+
+            <View style={styles.rideIcon}>
+              <Ionicons
+                name="car-outline"
+                size={19}
+                color={color.nightIndigo}
+              />
+            </View>
+          </View>
 
           <FlatList
             data={recentRides}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => <RideCard item={item} />}
+            showsVerticalScrollIndicator={false}
           />
         </View>
       </View>
@@ -547,116 +591,158 @@ const HomeScreen = () => {
       >
         <TouchableOpacity style={styles.modalBackground} activeOpacity={1}>
           <TouchableOpacity style={styles.modalContainer} activeOpacity={1}>
-            <View>
-              <Text style={styles.modalTitle}>New Ride Request Received!</Text>
+            {/* Ride request heading */}
+            <View style={styles.modalHeader}>
+              <View style={styles.modalIcon}>
+                <Ionicons
+                  name="car-outline"
+                  size={21}
+                  color={color.routeAmber}
+                />
+              </View>
+
+              <View style={styles.modalHeaderText}>
+                <Text style={styles.modalTitle}>New ride request</Text>
+
+                <Text style={styles.modalSubtitle}>
+                  A passenger is waiting for your response
+                </Text>
+              </View>
+
+              <View style={styles.requestDot} />
             </View>
 
-            <MapView
-              key={isModalVisible ? "map-visible" : "map-hidden"}
-              style={{
-                width: "100%",
-                height: windowHeight(250),
-                marginTop: windowHeight(10),
-              }}
-              region={region}
-              onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
-              rotateEnabled={true}
-              zoomEnabled={true}
-              zoomControlEnabled={true}
-              showsCompass={true}
-              pitchEnabled={true}
-              scrollEnabled={true}
-            >
-              <UrlTile
-                urlTemplate={`https://api.maptiler.com/maps/positron-v4/256/{z}/{x}/{y}.png?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
-                maximumZ={20}
-              />
-
-              {pickup && <Marker coordinate={pickup} title="Pickup" />}
-
-              {dropoff && (
-                <Marker coordinate={dropoff} title="Dropoff" pinColor="red" />
-              )}
-
-              {routeCoords.length > 0 && (
-                <Polyline
-                  coordinates={routeCoords}
-                  strokeWidth={4}
-                  strokeColor="blue"
+            {/* Map */}
+            <View style={styles.mapWrapper}>
+              <MapView
+                key={isModalVisible ? "map-visible" : "map-hidden"}
+                style={styles.map}
+                region={region}
+                onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+                rotateEnabled={true}
+                zoomEnabled={true}
+                zoomControlEnabled={true}
+                showsCompass={true}
+                pitchEnabled={true}
+                scrollEnabled={true}
+              >
+                <UrlTile
+                  urlTemplate={`https://api.maptiler.com/maps/positron-v4/256/{z}/{x}/{y}.png?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
+                  maximumZ={20}
                 />
-              )}
-            </MapView>
 
-            <View
-              style={{
-                alignItems: "flex-end",
-                marginTop: -windowHeight(16),
-                marginBottom: windowHeight(6),
-              }}
-            >
-              <Text style={{ fontSize: 9 }}>
+                {pickup && <Marker coordinate={pickup} title="Pickup" />}
+
+                {dropoff && (
+                  <Marker coordinate={dropoff} title="Dropoff" pinColor="red" />
+                )}
+
+                {routeCoords.length > 0 && (
+                  <Polyline
+                    coordinates={routeCoords}
+                    strokeWidth={4}
+                    strokeColor={color.buttonBg}
+                  />
+                )}
+              </MapView>
+            </View>
+
+            {/* Map attribution */}
+            <View style={styles.mapAttribution}>
+              <Text style={styles.attributionText}>
                 © MapTiler © OpenStreetMap contributors
               </Text>
             </View>
 
-            <View style={{ flexDirection: "row" }}>
+            {/* Route */}
+            <View style={styles.locationContainer}>
               <View style={styles.leftView}>
-                <LocationIcon color={colors.text} />
+                <View style={styles.locationIconBox}>
+                  <LocationIcon color={color.buttonBg} />
+                </View>
 
                 <View
-                  style={[styles.verticaldot, { borderColor: color.buttonBg }]}
+                  style={[
+                    styles.verticaldot,
+                    { borderColor: color.routeAmber },
+                  ]}
                 />
 
-                <Gps colors={colors.text} />
+                <View style={styles.locationIconBox}>
+                  <Gps colors={color.nightIndigo} />
+                </View>
               </View>
 
               <View style={styles.rightView}>
-                <Text style={[styles.pickup, { color: colors.text }]}>
+                <Text style={styles.locationLabel} numberOfLines={1}>
+                  PICKUP
+                </Text>
+
+                <Text style={styles.pickup} numberOfLines={2}>
                   {currentLocationName || "Pickup location"}
                 </Text>
 
                 <View style={styles.border} />
 
-                <Text style={[styles.drop, { color: colors.text }]}>
+                <Text style={styles.locationLabel} numberOfLines={1}>
+                  DROPOFF
+                </Text>
+
+                <Text style={styles.drop} numberOfLines={2}>
                   {destinationLocationName || "Dropoff location"}
                 </Text>
               </View>
             </View>
 
-            <Text
-              style={{
-                paddingTop: windowHeight(5),
-                fontSize: windowHeight(14),
-              }}
-            >
-              Distance: {distance !== null ? `${distance} km` : "--"}
-            </Text>
+            {/* Ride information */}
+            <View style={styles.infoContainer}>
+              <View style={styles.infoCard}>
+                <View style={styles.infoIcon}>
+                  <Ionicons
+                    name="navigate-outline"
+                    size={17}
+                    color={color.buttonBg}
+                  />
+                </View>
 
-            <Text
-              style={{
-                paddingVertical: windowHeight(5),
-                fontSize: windowHeight(14),
-              }}
-            >
-              Amount:{" "}
-              {distance !== null && driver?.rate
-                ? (distance * parseFloat(driver.rate)).toFixed(2)
-                : "0.00"}{" "}
-              BDT
-            </Text>
+                <View>
+                  <Text style={styles.infoLabel}>Distance</Text>
 
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginVertical: windowHeight(5),
-              }}
-            >
+                  <Text style={styles.infoValue}>
+                    {distance !== null ? `${distance} km` : "--"}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.infoCard}>
+                <View style={styles.infoIconAmber}>
+                  <Ionicons
+                    name="cash-outline"
+                    size={17}
+                    color={color.routeAmber}
+                  />
+                </View>
+
+                <View>
+                  <Text style={styles.infoLabel}>Amount</Text>
+
+                  <Text style={styles.infoValue}>
+                    {distance !== null && driver?.rate
+                      ? (distance * parseFloat(driver.rate)).toFixed(2)
+                      : "0.00"}{" "}
+                    BDT
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Actions */}
+            <View style={styles.buttonContainer}>
               <Button
                 title="Decline"
                 onPress={handleClose}
                 width={windowWidth(120)}
-                height={windowHeight(30)}
+                height={windowHeight(32)}
                 backgroundColor="crimson"
               />
 
@@ -664,7 +750,7 @@ const HomeScreen = () => {
                 title="Accept"
                 onPress={acceptRideHandler}
                 width={windowWidth(120)}
-                height={windowHeight(30)}
+                height={windowHeight(32)}
               />
             </View>
           </TouchableOpacity>

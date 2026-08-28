@@ -4,91 +4,297 @@ import fonts from "@/themes/app.fonts";
 import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  // Main screen
   spaceBelow: {
-    paddingBottom: windowHeight(10),
+    paddingBottom: windowHeight(20),
   },
-  rideContainer: {
+
+  headerWrapper: {
+    overflow: "hidden",
+  },
+
+  // Dashboard
+  dashboardSection: {
     paddingHorizontal: windowWidth(20),
-    paddingTop: windowHeight(5),
-    paddingBottom: windowHeight(10),
+    paddingTop: windowHeight(22),
   },
+
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: windowHeight(14),
+  },
+
+  sectionTitle: {
+    fontFamily: fonts.display,
+    fontSize: 18,
+    color: color.nightIndigo,
+  },
+
+  sectionSubtitle: {
+    fontFamily: fonts.regular,
+    fontSize: 12.5,
+    color: color.slateTeal,
+    marginTop: 4,
+  },
+
+  sectionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+    backgroundColor: "#0F4C4A12",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  columnWrapper: {
+    justifyContent: "space-between",
+  },
+
+  // Recent rides
+  rideContainer: {
+    marginHorizontal: windowWidth(20),
+    paddingTop: windowHeight(15),
+    paddingBottom: windowHeight(12),
+  },
+
+  rideHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: windowHeight(14),
+  },
+
   rideTitle: {
-    marginVertical: windowHeight(5),
-    fontSize: fontSizes.FONT25,
-    fontFamily: fonts.medium,
+    fontFamily: fonts.display,
+    fontSize: 18,
+    color: color.nightIndigo,
   },
+
+  rideSubtitle: {
+    fontFamily: fonts.regular,
+    fontSize: 12.5,
+    color: color.slateTeal,
+    marginTop: 4,
+  },
+
+  rideIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+    backgroundColor: "#0F4C4A12",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  // Modal
   modalBackground: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: color.modelBg,
+    paddingHorizontal: windowWidth(14),
   },
+
   modalContainer: {
-    backgroundColor: "white",
-    width: windowWidth(420),
-    maxWidth: windowWidth(420),
-    padding: windowWidth(15),
-    paddingHorizontal: windowWidth(30),
-    borderRadius: 8,
-    alignItems: "center",
+    width: "100%",
+    maxWidth: windowWidth(430),
+    backgroundColor: color.white,
+    borderRadius: 22,
+    paddingHorizontal: windowWidth(17),
+    paddingTop: windowHeight(17),
+    paddingBottom: windowHeight(15),
   },
-  modalTitle: {
-    color: color.primaryText,
-    fontFamily: fonts.medium,
-    fontSize: fontSizes.FONT25,
-    paddingBottom: windowHeight(8),
-  },
-  buttonContainer: {
+
+  modalHeader: {
     flexDirection: "row",
-    width: "80%",
-    justifyContent: "space-between",
-    marginTop: windowHeight(2),
+    alignItems: "center",
+    marginBottom: windowHeight(13),
   },
-  button: {
-    backgroundColor: color.primary,
-    width: windowWidth(20),
-    height: windowHeight(5),
+
+  modalIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: "#0F4C4A12",
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 8,
+    marginRight: windowWidth(11),
   },
-  buttonText: {
-    fontFamily: fonts.medium,
-    color: color.whiteColor,
+
+  modalHeaderText: {
+    flex: 1,
   },
-  mainContainer: {
-    alignItems: "center",
+
+  modalTitle: {
+    fontFamily: fonts.display,
+    fontSize: 18,
+    color: color.nightIndigo,
   },
+
+  modalSubtitle: {
+    fontFamily: fonts.regular,
+    fontSize: 11.5,
+    color: color.slateTeal,
+    marginTop: 3,
+    lineHeight: 16,
+  },
+
+  requestDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: color.routeAmber,
+  },
+
+  // Map
+  mapWrapper: {
+    width: "100%",
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+
+  map: {
+    width: "100%",
+    height: windowHeight(205),
+  },
+
+  mapAttribution: {
+    alignItems: "flex-end",
+    marginTop: 3,
+    marginBottom: 8,
+  },
+
+  attributionText: {
+    fontFamily: fonts.regular,
+    fontSize: 8,
+    color: color.slateTeal,
+  },
+
+  // Locations
+  locationContainer: {
+    flexDirection: "row",
+    backgroundColor: "#F7FAF9",
+    borderRadius: 15,
+    paddingHorizontal: windowWidth(11),
+    paddingVertical: windowHeight(11),
+    marginBottom: windowHeight(11),
+  },
+
   leftView: {
-    marginRight: windowWidth(3),
+    width: 28,
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: windowHeight(5),
   },
-  rightView: {
-    paddingTop: windowHeight(5),
+
+  locationIconBox: {
+    width: 27,
+    height: 27,
+    borderRadius: 9,
+    backgroundColor: color.white,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  border: {
-    borderStyle: "dashed",
-    borderBottomWidth: 0.5,
-    borderColor: color.border,
-    marginVertical: windowHeight(1.5),
-  },
+
   verticaldot: {
-    borderLeftWidth: 1,
-    marginHorizontal: 5,
+    flex: 1,
+    borderLeftWidth: 1.5,
+    borderStyle: "dashed",
+    marginVertical: 3,
   },
+
+  rightView: {
+    flex: 1,
+    marginLeft: windowWidth(9),
+  },
+
+  locationLabel: {
+    fontFamily: fonts.medium,
+    fontSize: 8.5,
+    color: color.slateTeal,
+    letterSpacing: 0.8,
+    marginBottom: 2,
+  },
+
   pickup: {
-    fontSize: fontSizes.FONT20,
-    fontFamily: fonts.regular,
+    fontFamily: fonts.medium,
+    fontSize: 12.5,
+    color: color.nightIndigo,
+    lineHeight: 17,
   },
+
   drop: {
-    fontSize: fontSizes.FONT20,
+    fontFamily: fonts.medium,
+    fontSize: 12.5,
+    color: color.nightIndigo,
+    lineHeight: 17,
+  },
+
+  border: {
+    borderBottomWidth: 1,
+    borderStyle: "dashed",
+    borderColor: color.ivoryLine,
+    marginVertical: 7,
+  },
+
+  // Distance and amount
+  infoContainer: {
+    flexDirection: "row",
+    gap: windowWidth(9),
+    marginBottom: windowHeight(13),
+  },
+
+  infoCard: {
+    flex: 1,
+    minHeight: windowHeight(52),
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F7FAF9",
+    borderRadius: 14,
+    paddingHorizontal: windowWidth(10),
+  },
+
+  infoIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    backgroundColor: "#0F4C4A12",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: windowWidth(8),
+  },
+
+  infoIconAmber: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    backgroundColor: "#F5A52418",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: windowWidth(8),
+  },
+
+  infoLabel: {
     fontFamily: fonts.regular,
-    paddingTop: windowHeight(13),
+    fontSize: 9.5,
+    color: color.slateTeal,
+    marginBottom: 2,
+  },
+
+  infoValue: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    color: color.nightIndigo,
+  },
+
+  // Buttons
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: windowHeight(2),
   },
 });
+
 export default styles;

@@ -1,11 +1,11 @@
-import {DimensionValue, Dimensions, PixelRatio, Platform} from 'react-native';
+import { DimensionValue, Dimensions, PixelRatio, Platform } from "react-native";
 
-export const SCREEN_HEIGHT = Dimensions.get('window').height;
-export const SCREEN_WIDTH = Dimensions.get('window').width;
+export const SCREEN_HEIGHT = Dimensions.get("window").height;
+export const SCREEN_WIDTH = Dimensions.get("window").width;
 
-export const IsIOS = Platform.OS === 'ios';
+export const IsIOS = Platform.OS === "ios";
 export const IsIPAD = IsIOS && SCREEN_HEIGHT / SCREEN_WIDTH < 1.6;
-export const IsAndroid = Platform.OS === 'android';
+export const IsAndroid = Platform.OS === "android";
 
 export const IsHaveNotch = SCREEN_HEIGHT > 750;
 
@@ -52,4 +52,13 @@ export const fontSizes = {
   FONT27: windowWidth(27),
   FONT28: windowWidth(28),
   FONT30: windowWidth(30),
+};
+
+export const space = {
+  xs: windowHeight(4),
+  sm: windowHeight(8),
+  md: windowHeight(12),
+  lg: windowHeight(16),
+  xl: windowHeight(24),
+  xxl: windowHeight(32),
 };
