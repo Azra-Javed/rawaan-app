@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "user",
-    "slug": "user",
+    "name": "Rawaan User",
+    "slug": "rawaan-user",
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "user",
@@ -16,7 +16,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.user"
+      "package": "com.rawaan.user"
     },
     "web": {
       "output": "static"
@@ -26,6 +26,7 @@
       [
         "expo-splash-screen",
         {
+          "image": "./assets/splash.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -40,10 +41,11 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }, 
-    "extra":{
-      "eas":{
-        "projectId": "91935a5e-9d23-4495-a76d-a2e0f1b7dba5"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d3a22e17-82da-4890-bb9e-0a20049cb8f0"
       }
     }
   }

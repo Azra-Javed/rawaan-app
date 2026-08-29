@@ -1,6 +1,6 @@
 let socket: WebSocket | null = null;
 
-const SOCKET_URL = "ws://192.168.43.237:8080";
+const SOCKET_URL = "wss://rawaan-app-socket.onrender.com";
 
 export const connectWebSocket = (
   onMessage?: (data: any) => void,
