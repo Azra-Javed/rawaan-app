@@ -1,14 +1,20 @@
 import express from "express";
+import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import geolib from "geolib";
 
 const app = express();
 
+const server = createServer(app);
+
 const wss = new WebSocketServer({
-  port: 8080,
+  server,
 });
 
-const drivers: Record<string, { latitude: number; longitude: number }> = {};
+const drivers: Record<
+  string,
+  { latitude: number; longitude: number }
+> = {};
 
 wss.on("connection", (socket) => {
   console.log("Client connected");
@@ -27,7 +33,10 @@ wss.on("connection", (socket) => {
       }
 
       if (data.type === "requestRide" && data.role === "user") {
-        const nearbyDrivers = findNearbyDrivers(data.latitude, data.longitude);
+        const nearbyDrivers = findNearbyDrivers(
+          data.latitude,
+          data.longitude
+        );
 
         console.log("Nearby drivers:", nearbyDrivers);
 
@@ -35,7 +44,7 @@ wss.on("connection", (socket) => {
           JSON.stringify({
             type: "nearbyDrivers",
             drivers: nearbyDrivers,
-          }),
+          })
         );
       }
     } catch (error) {
@@ -48,7 +57,10 @@ wss.on("connection", (socket) => {
   });
 });
 
-const findNearbyDrivers = (userLat: number, userLong: number) => {
+const findNearbyDrivers = (
+  userLat: number,
+  userLong: number
+) => {
   return Object.entries(drivers)
     .filter(([_, location]) => {
       const distance = geolib.getDistance(
@@ -56,7 +68,7 @@ const findNearbyDrivers = (userLat: number, userLong: number) => {
           latitude: userLat,
           longitude: userLong,
         },
-        location,
+        location
       );
 
       return distance <= 5000;
@@ -67,6 +79,10 @@ const findNearbyDrivers = (userLat: number, userLong: number) => {
     }));
 };
 
-app.listen(4000, () => {
-  console.log("Express server running on port 4000");
+const PORT = process.env.PORT
+  ? parseInt(process.env.PORT)
+  : 4000;
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
