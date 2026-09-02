@@ -49,6 +49,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
+import { getUser, saveAuth } from "@/utils/authStorage";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -60,7 +61,7 @@ Notifications.setNotificationHandler({
 });
 
 export default function RidePlanScreen() {
-  const { user } = useUser();
+
   const notificationListener = useRef<Notifications.EventSubscription | null>(
     null,
   );
@@ -89,6 +90,15 @@ export default function RidePlanScreen() {
   const [currentLocationName, setCurrentLocationName] =
     useState("Current Location");
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
+  const { user: currentUser } = useUser();
+
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    if (currentUser) {
+      setUser(currentUser);
+    }
+  }, [currentUser]);
 
   // WebSocket lifecycle
   useEffect(() => {
@@ -276,29 +286,80 @@ export default function RidePlanScreen() {
   };
 
   // Push Notifications Listener
+
   useEffect(() => {
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
         try {
-          const payload = JSON.parse(
-            notification?.request?.content?.data?.orderData as string,
-          );
+          const rawOrderData =
+            notification?.request?.content?.data?.orderData;
 
-          if (payload.type === "rideAccepted") {
+          const payload =
+            typeof rawOrderData === "string"
+              ? JSON.parse(rawOrderData)
+              : rawOrderData;
+
+          console.log("Rider notification data:", payload);
+
+          // DRIVER REJECTED THE REQUEST
+
+          if (payload?.type === "rideRejected") {
+            const rejectedDriverId = payload?.driverId;
+
+            if (rejectedDriverId) {
+              setDriverLists((prevDrivers) =>
+                prevDrivers.filter(
+                  (driver) =>
+                    String(driver.id) !==
+                    String(rejectedDriverId),
+                ),
+              );
+
+              // If the rejected driver was selected,
+              // clear the selection.
+              setSelectedDriverId((currentSelectedId) =>
+                String(currentSelectedId) ===
+                  String(rejectedDriverId)
+                  ? null
+                  : currentSelectedId,
+              );
+            }
+
+            Toast.show(
+              "This driver is not available.Choose other driver for you.",
+              {
+                type: "danger",
+              },
+            );
+
+            return;
+          }
+
+
+          // DRIVER ACCEPTED THE REQUEST
+
+          if (payload?.type === "rideAccepted") {
             router.push({
               pathname: "/(routes)/ride-details",
-              params: { orderData: JSON.stringify(payload) },
+              params: {
+                orderData: JSON.stringify(payload),
+              },
             });
           }
         } catch (error) {
-          console.log("Failed to process rider notification:", error);
+          console.log(
+            "Failed to process rider notification:",
+            error,
+          );
         }
       });
 
     return () => {
       notificationListener.current?.remove();
+      notificationListener.current = null;
     };
   }, []);
+
 
   const sendPushNotification = async (expoPushToken: string, data: any) => {
     const message = {
@@ -348,9 +409,19 @@ export default function RidePlanScreen() {
           await Notifications.getExpoPushTokenAsync({ projectId })
         ).data;
 
-        await api.put("/user/update-push-token", {
+        console.log("========== USER PUSH TOKEN ==========");
+        console.log("Project ID:", projectId);
+        console.log("User ID:", user?.id);
+        console.log("Push Token:", pushTokenString);
+        console.log("=====================================");
+
+        const response = await api.put("/user/update-push-token", {
           pushToken: pushTokenString,
         });
+
+
+
+        setUser(response.data.user);
       } catch (e: unknown) {
         Toast.show(`${e}`, { type: "danger" });
       }
@@ -377,8 +448,9 @@ export default function RidePlanScreen() {
   const handleOrder = async () => {
     if (!currentLocation || !dropoff || distance === null) return;
 
-    const selectedDriver = driverLists.find((d) => d.id === selectedDriverId);
-
+    const selectedDriver = driverLists.find(
+      (d) => String(d.id) === String(selectedDriverId)
+    );
     if (!selectedDriver?.pushToken) {
       Toast.show("Selected driver is not available for notifications", {
         type: "danger",
@@ -657,11 +729,14 @@ export default function RidePlanScreen() {
                             styles.driverCard,
                             isSelected && styles.driverCardSelected,
                           ]}
-                          onPress={() => {
-                            setSelectedVehicle(driver.vehicle_type);
 
-                            setSelectedDriverId(driver.id);
-                          }}
+                          onPress={() => {
+
+
+                            setSelectedVehicle(driver.vehicle_type);
+                            setSelectedDriverId(String(driver.id));
+                          }
+                          }
                         >
                           {isSelected && (
                             <View style={styles.selectedBadge}>
@@ -711,8 +786,8 @@ export default function RidePlanScreen() {
                                 PKR{" "}
                                 {distance !== null
                                   ? (
-                                      distance * parseFloat(driver.rate || "0")
-                                    ).toFixed(2)
+                                    distance * parseFloat(driver.rate || "0")
+                                  ).toFixed(2)
                                   : "0.00"}
                               </Text>
                             </View>

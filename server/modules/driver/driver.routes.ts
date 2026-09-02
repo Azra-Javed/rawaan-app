@@ -4,6 +4,7 @@ import {
   getDriverInfo,
   getDriversById,
   newRide,
+  rejectRide,
   updatePushToken,
   UpdateStatus,
   updatingRideStatus,
@@ -26,3 +27,5 @@ driverRouter.put(
 driverRouter.get("/get-rides", driverAuthMiddleware, getAllRides);
 export default driverRouter;
 driverRouter.get("/me", driverAuthMiddleware, getDriverInfo);
+driverRouter.post("/reject-ride", driverAuthMiddleware, rejectRide);
+

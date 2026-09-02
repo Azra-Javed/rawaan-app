@@ -285,3 +285,45 @@ export const getDriverInfo = async (req: Request, res: Response) => {
     console.log(error);
   }
 };
+
+
+// @desc: reject a ride request
+// @route: POST /api/v1/driver/reject-ride
+export const rejectRide = async (req: Request, res: Response) => {
+  try {
+    const driverId = req.driver?.driverId;
+
+    if (!driverId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    // Do NOT create a Ride here.
+    // Only increase the driver's rejected/cancelled ride count.
+    const driver = await prisma.driver.update({
+      where: {
+        id: driverId,
+      },
+      data: {
+        cancelRides: {
+          increment: 1,
+        },
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Ride request rejected successfully",
+      driverId,
+    });
+  } catch (error: any) {
+    console.error("Reject ride error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

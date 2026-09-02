@@ -40,6 +40,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
+import axios from "axios";
 
 // Set up how notifications behave when they arrive -- runs once at module load, not on every render
 Notifications.setNotificationHandler({
@@ -99,6 +100,7 @@ const HomeScreen = () => {
   const [distance, setDistance] = useState<number | null>(null);
 
   const [userData, setUserData] = useState<any>(null);
+
 
   const [recentRides, setrecentRides] = useState<any>([]);
 
@@ -160,9 +162,9 @@ const HomeScreen = () => {
     const a =
       Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
       Math.cos(lat1) *
-        Math.cos(lat2) *
-        Math.sin(deltaLon / 2) *
-        Math.sin(deltaLon / 2);
+      Math.cos(lat2) *
+      Math.sin(deltaLon / 2) *
+      Math.sin(deltaLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c; // distance in meters
@@ -211,7 +213,7 @@ const HomeScreen = () => {
               const movedFarEnough =
                 !lastLocationRef.current ||
                 haversineDistance(lastLocationRef.current, current) >
-                  MIN_DISTANCE_METERS;
+                MIN_DISTANCE_METERS;
 
               if (movedFarEnough) {
                 sendLocationUpdate(current);
@@ -281,25 +283,101 @@ const HomeScreen = () => {
     }
   };
 
-  const handleClose = () => {
-    setIsModalVisible(false);
+
+  const rejectRideHandler = async () => {
+    try {
+
+      const response = await api.post("/driver/reject-ride");
+
+      console.log("Ride rejected:", response.data);
+
+      const data = {
+        type: "rideRejected",
+        driverId: response.data?.driverId,
+      };
+
+      // Tell the rider that this driver rejected the request.
+      if (userData?.pushToken) {
+        try {
+          await sendPushNotification(userData.pushToken, data);
+
+          console.log("Rejection notification sent to rider");
+        } catch (notificationError: any) {
+          console.log(
+            "Rejection notification failed:",
+            notificationError?.response?.data ||
+            notificationError?.message,
+          );
+        }
+      }
+
+      // Close the incoming ride request modal.
+      setIsModalVisible(false);
+
+      Toast.show(
+        "Ride request rejected.",
+        {
+          type: "success",
+        },
+      );
+    } catch (error: any) {
+      console.log("========== REJECT RIDE ERROR ==========");
+      console.log("Error:", error);
+      console.log("Response:", error?.response?.data);
+      console.log("Status:", error?.response?.status);
+      console.log("Message:", error?.message);
+      console.log("=======================================");
+
+      Toast.show(
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to reject ride. Please try again.",
+        {
+          type: "danger",
+        },
+      );
+    }
   };
+
 
   // Send a push notification to any Expo push token (rider or driver)
-  const sendPushNotification = async (expoPushToken: string, data: any) => {
-    const message = {
-      to: expoPushToken,
-      sound: "default",
-      title: "Ride Request Accepted!",
-      body: "Your driver is on the way!",
-      data: { orderData: JSON.stringify(data) },
-    };
-    await api
-      .post("https://exp.host/--/api/v2/push/send", message)
-      .then((res) => console.log(res.data))
-      .catch((error) => console.log(error));
+  const sendPushNotification = async (
+    expoPushToken: string,
+    data: any,
+  ) => {
+    try {
+      const message = {
+        to: expoPushToken,
+        sound: "default",
+        title: "Ride Accepted! 🚗",
+        body: "Your driver has accepted your ride.",
+        data: {
+          orderData: JSON.stringify(data),
+        },
+      };
+
+      console.log("========== SENDING PUSH ==========");
+      console.log("Token:", expoPushToken);
+      console.log("Data:", data);
+      console.log("=================================");
+
+      const response = await axios.post(
+        "https://exp.host/--/api/v2/push/send",
+        message,
+      );
+
+      console.log("Push response:", response.data);
+
+      return response.data;
+    } catch (error) {
+      console.log("Push notification error:", error);
+      throw error;
+    }
   };
 
+  const handleClose = () => {
+    setIsModalVisible(false);
+  }
   // accepting a ride now actually persists it, notifies the rider,
   // closes the modal, and navigates to a ride-in-progress screen.
   const acceptRideHandler = async () => {
@@ -318,18 +396,34 @@ const HomeScreen = () => {
         status: "Processing",
         currentLocationName,
         destinationLocationName,
-        distance,
+        distance: distance !== null ? distance.toFixed(2) : "0.00",
       });
+
+
       const data = {
-        ...driver,
+        type: "rideAccepted",
+        user: userData,
         currentLocation,
         dropoff,
         distance,
+        driver,
+        ride: response.data?.newRide,
       };
+
+      console.log("user data in notification", data);
 
       // Notify the rider that their ride was accepted, using the rider's own push token
       if (userData?.pushToken) {
-        await sendPushNotification(userData.pushToken, data);
+        try {
+          console.log("Sending acceptance notification to:", userData.pushToken);
+
+          await sendPushNotification(userData.pushToken, data);
+
+          console.log("Acceptance push notification sent");
+        } catch (notificationError: any) {
+          console.log("Push notification failed:", notificationError?.response?.data);
+          console.log("But ride was already accepted.");
+        }
       } else {
         console.log("Rider has no push token, skipping notification");
       }
@@ -351,11 +445,23 @@ const HomeScreen = () => {
         pathname: "/(routes)/ride-details",
         params: { orderData: JSON.stringify(rideData) },
       });
-    } catch (error) {
-      console.log("Accept ride error:", error);
-      Toast.show("Failed to accept ride. Please try again.", {
-        type: "danger",
-      });
+    } catch (error: any) {
+      console.log("========== ACCEPT RIDE ERROR ==========");
+      console.log("Error:", error);
+      console.log("Response:", error?.response?.data);
+      console.log("Status:", error?.response?.status);
+      console.log("Message:", error?.message);
+      console.log("=======================================");
+
+      Toast.show(
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.message ||
+        "Failed to accept ride. Please try again.",
+        {
+          type: "danger",
+        }
+      );
     }
   };
 
@@ -556,7 +662,7 @@ const HomeScreen = () => {
             <View>
               <Text
                 style={styles.rideTitle}
-                onPress={() => setIsModalVisible(true)}
+
               >
                 Recent rides
               </Text>
@@ -740,7 +846,7 @@ const HomeScreen = () => {
             <View style={styles.buttonContainer}>
               <Button
                 title="Decline"
-                onPress={handleClose}
+                onPress={rejectRideHandler}
                 width={windowWidth(120)}
                 height={windowHeight(32)}
                 backgroundColor="crimson"

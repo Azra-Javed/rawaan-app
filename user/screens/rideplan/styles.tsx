@@ -17,19 +17,19 @@ const styles = StyleSheet.create({
   // ==========================================================
 
   mapWrapper: {
-    width: "100%",
-    overflow: "hidden",
-    backgroundColor: "#E8EEEE",
-    position: "relative",
-  },
-
+  width: "100%",
+  height: windowHeight(300),
+  overflow: "hidden",
+  backgroundColor: "#E8EEEE",
+  position: "relative",
+},
   map: {
     flex: 1,
   },
 
   mapStatus: {
     position: "absolute",
-    top: windowHeight(12),
+    top: windowHeight(35),
     left: windowWidth(15),
 
     flexDirection: "row",

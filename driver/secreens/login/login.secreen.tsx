@@ -74,8 +74,8 @@ const LoginScreen = () => {
             <Text style={localStyles.subtitle}>
               Sign in to start your journey
             </Text>
-          </View>{" "}
-        </View>{" "}
+          </View>
+        </View>
         <View style={{ marginTop: 10 }}>
           <RouteDots />
         </View>

@@ -91,6 +91,7 @@ export const updateUserPushToken = async (req: Request, res: Response) => {
       data: { pushToken },
     });
 
+  
     return res.status(200).json({ success: true, user });
   } catch (error: any) {
     console.error(error);
