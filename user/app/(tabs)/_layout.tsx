@@ -37,7 +37,7 @@ const getTabIcon = (routeName: string, focused: boolean) => {
 export default function _layout() {
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor={color.tealDark} />
+    
       <Tabs
         screenOptions={({ route }) => ({
           headerShown: false,

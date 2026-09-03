@@ -506,7 +506,7 @@ export default function RidePlanScreen() {
       <View style={[styles.mapWrapper]}>
         <MapView
           style={styles.map}
-          region={region}
+          initialRegion={region}
           onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
           rotateEnabled
           zoomEnabled

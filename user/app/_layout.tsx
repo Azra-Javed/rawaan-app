@@ -5,7 +5,8 @@ import { Stack } from "expo-router";
 import { ToastProvider } from "react-native-toast-notifications";
 import { LogBox } from "react-native";
 import { useFonts } from "expo-font";
-
+import color from "@/themes/app.colors";
+import { StatusBar } from "expo-status-bar";
 export { ErrorBoundary } from "expo-router";
 
 export default function RootLayout() {
@@ -47,6 +48,7 @@ function RootLayoutNav() {
       }}
     >
       <Stack screenOptions={{ headerShown: false }}>
+        <StatusBar style="light" backgroundColor={color.tealDark} />
         <Stack.Screen name="(routes)/onboarding" />
       </Stack>
     </ToastProvider>

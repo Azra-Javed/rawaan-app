@@ -340,17 +340,26 @@ const HomeScreen = () => {
   };
 
 
-  // Send a push notification to any Expo push token (rider or driver)
+  // Send a push notification to the rider
   const sendPushNotification = async (
     expoPushToken: string,
     data: any,
   ) => {
     try {
+      const isRejected = data?.type === "rideRejected";
+
       const message = {
         to: expoPushToken,
         sound: "default",
-        title: "Ride Accepted! 🚗",
-        body: "Your driver has accepted your ride.",
+
+        title: isRejected
+          ? "Driver Not Available"
+          : "Ride Accepted! 🚗",
+
+        body: isRejected
+          ? "This driver is not available."
+          : "Your driver has accepted your ride.",
+
         data: {
           orderData: JSON.stringify(data),
         },
@@ -359,6 +368,8 @@ const HomeScreen = () => {
       console.log("========== SENDING PUSH ==========");
       console.log("Token:", expoPushToken);
       console.log("Data:", data);
+      console.log("Title:", message.title);
+      console.log("Body:", message.body);
       console.log("=================================");
 
       const response = await axios.post(

@@ -6,6 +6,8 @@ import { ToastProvider } from "react-native-toast-notifications";
 import { LogBox } from "react-native";
 import { useFonts } from "expo-font";
 import React from "react";
+import color from "@/themes/app.colors";
+import { StatusBar } from "expo-status-bar";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -54,6 +56,7 @@ function RootLayoutNav() {
       }}
     >
       <Stack screenOptions={{ headerShown: false }}>
+        <StatusBar style="light" backgroundColor={color.tealDark} />
         <Stack.Screen name="index" />
       </Stack>
     </ToastProvider>
