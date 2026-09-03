@@ -17,6 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import color from "@/themes/app.colors";
 import { getRoute, type Coord } from "@/utils/osrm";
+import { connectWebSocket, disconnectWebSocket } from "@/utils/websocket";
 
 type RideData = {
   user?: any;
@@ -49,7 +50,7 @@ const RideDetailsScreen = () => {
   const [region, setRegion] = useState<Region>(DEFAULT_REGION);
   const [routeCoords, setRouteCoords] = useState<Coord[]>([]);
   const [routeLoading, setRouteLoading] = useState(false);
-
+  const [orderStatus, setOrderStatus] = useState("Processing");
   const [paymentModalVisible, setPaymentModalVisible] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] =
     useState("Cash");
@@ -69,6 +70,7 @@ const RideDetailsScreen = () => {
 
       console.log("Ride details received:", parsed);
       setOrderData(parsed);
+      setOrderStatus(parsed?.ride?.status || "Processing");
     } catch (error) {
       console.log("Failed to parse ride data:", error);
     }
@@ -175,6 +177,27 @@ const RideDetailsScreen = () => {
     setPaymentCompleted(true);
   };
 
+  useEffect(() => {
+    connectWebSocket((data) => {
+      console.log("Ride status WebSocket:", data);
+
+      if (
+        data.type === "rideStatusUpdated" &&
+        data.rideId === orderData?.ride?.id
+      ) {
+        console.log(
+          "Ride status changed to:",
+          data.status
+        );
+
+        setOrderStatus(data.status);
+      }
+    });
+
+    return () => {
+      disconnectWebSocket();
+    };
+  }, [orderData?.ride?.id]);
   if (!orderData) {
     return (
       <SafeAreaView style={styles.emptyScreen}>
@@ -324,7 +347,9 @@ const RideDetailsScreen = () => {
             <View style={styles.statusBadge}>
               <View style={styles.statusDot} />
 
-              <Text style={styles.statusText}>Driver assigned</Text>
+              <Text style={styles.statusText}>
+                {orderStatus}
+              </Text>
             </View>
           </View>
 
@@ -351,7 +376,7 @@ const RideDetailsScreen = () => {
               style={[
                 styles.callButton,
                 !driver?.phone_number &&
-                  styles.callButtonDisabled,
+                styles.callButtonDisabled,
               ]}
               disabled={!driver?.phone_number}
               onPress={callDriver}
@@ -388,7 +413,7 @@ const RideDetailsScreen = () => {
                   style={[
                     styles.detailValue,
                     driver?.phone_number &&
-                      styles.phoneValue,
+                    styles.phoneValue,
                   ]}
                 >
                   {driver?.phone_number || "Unavailable"}
@@ -464,69 +489,72 @@ const RideDetailsScreen = () => {
           </View>
 
           {/* PAYMENT */}
+          {
+            orderStatus === "Completed" && (<View style={styles.paymentSection}>
+              <View style={styles.paymentHeader}>
+                <Text style={styles.paymentTitle}>Payment</Text>
 
-          <View style={styles.paymentSection}>
-            <View style={styles.paymentHeader}>
-              <Text style={styles.paymentTitle}>Payment</Text>
+                {paymentCompleted && (
+                  <View style={styles.paidBadge}>
+                    <Ionicons
+                      name="checkmark"
+                      size={13}
+                      color={color.white}
+                    />
+
+                    <Text style={styles.paidText}>Paid</Text>
+                  </View>
+                )}
+              </View>
+
+              <View style={styles.paymentRow}>
+                <View>
+                  <Text style={styles.paymentLabel}>
+                    TOTAL FARE
+                  </Text>
+
+                  <Text style={styles.paymentAmount}>
+                    {payableAmount.toFixed(2)}{" "}
+                    <Text style={styles.paymentCurrency}>PKR</Text>
+                  </Text>
+                </View>
+
+                {!paymentCompleted && (
+                  <TouchableOpacity
+                    style={styles.payButton}
+                    onPress={() => setPaymentModalVisible(true)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={styles.payButtonText}>
+                      Pay Now
+                    </Text>
+
+                    <Ionicons
+                      name="arrow-forward"
+                      size={16}
+                      color={color.white}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
 
               {paymentCompleted && (
-                <View style={styles.paidBadge}>
+                <View style={styles.paymentSuccess}>
                   <Ionicons
-                    name="checkmark"
-                    size={13}
-                    color={color.white}
+                    name="checkmark-circle"
+                    size={17}
+                    color={color.buttonBg}
                   />
 
-                  <Text style={styles.paidText}>Paid</Text>
+                  <Text style={styles.paymentSuccessText}>
+                    Payment completed successfully
+                  </Text>
                 </View>
               )}
             </View>
+            )
+          }
 
-            <View style={styles.paymentRow}>
-              <View>
-                <Text style={styles.paymentLabel}>
-                  TOTAL FARE
-                </Text>
-
-                <Text style={styles.paymentAmount}>
-                  {payableAmount.toFixed(2)}{" "}
-                  <Text style={styles.paymentCurrency}>PKR</Text>
-                </Text>
-              </View>
-
-              {!paymentCompleted && (
-                <TouchableOpacity
-                  style={styles.payButton}
-                  onPress={() => setPaymentModalVisible(true)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.payButtonText}>
-                    Pay Now
-                  </Text>
-
-                  <Ionicons
-                    name="arrow-forward"
-                    size={16}
-                    color={color.white}
-                  />
-                </TouchableOpacity>
-              )}
-            </View>
-
-            {paymentCompleted && (
-              <View style={styles.paymentSuccess}>
-                <Ionicons
-                  name="checkmark-circle"
-                  size={17}
-                  color={color.buttonBg}
-                />
-
-                <Text style={styles.paymentSuccessText}>
-                  Payment completed successfully
-                </Text>
-              </View>
-            )}
-          </View>
 
           {/* SIMPLE NOTE */}
 
@@ -599,7 +627,7 @@ const RideDetailsScreen = () => {
               style={[
                 styles.paymentMethod,
                 selectedPaymentMethod === "Cash" &&
-                  styles.paymentMethodSelected,
+                styles.paymentMethodSelected,
               ]}
               onPress={() => setSelectedPaymentMethod("Cash")}
               activeOpacity={0.8}
@@ -626,7 +654,7 @@ const RideDetailsScreen = () => {
                 style={[
                   styles.radio,
                   selectedPaymentMethod === "Cash" &&
-                    styles.radioSelected,
+                  styles.radioSelected,
                 ]}
               >
                 {selectedPaymentMethod === "Cash" && (
@@ -639,7 +667,7 @@ const RideDetailsScreen = () => {
               style={[
                 styles.paymentMethod,
                 selectedPaymentMethod === "Card" &&
-                  styles.paymentMethodSelected,
+                styles.paymentMethodSelected,
               ]}
               onPress={() => setSelectedPaymentMethod("Card")}
               activeOpacity={0.8}
@@ -666,7 +694,7 @@ const RideDetailsScreen = () => {
                 style={[
                   styles.radio,
                   selectedPaymentMethod === "Card" &&
-                    styles.radioSelected,
+                  styles.radioSelected,
                 ]}
               >
                 {selectedPaymentMethod === "Card" && (

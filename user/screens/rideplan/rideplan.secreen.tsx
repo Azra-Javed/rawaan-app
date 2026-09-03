@@ -80,7 +80,7 @@ export default function RidePlanScreen() {
   const [routeCoords, setRouteCoords] = useState<Coord[]>([]);
   const [distance, setDistance] = useState<number | null>(null);
   const [travelTime, setTravelTime] = useState<number | null>(null);
-
+  const [isLoading, setIsLoading] = useState(false);
   const [locationSelected, setLocationSelected] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState("Car");
   const [keyboardAvoidingHeight, setKeyboardAvoidingHeight] = useState(false);
@@ -446,20 +446,32 @@ export default function RidePlanScreen() {
   }, []);
 
   const handleOrder = async () => {
-    if (!currentLocation || !dropoff || distance === null) return;
+    // Prevent multiple requests
+    if (isLoading) return;
+
+    if (!currentLocation || !dropoff || distance === null) {
+      return;
+    }
 
     const selectedDriver = driverLists.find(
       (d) => String(d.id) === String(selectedDriverId)
     );
+
     if (!selectedDriver?.pushToken) {
-      Toast.show("Selected driver is not available for notifications", {
-        type: "danger",
-      });
+      Toast.show(
+        "Selected driver is not available for notifications",
+        {
+          type: "danger",
+        }
+      );
       return;
     }
 
     try {
+      setIsLoading(true);
+
       const data = {
+        type: "rideRequest",
         user,
         currentLocation,
         marker: {
@@ -478,6 +490,8 @@ export default function RidePlanScreen() {
       );
     } catch (error) {
       console.log("Order error:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -720,7 +734,8 @@ export default function RidePlanScreen() {
 
                   <View style={styles.driverList}>
                     {driverLists.map((driver: any, index) => {
-                      const isSelected = selectedDriverId === driver.id;
+                      const isSelected =
+                        String(selectedDriverId) === String(driver.id);
 
                       return (
                         <Pressable
@@ -731,14 +746,17 @@ export default function RidePlanScreen() {
                           ]}
 
                           onPress={() => {
-
-
-                            setSelectedVehicle(driver.vehicle_type);
-                            setSelectedDriverId(String(driver.id));
-                          }
-                          }
+                            if (isSelected) {
+                              setSelectedDriverId(null);
+                            } else {
+                              setSelectedDriverId(String(driver.id));
+                              setSelectedVehicle(driver.vehicle_type);
+                            }
+                          }}
                         >
+
                           {isSelected && (
+
                             <View style={styles.selectedBadge}>
                               <Ionicons
                                 name="checkmark"
@@ -831,10 +849,10 @@ export default function RidePlanScreen() {
                     <Button
                       backgroundColor={color.tealDark}
                       textColor={color.white}
-                      title="Confirm Booking"
+                      title={isLoading ? "Requesting..." : "Confirm Booking"}
                       onPress={handleOrder}
+                      disabled={isLoading}
                     />
-
                     <View style={styles.bookingSecure}>
                       <Ionicons
                         name="shield-checkmark-outline"

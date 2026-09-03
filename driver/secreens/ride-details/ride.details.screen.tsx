@@ -18,6 +18,7 @@ import Button from "@/components/common/button";
 import api from "@/api/client";
 import { Toast } from "react-native-toast-notifications";
 import { getRoute, type Coord } from "@/utils/osrm";
+import { sendWebSocketMessage } from "@/utils/websocket";
 
 type RideData = {
   user?: {
@@ -58,23 +59,35 @@ export default function RideDetailsScreen() {
 
   // Parse the ride data passed in via navigation params
   useEffect(() => {
-    try {
-      if (!orderDataParam) {
-        console.log("No orderData received");
-        return;
-      }
-
-      const parsed =
-        typeof orderDataParam === "string"
-          ? JSON.parse(orderDataParam)
-          : orderDataParam;
-
-      setOrderData(parsed);
-      setOrderStatus(parsed?.ride?.status || "Processing");
-    } catch (error) {
-      console.log("Failed to parse ride data:", error);
+  try {
+    if (!orderDataParam) {
+      console.log("No orderData received");
+      return;
     }
-  }, [orderDataParam]);
+
+    const parsed =
+      typeof orderDataParam === "string"
+        ? JSON.parse(orderDataParam)
+        : orderDataParam;
+
+    console.log(
+      "NEW RIDE RECEIVED:",
+      parsed?.ride?.id,
+      parsed?.ride?.status
+    );
+
+    setOrderData(parsed);
+
+    setOrderStatus(
+      parsed?.ride?.status || "Processing"
+    );
+  } catch (error) {
+    console.log(
+      "Failed to parse ride data:",
+      error
+    );
+  }
+}, [orderDataParam]);
 
   const pickup = useMemo<Coord | null>(() => {
     if (
@@ -119,7 +132,7 @@ export default function RideDetailsScreen() {
     });
   }, [pickup, dropoff]);
 
- 
+
   useEffect(() => {
     let cancelled = false;
 
@@ -164,46 +177,86 @@ export default function RideDetailsScreen() {
     }
   };
 
-  // Advance the ride: Processing -> Ongoing -> Completed
   const handleSubmit = async () => {
     if (!orderData?.ride?.id) {
-      Toast.show("Ride information is missing, cannot update status", {
-        type: "danger",
-      });
+      Toast.show(
+        "Ride information is missing, cannot update status",
+        {
+          type: "danger",
+        }
+      );
       return;
     }
 
-    const nextStatus = orderStatus === "Ongoing" ? "Completed" : "Ongoing";
+    const nextStatus =
+      orderStatus === "Ongoing"
+        ? "Completed"
+        : "Ongoing";
 
     try {
       setSubmitting(true);
 
-      const res = await api.put(`/driver/update-ride-status`, {
-        rideStatus: nextStatus,
-        rideId: orderData.ride.id,
-      });
+      const res = await api.put(
+        `/driver/update-ride-status`,
+        {
+          rideStatus: nextStatus,
+          rideId: orderData.ride.id,
+        }
+      );
 
-      const updatedStatus = res.data?.updatedRide?.status;
+      const updatedStatus =
+        res.data?.updatedRide?.status;
 
       if (updatedStatus === "Ongoing") {
         setOrderStatus(updatedStatus);
-        Toast.show("Let's have a safe journey!", { type: "success" });
-      } else if (updatedStatus === "Completed") {
-        Toast.show(`Well done ${driver?.name || "driver"}!`, {
-          type: "success",
+
+        // Send status to user
+        sendWebSocketMessage({
+          type: "rideStatusUpdate",
+          rideId: orderData.ride.id,
+          status: updatedStatus,
         });
+
+        Toast.show(
+          "Let's have a safe journey!",
+          {
+            type: "success",
+          }
+        );
+      } else if (updatedStatus === "Completed") {
+        // Send status to user
+        sendWebSocketMessage({
+          type: "rideStatusUpdate",
+          rideId: orderData.ride.id,
+          status: updatedStatus,
+        });
+
+        Toast.show(
+          `Well done ${driver?.name || "driver"
+          }!`,
+          {
+            type: "success",
+          }
+        );
+
         router.push("/(tabs)/home");
       }
     } catch (error) {
-      console.log("Update ride status error:", error);
-      Toast.show("Failed to update ride status. Please try again.", {
-        type: "danger",
-      });
+      console.log(
+        "Update ride status error:",
+        error
+      );
+
+      Toast.show(
+        "Failed to update ride status. Please try again.",
+        {
+          type: "danger",
+        }
+      );
     } finally {
       setSubmitting(false);
     }
   };
-
   if (!orderData) {
     return (
       <View style={styles.emptyContainer}>
@@ -304,7 +357,7 @@ export default function RideDetailsScreen() {
             />
           </Pressable>
 
-        
+
 
           <View style={styles.statusBadge}>
             <View style={styles.statusDot} />
@@ -397,9 +450,9 @@ export default function RideDetailsScreen() {
             </Pressable>
           </View>
 
-      
 
-         
+
+
 
           {/* RIDE STATS */}
           <View style={styles.statsRow}>

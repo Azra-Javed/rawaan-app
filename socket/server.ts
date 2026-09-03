@@ -23,22 +23,36 @@ wss.on("connection", (socket) => {
     try {
       const data = JSON.parse(message.toString());
 
-      if (data.type === "locationUpdate" && data.role === "driver") {
+      // Driver location
+      if (
+        data.type === "locationUpdate" &&
+        data.role === "driver"
+      ) {
         drivers[data.driverId] = {
           latitude: data.data.latitude,
           longitude: data.data.longitude,
         };
 
-        console.log("Driver location updated:", drivers[data.driverId]);
+        console.log(
+          "Driver location updated:",
+          drivers[data.driverId]
+        );
       }
 
-      if (data.type === "requestRide" && data.role === "user") {
+      // User requests nearby drivers
+      if (
+        data.type === "requestRide" &&
+        data.role === "user"
+      ) {
         const nearbyDrivers = findNearbyDrivers(
           data.latitude,
           data.longitude
         );
 
-        console.log("Nearby drivers:", nearbyDrivers);
+        console.log(
+          "Nearby drivers:",
+          nearbyDrivers
+        );
 
         socket.send(
           JSON.stringify({
@@ -47,8 +61,34 @@ wss.on("connection", (socket) => {
           })
         );
       }
+
+      // Driver updates ride status
+      if (
+        data.type === "rideStatusUpdate"
+      ) {
+        console.log(
+          "Ride status update:",
+          data
+        );
+
+        // Send to all connected clients
+        wss.clients.forEach((client) => {
+          if (client.readyState === client.OPEN) {
+            client.send(
+              JSON.stringify({
+                type: "rideStatusUpdated",
+                rideId: data.rideId,
+                status: data.status,
+              })
+            );
+          }
+        });
+      }
     } catch (error) {
-      console.log("Invalid message:", error);
+      console.log(
+        "Invalid message:",
+        error
+      );
     }
   });
 
@@ -63,13 +103,14 @@ const findNearbyDrivers = (
 ) => {
   return Object.entries(drivers)
     .filter(([_, location]) => {
-      const distance = geolib.getDistance(
-        {
-          latitude: userLat,
-          longitude: userLong,
-        },
-        location
-      );
+      const distance =
+        geolib.getDistance(
+          {
+            latitude: userLat,
+            longitude: userLong,
+          },
+          location
+        );
 
       return distance <= 5000;
     })
@@ -84,5 +125,7 @@ const PORT = process.env.PORT
   : 4000;
 
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(
+    `Server running on port ${PORT}`
+  );
 });

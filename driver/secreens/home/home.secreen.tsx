@@ -57,7 +57,6 @@ const MIN_DISTANCE_METERS = 200;
 
 const HomeScreen = () => {
   const { colors } = useTheme();
-  const { driver } = useDriver();
   const notificationListener = useRef<Notifications.EventSubscription | null>(
     null,
   );
@@ -84,7 +83,7 @@ const HomeScreen = () => {
   const [isOn, setIsOn] = useState<boolean>(false);
   const [loading, setloading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-
+  const [driver, setDriver] = useState<any>(null);
   // Whether the WebSocket connection is currently open -- used to gate location broadcasts
   const [wsConnected, setWsConnected] = useState(false);
 
@@ -626,6 +625,19 @@ const HomeScreen = () => {
       setrecentRides(res.data.rides);
     };
 
+    const fetchDriverInfo = async () => {
+      try {
+        const response = await api.get("/driver/me");
+        if (response.data.success) {
+          const driverData = response.data.driver;
+          setDriver(driverData);
+        }
+      }
+      catch (error) {
+        console.error("Error fetching driver info:", error);
+      }
+    }
+    fetchDriverInfo();
     getRecentRides();
   }, []);
 
@@ -662,7 +674,7 @@ const HomeScreen = () => {
             numColumns={2}
             columnWrapperStyle={styles.columnWrapper}
             renderItem={({ item }) => (
-              <RenderRideItem item={item} colors={colors} />
+              <RenderRideItem item={item} colors={colors} driver={driver}/>
             )}
           />
         </View>
