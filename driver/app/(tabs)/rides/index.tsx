@@ -54,7 +54,7 @@ export default function Rides() {
         {recentRides?.length > 0 ? (
           <View style={styles.ridesContainer}>
             {recentRides.map((item: any, index: number) => (
-              <View key={index} style={styles.rideWrapper}>
+              <View key={index}>
                 <RideCard item={item} />
               </View>
             ))}
@@ -133,16 +133,10 @@ const styles = StyleSheet.create({
   // ================= RIDES =================
 
   ridesContainer: {
-    gap: windowHeight(10),
+    
   },
 
-  rideWrapper: {
-    backgroundColor: color.white,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: color.ivoryLine,
-    overflow: "hidden",
-  },
+ 
 
   // ================= EMPTY STATE =================
 

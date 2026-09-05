@@ -12,6 +12,49 @@ const styles = StyleSheet.create({
   headerWrapper: {
     overflow: "hidden",
   },
+ 
+
+statsGrid: {
+  width: "100%",
+  flexDirection: "row",
+  flexWrap: "wrap",
+  justifyContent: "space-between",
+},
+
+emptyRide: {
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: windowHeight(24),
+  paddingHorizontal: windowWidth(20),
+  backgroundColor: color.white,
+  borderRadius: 17,
+  borderWidth: 1,
+  borderColor: color.border,
+},
+
+emptyRideIcon: {
+  width: windowWidth(44),
+  height: windowWidth(44),
+  borderRadius: 14,
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: color.tealSoft,
+  marginBottom: windowHeight(8),
+},
+
+emptyRideTitle: {
+  fontFamily: "TT-Octosquares-Medium",
+  fontSize: fontSizes.FONT14,
+  color: color.textDark,
+},
+
+emptyRideText: {
+  marginTop: windowHeight(3),
+  fontFamily: "TT-Octosquares-Medium",
+  fontSize: fontSizes.FONT10,
+  color: color.textMuted,
+  textAlign: "center",
+},
 
   // Dashboard
   dashboardSection: {

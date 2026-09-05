@@ -11,6 +11,7 @@
     "dev": "nodemon --watch . --ext ts --exec tsx server.ts"
   },
   "dependencies": {
+    "expo": "^57.0.19",
     "express": "^5.2.1",
     "geolib": "^3.3.14",
     "ws": "^8.21.3"

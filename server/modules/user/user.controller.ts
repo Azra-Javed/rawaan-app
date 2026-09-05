@@ -63,7 +63,10 @@ export const registerUser = async (req: Request, res: Response) => {
 // @route  PUT /api/v1/user/me
 export const getUserInfo = async (req: Request, res: Response) => {
   try {
-    const user = req.user;
+    const userId = req.user?.userId;
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
 
     res.status(200).json({
       success: true,
@@ -91,7 +94,7 @@ export const updateUserPushToken = async (req: Request, res: Response) => {
       data: { pushToken },
     });
 
-  
+
     return res.status(200).json({ success: true, user });
   } catch (error: any) {
     console.error(error);

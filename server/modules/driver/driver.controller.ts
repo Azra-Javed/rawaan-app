@@ -275,8 +275,11 @@ export const getAllRides = async (req: Request, res: Response) => {
 // @route  PUT /api/v1/driver/me
 export const getDriverInfo = async (req: Request, res: Response) => {
   try {
-    const driver = req.driver;
-
+    const driverId = req.driver?.driverId;
+    const driver = await prisma.driver.findUnique({
+      where: { id: driverId },
+    });
+    
     res.status(200).json({
       success: true,
       driver,
@@ -324,6 +327,133 @@ export const rejectRide = async (req: Request, res: Response) => {
     return res.status(500).json({
       success: false,
       message: error.message,
+    });
+  }
+};
+
+
+//@desc: update driver rating and ride rating
+//@route: PUT /api/v1/driver/rating
+
+export const rateDriver = async (req: Request, res: Response) => {
+  try {
+    
+    const { rating, rideId} = req.body;
+
+    const numericRating = Number(rating);
+    const ride = await prisma.rides.findUnique({
+      where: {
+        id: rideId,
+      },
+    });
+
+    if (!ride) {
+      return res.status(404).json({
+        success: false,
+        message: "Ride not found",
+      });
+    }
+
+    // Ride must be completed
+    if (ride.status.toLowerCase() !== "completed") {
+      return res.status(400).json({
+        success: false,
+        message: "You can only rate a completed ride",
+      });
+    }
+
+   
+    // Prevent duplicate rating
+    if (ride.rating !== null) {
+      return res.status(400).json({
+        success: false,
+        message: "You have already rated this ride",
+      });
+    }
+
+
+    const driver = await prisma.driver.findUnique({
+      where: {
+        id: ride.driverId,
+      },
+    });
+
+    if (!driver) {
+      return res.status(404).json({
+        success: false,
+        message: "Driver not found",
+      });
+    }
+
+    
+    // Calculate new driver rating
+    
+    const ratedRides = await prisma.rides.findMany({
+      where: {
+        driverId: ride.driverId,
+        rating: {
+          not: null,
+        },
+      },
+      select: {
+        rating: true,
+      },
+    });
+
+    const oldRatingTotal = ratedRides.reduce(
+      (total, currentRide) =>
+        total + Number(currentRide.rating || 0),
+      0
+    );
+
+    const oldRatingCount = ratedRides.length;
+
+    const newRatingTotal = oldRatingTotal + numericRating;
+
+    const newRatingCount = oldRatingCount + 1;
+
+    const newDriverRating =
+      newRatingTotal / newRatingCount;
+
+    
+
+    const updatedRide = await prisma.rides.update({
+      where: {
+        id: rideId,
+      },
+      data: {
+        rating: numericRating,
+      },
+    });
+
+    const updatedDriver = await prisma.driver.update({
+      where: {
+        id: ride.driverId,
+      },
+      data: {
+        ratings: Number(newDriverRating.toFixed(2)),
+      },
+    });
+
+    
+    return res.status(200).json({
+      success: true,
+      message: "Driver rated successfully",
+      data: {
+        ride: updatedRide,
+        driver: {
+          id: updatedDriver.id,
+          name: updatedDriver.name,
+          ratings: updatedDriver.ratings,
+        },
+      },
+    });
+  } catch (error) {
+    console.error("Rate driver error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to submit driver rating",
     });
   }
 };

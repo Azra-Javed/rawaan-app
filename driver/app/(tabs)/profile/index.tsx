@@ -1,4 +1,4 @@
-import Input from "@/components/common/input";
+
 import ScreenHeader from "@/components/common/screen-header";
 import { useDriver } from "@/hooks/useDriver";
 import color from "@/themes/app.colors";
@@ -8,18 +8,23 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
 import {
+  ActivityIndicator,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+
 export default function Profile() {
   const { driver, loading } = useDriver();
 
   if (loading) {
-    return;
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={color.tealDark} />
+      </View>
+    );
   }
 
   const handleLogout = async () => {
@@ -35,12 +40,14 @@ export default function Profile() {
       .join("")
       .toUpperCase() || "?";
 
+  const isActive = driver?.status?.toLowerCase() === "active";
+
   return (
     <View style={styles.screen}>
       <ScreenHeader
-        eyebrow="RAWAAN ACCOUNT"
+        eyebrow="ACCOUNT"
         title="Profile"
-        subtitle="Manage your account details"
+        subtitle="Driver account"
         icon="person-outline"
         showDots
       />
@@ -49,118 +56,302 @@ export default function Profile() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.body}
       >
-        <View style={styles.summaryCard}>
-          <View style={styles.avatarWrapper}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initials}</Text>
+        {/* ================= DRIVER CARD ================= */}
+
+        <View style={styles.driverCard}>
+          <View style={styles.driverTop}>
+            <View style={styles.avatarContainer}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{initials}</Text>
+              </View>
+
+              <View
+                style={[
+                  styles.onlineDot,
+                  {
+                    backgroundColor: isActive ? "#4C9A6A" : "#B77900",
+                  },
+                ]}
+              />
             </View>
 
-            <View style={styles.onlineDot} />
-          </View>
+            <View style={styles.driverInfo}>
+              <View style={styles.nameRow}>
+                <Text style={styles.driverName}>
+                  {driver?.name || "Driver"}
+                </Text>
 
-          <View style={styles.summaryTextContainer}>
-            <Text style={styles.summaryLabel}>SIGNED IN AS</Text>
+                <Ionicons
+                  name="checkmark-circle"
+                  size={18}
+                  color={color.tealDark}
+                />
+              </View>
 
-            <Text style={styles.summaryName}>{driver?.name || "driver"}</Text>
-
-            <Text style={styles.summaryEmail}>{driver?.email}</Text>
-          </View>
-
-          <View style={styles.profileBadge}>
-            <Ionicons name="checkmark" size={15} color={color.tealDark} />
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <View style={styles.sectionTitleContainer}>
-              <Text style={styles.sectionEyebrow}>PERSONAL INFO</Text>
-
-              <Text style={styles.sectionTitle}>Account details</Text>
-
-              <Text style={styles.sectionSubtitle}>
-                Your personal information
+              <Text style={styles.driverEmail}>
+                {driver?.email || "No email"}
               </Text>
-            </View>
 
-            <View style={styles.sectionIcon}>
+              <View style={styles.activeRow}>
+               
+
+                <Text
+                  style={[
+                    styles.activeText,
+                    {
+                      color: isActive ? "#357A4F" : "#A45B00",
+                    },
+                  ]}
+                >
+                  {driver?.status || "Unknown"}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.vehicleStrip}>
+            <View style={styles.vehicleIcon}>
               <Ionicons
-                name="person-circle-outline"
-                size={21}
+                name="car-sport-outline"
+                size={19}
                 color={color.tealDark}
               />
             </View>
-          </View>
 
-          <View style={styles.detailsCard}>
-            <Input
-              title="Name"
-              value={driver?.name}
-              onChangeText={() => console.log("")}
-              placeholder={driver?.name!}
-            />
+            <View style={styles.vehicleInfo}>
+              <Text style={styles.vehicleType}>
+                {driver?.vehicle_type || "Vehicle"}
+              </Text>
 
-            <Input
-              title="Email Address"
-              value={driver?.email}
-              onChangeText={() => console.log("")}
-              placeholder={driver?.email!}
-              disabled={true}
-            />
+              <Text style={styles.vehicleDetails}>
+                {driver?.vehicle_color || "Unknown color"} •{" "}
+                {driver?.registeration_number || "No registration"}
+              </Text>
+            </View>
 
-            <Input
-              title="Phone Number"
-              value={driver?.phone_number}
-              onChangeText={() => console.log("")}
-              placeholder={driver?.phone_number!}
-              disabled={true}
+            <Ionicons
+              name="chevron-forward"
+              size={17}
+              color={color.textMuted}
             />
           </View>
         </View>
 
-        <View style={styles.infoCard}>
-          <View style={styles.infoIcon}>
+        {/* ================= STATS ================= */}
+
+        <View style={styles.statsCard}>
+          <StatItem
+            icon="car-outline"
+            value={String(driver?.totalRides ?? 0)}
+            label="RIDES"
+          />
+
+          <View style={styles.statDivider} />
+
+          <StatItem
+            icon="cash-outline"
+            value={`Rs. ${Number(
+              driver?.totalEarning ?? 0
+            ).toLocaleString()}`}
+            label="EARNINGS"
+          />
+
+          <View style={styles.statDivider} />
+
+          <StatItem
+            icon="close-circle-outline"
+            value={String(driver?.cancelRides ?? 0)}
+            label="CANCELLED"
+          />
+        </View>
+
+        {/* ================= DRIVER DETAILS ================= */}
+
+        <View style={styles.sectionHeader}>
+          <View>
+            <Text style={styles.sectionEyebrow}>DRIVER DETAILS</Text>
+            <Text style={styles.sectionTitle}>Information</Text>
+          </View>
+
+          <View style={styles.headerIcon}>
             <Ionicons
-              name="shield-checkmark-outline"
-              size={21}
+              name="person-outline"
+              size={18}
               color={color.tealDark}
             />
           </View>
+        </View>
 
-          <View style={styles.infoContent}>
-            <Text style={styles.infoTitle}>Your account is secure</Text>
+        <View style={styles.detailsCard}>
+          <DetailRow
+            icon="call-outline"
+            label="Phone"
+            value={driver?.phone_number || "Not available"}
+          />
 
-            <Text style={styles.infoText}>
-              Your account information is securely stored and protected.
-            </Text>
+          <DetailRow
+            icon="card-outline"
+            label="Driving license"
+            value={driver?.driving_license || "Not available"}
+          />
+
+          <DetailRow
+            icon="flag-outline"
+            label="Country"
+            value={driver?.country || "Pakistan"}
+            last
+          />
+        </View>
+
+        {/* ================= VEHICLE DETAILS ================= */}
+
+        <View style={styles.sectionHeader}>
+          <View>
+            <Text style={styles.sectionEyebrow}>VEHICLE</Text>
+            <Text style={styles.sectionTitle}>Registered vehicle</Text>
+          </View>
+
+          <View style={styles.headerIcon}>
+            <Ionicons
+              name="car-outline"
+              size={18}
+              color={color.tealDark}
+            />
           </View>
         </View>
 
-        <TouchableOpacity
-          style={styles.logoutCard}
-          onPress={handleLogout}
-          activeOpacity={0.85}
-        >
-          <View style={styles.logoutIcon}>
-            <Ionicons name="log-out-outline" size={21} color={color.coral} />
+        <View style={styles.detailsCard}>
+          <DetailRow
+            icon="car-sport-outline"
+            label="Type"
+            value={driver?.vehicle_type || "Not available"}
+          />
+
+          <DetailRow
+            icon="color-palette-outline"
+            label="Color"
+            value={driver?.vehicle_color || "Not available"}
+          />
+
+          <DetailRow
+            icon="document-text-outline"
+            label="Registration"
+            value={driver?.registeration_number || "Not available"}
+          />
+
+          <DetailRow
+            icon="calendar-outline"
+            label="Registered"
+            value={driver?.registeration_date || "Not available"}
+            last
+          />
+        </View>
+
+        {/* ================= RATING ================= */}
+
+        <View style={styles.ratingCard}>
+          <View style={styles.ratingIcon}>
+            <Ionicons name="star" size={19} color="#B77900" />
           </View>
 
-          <View style={styles.logoutContent}>
-            <Text style={styles.logoutTitle}>Log out</Text>
+          <View style={styles.ratingContent}>
+            <Text style={styles.ratingTitle}>Driver rating</Text>
 
-            <Text style={styles.logoutSubtitle}>
-              Sign out of your account on this device.
+            <Text style={styles.ratingSubtitle}>
+              {driver?.ratings ?? 0} ratings received
             </Text>
           </View>
 
-          <View style={styles.logoutArrow}>
-            <Ionicons name="chevron-forward" size={18} color={color.coral} />
-          </View>
+          <Text style={styles.ratingValue}>
+            {driver?.ratings ?? 0}
+          </Text>
+        </View>
+
+        {/* ================= LOGOUT ================= */}
+
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={handleLogout}
+          activeOpacity={0.8}
+        >
+          <Ionicons
+            name="log-out-outline"
+            size={20}
+            color={color.coral}
+          />
+
+          <Text style={styles.logoutText}>Log out</Text>
+
+          <Ionicons
+            name="chevron-forward"
+            size={17}
+            color={color.coral}
+          />
         </TouchableOpacity>
       </ScrollView>
     </View>
   );
 }
+
+
+function StatItem({
+  icon,
+  value,
+  label,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  value: string;
+  label: string;
+}) {
+  return (
+    <View style={styles.statItem}>
+      <Ionicons name={icon} size={18} color={color.tealDark} />
+
+      <Text style={styles.statValue}>{value}</Text>
+
+      <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+
+
+function DetailRow({
+  icon,
+  label,
+  value,
+  last = false,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value: string;
+  last?: boolean;
+}) {
+  return (
+    <View
+      style={[
+        styles.detailRow,
+        !last && styles.detailBorder,
+      ]}
+    >
+      <View style={styles.detailIcon}>
+        <Ionicons name={icon} size={17} color={color.tealDark} />
+      </View>
+
+      <View style={styles.detailContent}>
+        <Text style={styles.detailLabel}>{label}</Text>
+
+        <Text style={styles.detailValue} numberOfLines={2}>
+          {value}
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+
+  //  STYLES
+
 
 const styles = StyleSheet.create({
   screen: {
@@ -168,127 +359,51 @@ const styles = StyleSheet.create({
     backgroundColor: color.ivory,
   },
 
-  header: {
-    paddingTop: windowHeight(52),
-    paddingHorizontal: windowWidth(20),
-    paddingBottom: windowHeight(22),
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    overflow: "hidden",
-  },
-
-  headerGlow: {
-    position: "absolute",
-    width: 180,
-    height: 180,
-    borderRadius: 90,
-    right: -55,
-    top: -70,
-    backgroundColor: color.amber,
-    opacity: 0.12,
-  },
-
-  headerTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  headerIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 15,
-    backgroundColor: color.white,
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: color.ivory,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 13,
-  },
-
-  headerTextContainer: {
-    flex: 1,
-  },
-
-  eyebrow: {
-    color: color.amber,
-    fontSize: 10,
-    fontWeight: "800",
-    letterSpacing: 2,
-    marginBottom: 3,
-  },
-
-  headerTitle: {
-    fontSize: 25,
-    fontWeight: "800",
-    color: color.white,
-  },
-
-  headerSubtitle: {
-    fontSize: 13,
-    color: "#D7E6E5",
-    marginTop: 3,
-  },
-
-  routeAccent: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: windowHeight(18),
-  },
-
-  routeDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: color.amber,
-  },
-
-  routeDotSmall: {
-    width: 5,
-    height: 5,
-    opacity: 0.65,
-  },
-
-  routeLine: {
-    width: 42,
-    height: 2,
-    backgroundColor: color.amber,
-    opacity: 0.45,
-    marginHorizontal: 7,
   },
 
   body: {
     paddingHorizontal: windowWidth(18),
-    paddingTop: windowHeight(22),
-    paddingBottom: windowHeight(45),
+    paddingTop: windowHeight(18),
+    paddingBottom: windowHeight(40),
   },
 
-  summaryCard: {
-    flexDirection: "row",
-    alignItems: "center",
+  /* ================= DRIVER CARD ================= */
+
+  driverCard: {
     backgroundColor: color.white,
-    borderRadius: 20,
-    padding: windowWidth(16),
+    borderRadius: 22,
+    padding: windowWidth(15),
     borderWidth: 1,
     borderColor: color.border,
-    marginBottom: windowHeight(28),
+    marginBottom: windowHeight(12),
   },
 
-  avatarWrapper: {
+  driverTop: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  avatarContainer: {
     position: "relative",
-    marginRight: 14,
+    marginRight: 12,
   },
 
   avatar: {
-    width: 58,
-    height: 58,
+    width: 61,
+    height: 61,
     borderRadius: 19,
     backgroundColor: color.tealSoft,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#D5E8E6",
   },
 
   avatarText: {
-    fontSize: 20,
+    fontSize: 21,
     fontWeight: "800",
     color: color.tealDark,
   },
@@ -300,178 +415,272 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     right: -1,
     bottom: -1,
-    backgroundColor: "#4C9A6A",
     borderWidth: 2,
     borderColor: color.white,
   },
 
-  summaryTextContainer: {
+  driverInfo: {
     flex: 1,
   },
 
-  summaryLabel: {
-    fontSize: 9,
-    fontWeight: "800",
-    letterSpacing: 1.2,
-    color: color.textMuted,
-    marginBottom: 3,
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
   },
 
-  summaryName: {
-    fontSize: 17,
+  driverName: {
+    fontSize: 18,
     fontWeight: "800",
     color: color.textDark,
   },
 
-  summaryEmail: {
-    fontSize: 12,
+  driverEmail: {
+    fontSize: 11,
     color: color.textMuted,
-    marginTop: 3,
+    marginTop: 2,
   },
 
-  profileBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 10,
+  activeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+  },
+
+  activeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 5,
+  },
+
+  activeText: {
+    fontSize: 10,
+    fontWeight: "800",
+    textTransform: "capitalize",
+  },
+
+  vehicleStrip: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 15,
+    paddingTop: 13,
+    borderTopWidth: 1,
+    borderTopColor: color.border,
+  },
+
+  vehicleIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
     backgroundColor: color.tealSoft,
     alignItems: "center",
     justifyContent: "center",
+    marginRight: 10,
   },
 
-  section: {
-    marginBottom: windowHeight(20),
+  vehicleInfo: {
+    flex: 1,
   },
+
+  vehicleType: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: color.textDark,
+    textTransform: "capitalize",
+  },
+
+  vehicleDetails: {
+    fontSize: 10,
+    color: color.textMuted,
+    marginTop: 2,
+  },
+
+  /* ================= STATS ================= */
+
+  statsCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: color.white,
+    borderRadius: 18,
+    paddingVertical: 15,
+    paddingHorizontal: 5,
+    borderWidth: 1,
+    borderColor: color.border,
+    marginBottom: windowHeight(24),
+  },
+
+  statItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+
+  statValue: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: color.textDark,
+    marginTop: 5,
+  },
+
+  statLabel: {
+    fontSize: 7,
+    fontWeight: "800",
+    letterSpacing: 1,
+    color: color.textMuted,
+    marginTop: 2,
+  },
+
+  statDivider: {
+    width: 1,
+    height: 35,
+    backgroundColor: color.border,
+  },
+
+  /* ================= SECTION ================= */
 
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: windowHeight(15),
-  },
-
-  sectionTitleContainer: {
-    flex: 1,
+    marginBottom: 10,
+    marginTop: 2,
   },
 
   sectionEyebrow: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: "800",
-    letterSpacing: 1.5,
+    letterSpacing: 1.4,
     color: color.teal,
-    marginBottom: 3,
+    marginBottom: 2,
   },
 
   sectionTitle: {
-    fontSize: 19,
+    fontSize: 17,
     fontWeight: "800",
     color: color.textDark,
   },
 
-  sectionSubtitle: {
-    fontSize: 12,
-    color: color.textMuted,
-    marginTop: 3,
-  },
-
-  sectionIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 13,
+  headerIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 11,
     backgroundColor: color.tealSoft,
     alignItems: "center",
     justifyContent: "center",
   },
+
+  /* ================= DETAILS ================= */
 
   detailsCard: {
     backgroundColor: color.white,
     borderRadius: 18,
-    padding: windowWidth(15),
+    paddingHorizontal: 14,
     borderWidth: 1,
     borderColor: color.border,
+    marginBottom: windowHeight(22),
   },
 
-  infoCard: {
+  detailRow: {
     flexDirection: "row",
     alignItems: "center",
+    minHeight: 60,
+    paddingVertical: 9,
+  },
+
+  detailBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: color.border,
+  },
+
+  detailIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 11,
     backgroundColor: color.tealSoft,
-    borderRadius: 17,
-    padding: windowWidth(14),
-    marginBottom: windowHeight(20),
-    borderWidth: 1,
-    borderColor: "#D6E8E6",
-  },
-
-  infoIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 13,
-    backgroundColor: color.white,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 11,
+    marginRight: 10,
   },
 
-  infoContent: {
+  detailContent: {
     flex: 1,
   },
 
-  infoTitle: {
-    fontSize: 13,
+  detailLabel: {
+    fontSize: 8,
     fontWeight: "800",
-    color: color.tealDark,
-  },
-
-  infoText: {
-    fontSize: 11,
+    letterSpacing: 1,
     color: color.textMuted,
-    marginTop: 3,
-    lineHeight: 16,
+    marginBottom: 3,
   },
 
-  logoutCard: {
+  detailValue: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: color.textDark,
+  },
+
+  /* ================= RATING ================= */
+
+  ratingCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: color.white,
-    borderRadius: 18,
-    padding: windowWidth(14),
-    borderWidth: 1,
-    borderColor: "#F0D8D4",
+    backgroundColor: "#FFF8E8",
+    borderRadius: 17,
+    padding: 13,
+    marginBottom: windowHeight(12),
   },
 
-  logoutIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 13,
-    backgroundColor: "#FDECEA",
+  ratingIcon: {
+    width: 39,
+    height: 39,
+    borderRadius: 12,
+    backgroundColor: "#FFECC2",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 11,
+    marginRight: 10,
   },
 
-  logoutContent: {
+  ratingContent: {
     flex: 1,
   },
 
-  logoutTitle: {
-    fontSize: 14,
+  ratingTitle: {
+    fontSize: 12,
     fontWeight: "800",
     color: color.textDark,
   },
 
-  logoutSubtitle: {
+  ratingSubtitle: {
     fontSize: 10,
     color: color.textMuted,
-    marginTop: 3,
-    lineHeight: 15,
+    marginTop: 2,
   },
 
-  logoutArrow: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: "#FDECEA",
+  ratingValue: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#A66B00",
+  },
+
+  /* ================= LOGOUT ================= */
+
+  logoutButton: {
+    height: 54,
+    borderRadius: 16,
+    backgroundColor: color.white,
+    borderWidth: 1,
+    borderColor: "#F0D8D4",
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    marginLeft: 8,
+    paddingHorizontal: 15,
+  },
+
+  logoutText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "800",
+    color: color.coral,
+    marginLeft: 10,
   },
 });

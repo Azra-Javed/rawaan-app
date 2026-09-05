@@ -5,6 +5,7 @@ import {
   Modal,
   TouchableOpacity,
   Platform,
+  ScrollView,
 } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import Header from "@/components/common/header";
@@ -83,7 +84,8 @@ const HomeScreen = () => {
   const [isOn, setIsOn] = useState<boolean>(false);
   const [loading, setloading] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [driver, setDriver] = useState<any>(null);
+  const {driver} = useDriver();
+  console.log("driver data in home screen", driver);
   // Whether the WebSocket connection is currently open -- used to gate location broadcasts
   const [wsConnected, setWsConnected] = useState(false);
 
@@ -620,273 +622,401 @@ const HomeScreen = () => {
   //get recent rides
 
   useEffect(() => {
-    const getRecentRides = async () => {
-      const res = await api.get(`/driver/get-rides`);
-      setrecentRides(res.data.rides);
-    };
+   const getRecentRides = async () => {
+  const res = await api.get(`/driver/get-rides`);
 
-    const fetchDriverInfo = async () => {
-      try {
-        const response = await api.get("/driver/me");
-        if (response.data.success) {
-          const driverData = response.data.driver;
-          setDriver(driverData);
-        }
-      }
-      catch (error) {
-        console.error("Error fetching driver info:", error);
-      }
-    }
-    fetchDriverInfo();
+  const recentRide = [...res.data.rides]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() -
+        new Date(a.createdAt).getTime()
+    )
+    .slice(0, 1);
+
+  setrecentRides(recentRide);
+};
     getRecentRides();
   }, []);
 
-  return (
-    <View style={[external.fx_1, { backgroundColor: color.ivory }]}>
-      <View style={styles.spaceBelow}>
-        {/* Driver header and online status */}
-        <View style={styles.headerWrapper}>
-          <Header isOn={isOn} toggleSwitch={() => handleStatusChange()} />
-        </View>
+ return (
+  <View
+    style={[
+      external.fx_1,
+      {
+        flex: 1,
+        backgroundColor: color.ivory,
+      },
+    ]}
+  >
+    {/* ========================================================= */}
+    {/* HEADER - FIXED */}
+    {/* ========================================================= */}
 
-        {/* Dashboard cards */}
-        <View style={styles.dashboardSection}>
-          <View style={styles.sectionHeader}>
-            <View>
-              <Text style={styles.sectionTitle}>Driver dashboard</Text>
+    <View style={styles.headerWrapper}>
+      <Header
+        isOn={isOn}
+        toggleSwitch={() => handleStatusChange()}
+      />
+    </View>
 
-              <Text style={styles.sectionSubtitle}>
-                Your ride activity at a glance
-              </Text>
-            </View>
+    {/* ========================================================= */}
+    {/* MAIN CONTENT - ONLY ONE SCROLLABLE CONTAINER */}
+    {/* ========================================================= */}
 
-            <View style={styles.sectionIcon}>
-              <Ionicons
-                name="speedometer-outline"
-                size={19}
-                color={color.nightIndigo}
-              />
-            </View>
+    <ScrollView
+      style={{
+        flex: 1,
+      }}
+      contentContainerStyle={{
+        paddingBottom: windowHeight(40),
+      }}
+      showsVerticalScrollIndicator={false}
+      bounces={true}
+      nestedScrollEnabled={false}
+      keyboardShouldPersistTaps="handled"
+    >
+      {/* ===================================================== */}
+      {/* DRIVER DASHBOARD */}
+      {/* ===================================================== */}
+
+      <View style={styles.dashboardSection}>
+        {/* Section Header */}
+        <View style={styles.sectionHeader}>
+          <View>
+            <Text style={styles.sectionTitle}>
+              Driver dashboard
+            </Text>
+
+            <Text style={styles.sectionSubtitle}>
+              Your ride activity at a glance
+            </Text>
           </View>
 
-          <FlatList
-            data={rideData}
-            numColumns={2}
-            columnWrapperStyle={styles.columnWrapper}
-            renderItem={({ item }) => (
-              <RenderRideItem item={item} colors={colors} driver={driver}/>
-            )}
-          />
+          <View style={styles.sectionIcon}>
+            <Ionicons
+              name="speedometer-outline"
+              size={19}
+              color={color.nightIndigo}
+            />
+          </View>
         </View>
 
-        {/* Recent rides */}
-        <View style={styles.rideContainer}>
-          <View style={styles.rideHeader}>
-            <View>
-              <Text
-                style={styles.rideTitle}
+        
+        {/* DASHBOARD CARDS */}
+        
 
-              >
-                Recent rides
-              </Text>
-
-              <Text style={styles.rideSubtitle}>
-                Your latest passenger journeys
-              </Text>
-            </View>
-
-            <View style={styles.rideIcon}>
-              <Ionicons
-                name="car-outline"
-                size={19}
-                color={color.nightIndigo}
-              />
-            </View>
-          </View>
-
-          <FlatList
-            data={recentRides}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <RideCard item={item} />}
-            showsVerticalScrollIndicator={false}
-          />
+        <View style={styles.statsGrid}>
+          {rideData.map((item: any) => (
+            <RenderRideItem
+              key={item.id}
+              item={item}
+              colors={colors}
+              driver={driver}
+            />
+          ))}
         </View>
       </View>
 
-      <Modal
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={handleClose}
+      {/* ===================================================== */}
+      {/* RECENT RIDES */}
+      {/* ===================================================== */}
+
+      <View style={styles.rideContainer}>
+        {/* Recent Ride Header */}
+        <View style={styles.rideHeader}>
+          <View>
+            <Text style={styles.rideTitle}>
+              Recent rides
+            </Text>
+
+            <Text style={styles.rideSubtitle}>
+              Your latest passenger journey
+            </Text>
+          </View>
+
+          <View style={styles.rideIcon}>
+            <Ionicons
+              name="car-outline"
+              size={19}
+              color={color.nightIndigo}
+            />
+          </View>
+        </View>
+
+        
+        {/* ONLY THE LATEST RIDE */}
+        
+
+        {recentRides.length > 0 ? (
+          <RideCard item={recentRides[0]} />
+        ) : (
+          <View style={styles.emptyRide}>
+            <View style={styles.emptyRideIcon}>
+              <Ionicons
+                name="car-outline"
+                size={22}
+                color={color.slateTeal}
+              />
+            </View>
+
+            <Text style={styles.emptyRideTitle}>
+              No rides yet
+            </Text>
+
+            <Text style={styles.emptyRideText}>
+              Your latest ride will appear here.
+            </Text>
+          </View>
+        )}
+      </View>
+    </ScrollView>
+
+    {/* ========================================================= */}
+    {/* RIDE REQUEST MODAL */}
+    {/* ========================================================= */}
+
+    <Modal
+      transparent={true}
+      visible={isModalVisible}
+      onRequestClose={handleClose}
+    >
+      <TouchableOpacity
+        style={styles.modalBackground}
+        activeOpacity={1}
       >
-        <TouchableOpacity style={styles.modalBackground} activeOpacity={1}>
-          <TouchableOpacity style={styles.modalContainer} activeOpacity={1}>
-            {/* Ride request heading */}
-            <View style={styles.modalHeader}>
-              <View style={styles.modalIcon}>
+        <TouchableOpacity
+          style={styles.modalContainer}
+          activeOpacity={1}
+        >
+          
+          {/* RIDE REQUEST HEADING */}
+          
+
+          <View style={styles.modalHeader}>
+            <View style={styles.modalIcon}>
+              <Ionicons
+                name="car-outline"
+                size={21}
+                color={color.routeAmber}
+              />
+            </View>
+
+            <View style={styles.modalHeaderText}>
+              <Text style={styles.modalTitle}>
+                New ride request
+              </Text>
+
+              <Text style={styles.modalSubtitle}>
+                A passenger is waiting for your response
+              </Text>
+            </View>
+
+            <View style={styles.requestDot} />
+          </View>
+
+          
+          {/* MAP */}
+          
+
+          <View style={styles.mapWrapper}>
+            <MapView
+              key={
+                isModalVisible
+                  ? "map-visible"
+                  : "map-hidden"
+              }
+              style={styles.map}
+              region={region}
+              onRegionChangeComplete={(newRegion) =>
+                setRegion(newRegion)
+              }
+              rotateEnabled={true}
+              zoomEnabled={true}
+              zoomControlEnabled={true}
+              showsCompass={true}
+              pitchEnabled={true}
+              scrollEnabled={true}
+            >
+              <UrlTile
+                urlTemplate={`https://api.maptiler.com/maps/positron-v4/256/{z}/{x}/{y}.png?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
+                maximumZ={20}
+              />
+
+              {pickup && (
+                <Marker
+                  coordinate={pickup}
+                  title="Pickup"
+                />
+              )}
+
+              {dropoff && (
+                <Marker
+                  coordinate={dropoff}
+                  title="Dropoff"
+                  pinColor="red"
+                />
+              )}
+
+              {routeCoords.length > 0 && (
+                <Polyline
+                  coordinates={routeCoords}
+                  strokeWidth={4}
+                  strokeColor={color.buttonBg}
+                />
+              )}
+            </MapView>
+          </View>
+
+          
+          {/* MAP ATTRIBUTION */}
+          
+
+          <View style={styles.mapAttribution}>
+            <Text style={styles.attributionText}>
+              © MapTiler © OpenStreetMap contributors
+            </Text>
+          </View>
+
+          
+          {/* ROUTE */}
+          
+
+          <View style={styles.locationContainer}>
+            <View style={styles.leftView}>
+              <View style={styles.locationIconBox}>
+                <LocationIcon color={color.buttonBg} />
+              </View>
+
+              <View
+                style={[
+                  styles.verticaldot,
+                  {
+                    borderColor: color.routeAmber,
+                  },
+                ]}
+              />
+
+              <View style={styles.locationIconBox}>
+                <Gps colors={color.nightIndigo} />
+              </View>
+            </View>
+
+            <View style={styles.rightView}>
+              <Text
+                style={styles.locationLabel}
+                numberOfLines={1}
+              >
+                PICKUP
+              </Text>
+
+              <Text
+                style={styles.pickup}
+                numberOfLines={2}
+              >
+                {currentLocationName ||
+                  "Pickup location"}
+              </Text>
+
+              <View style={styles.border} />
+
+              <Text
+                style={styles.locationLabel}
+                numberOfLines={1}
+              >
+                DROPOFF
+              </Text>
+
+              <Text
+                style={styles.drop}
+                numberOfLines={2}
+              >
+                {destinationLocationName ||
+                  "Dropoff location"}
+              </Text>
+            </View>
+          </View>
+
+          
+          {/* RIDE INFORMATION */}
+          
+
+          <View style={styles.infoContainer}>
+            {/* Distance */}
+            <View style={styles.infoCard}>
+              <View style={styles.infoIcon}>
                 <Ionicons
-                  name="car-outline"
-                  size={21}
+                  name="navigate-outline"
+                  size={17}
+                  color={color.buttonBg}
+                />
+              </View>
+
+              <View>
+                <Text style={styles.infoLabel}>
+                  Distance
+                </Text>
+
+                <Text style={styles.infoValue}>
+                  {distance !== null
+                    ? `${distance} km`
+                    : "--"}
+                </Text>
+              </View>
+            </View>
+
+            {/* Amount */}
+            <View style={styles.infoCard}>
+              <View style={styles.infoIconAmber}>
+                <Ionicons
+                  name="cash-outline"
+                  size={17}
                   color={color.routeAmber}
                 />
               </View>
 
-              <View style={styles.modalHeaderText}>
-                <Text style={styles.modalTitle}>New ride request</Text>
-
-                <Text style={styles.modalSubtitle}>
-                  A passenger is waiting for your response
-                </Text>
-              </View>
-
-              <View style={styles.requestDot} />
-            </View>
-
-            {/* Map */}
-            <View style={styles.mapWrapper}>
-              <MapView
-                key={isModalVisible ? "map-visible" : "map-hidden"}
-                style={styles.map}
-                region={region}
-                onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
-                rotateEnabled={true}
-                zoomEnabled={true}
-                zoomControlEnabled={true}
-                showsCompass={true}
-                pitchEnabled={true}
-                scrollEnabled={true}
-              >
-                <UrlTile
-                  urlTemplate={`https://api.maptiler.com/maps/positron-v4/256/{z}/{x}/{y}.png?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
-                  maximumZ={20}
-                />
-
-                {pickup && <Marker coordinate={pickup} title="Pickup" />}
-
-                {dropoff && (
-                  <Marker coordinate={dropoff} title="Dropoff" pinColor="red" />
-                )}
-
-                {routeCoords.length > 0 && (
-                  <Polyline
-                    coordinates={routeCoords}
-                    strokeWidth={4}
-                    strokeColor={color.buttonBg}
-                  />
-                )}
-              </MapView>
-            </View>
-
-            {/* Map attribution */}
-            <View style={styles.mapAttribution}>
-              <Text style={styles.attributionText}>
-                © MapTiler © OpenStreetMap contributors
-              </Text>
-            </View>
-
-            {/* Route */}
-            <View style={styles.locationContainer}>
-              <View style={styles.leftView}>
-                <View style={styles.locationIconBox}>
-                  <LocationIcon color={color.buttonBg} />
-                </View>
-
-                <View
-                  style={[
-                    styles.verticaldot,
-                    { borderColor: color.routeAmber },
-                  ]}
-                />
-
-                <View style={styles.locationIconBox}>
-                  <Gps colors={color.nightIndigo} />
-                </View>
-              </View>
-
-              <View style={styles.rightView}>
-                <Text style={styles.locationLabel} numberOfLines={1}>
-                  PICKUP
+              <View>
+                <Text style={styles.infoLabel}>
+                  Amount
                 </Text>
 
-                <Text style={styles.pickup} numberOfLines={2}>
-                  {currentLocationName || "Pickup location"}
-                </Text>
-
-                <View style={styles.border} />
-
-                <Text style={styles.locationLabel} numberOfLines={1}>
-                  DROPOFF
-                </Text>
-
-                <Text style={styles.drop} numberOfLines={2}>
-                  {destinationLocationName || "Dropoff location"}
+                <Text style={styles.infoValue}>
+                  {distance !== null && driver?.rate
+                    ? (
+                        distance *
+                        parseFloat(driver.rate)
+                      ).toFixed(2)
+                    : "0.00"}{" "}
+                  BDT
                 </Text>
               </View>
             </View>
+          </View>
 
-            {/* Ride information */}
-            <View style={styles.infoContainer}>
-              <View style={styles.infoCard}>
-                <View style={styles.infoIcon}>
-                  <Ionicons
-                    name="navigate-outline"
-                    size={17}
-                    color={color.buttonBg}
-                  />
-                </View>
+          
+          {/* ACTION BUTTONS */}
+          
 
-                <View>
-                  <Text style={styles.infoLabel}>Distance</Text>
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Decline"
+              onPress={rejectRideHandler}
+              width={windowWidth(120)}
+              height={windowHeight(32)}
+              backgroundColor="crimson"
+            />
 
-                  <Text style={styles.infoValue}>
-                    {distance !== null ? `${distance} km` : "--"}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.infoCard}>
-                <View style={styles.infoIconAmber}>
-                  <Ionicons
-                    name="cash-outline"
-                    size={17}
-                    color={color.routeAmber}
-                  />
-                </View>
-
-                <View>
-                  <Text style={styles.infoLabel}>Amount</Text>
-
-                  <Text style={styles.infoValue}>
-                    {distance !== null && driver?.rate
-                      ? (distance * parseFloat(driver.rate)).toFixed(2)
-                      : "0.00"}{" "}
-                    BDT
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            {/* Actions */}
-            <View style={styles.buttonContainer}>
-              <Button
-                title="Decline"
-                onPress={rejectRideHandler}
-                width={windowWidth(120)}
-                height={windowHeight(32)}
-                backgroundColor="crimson"
-              />
-
-              <Button
-                title="Accept"
-                onPress={acceptRideHandler}
-                width={windowWidth(120)}
-                height={windowHeight(32)}
-              />
-            </View>
-          </TouchableOpacity>
+            <Button
+              title="Accept"
+              onPress={acceptRideHandler}
+              width={windowWidth(120)}
+              height={windowHeight(32)}
+            />
+          </View>
         </TouchableOpacity>
-      </Modal>
-    </View>
-  );
+      </TouchableOpacity>
+    </Modal>
+  </View>
+);
 };
 
 export default HomeScreen;

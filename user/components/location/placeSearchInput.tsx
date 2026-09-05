@@ -24,9 +24,11 @@ import { fontSizes, windowHeight, windowWidth } from "@/themes/app.constant";
 type Props = {
   placeholder: string;
   onSelect: (place: PlaceResult) => void;
+  latitude?: number;
+  longitude?: number; 
 };
 
-export default function PlaceSearchInput({ placeholder, onSelect }: Props) {
+export default function PlaceSearchInput({ placeholder, onSelect ,longitude, latitude}: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlaceResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -52,7 +54,8 @@ export default function PlaceSearchInput({ placeholder, onSelect }: Props) {
 
     debounceTimer.current = setTimeout(async () => {
       try {
-        const places = await searchPlaces(text);
+        const places = await searchPlaces(text,  latitude,
+  longitude);
         setResults(places);
       } catch (error) {
         console.log("Photon place search error:", error);
@@ -141,9 +144,8 @@ export default function PlaceSearchInput({ placeholder, onSelect }: Props) {
         presentationStyle="fullScreen"
         onRequestClose={closeSearchModal}
       >
-        <SafeAreaView style={styles.modal}>
-          <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-
+        <View style={styles.modal}>
+      
           <View style={styles.header}>
             <TouchableOpacity
               onPress={closeSearchModal}
@@ -338,21 +340,15 @@ export default function PlaceSearchInput({ placeholder, onSelect }: Props) {
               </View>
             )}
           </View>
-        </SafeAreaView>
+         </View>
       </Modal>
     </View>
   );
 }
 
-/* ============================================================
-   STYLES
-============================================================ */
 
 const styles = StyleSheet.create({
-  /* ---------------------------------------------------------
-     MAIN
-  --------------------------------------------------------- */
-
+  
   wrapper: {
     width: "100%",
   },

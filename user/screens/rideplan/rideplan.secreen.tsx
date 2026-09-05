@@ -295,7 +295,7 @@ export default function RidePlanScreen() {
             notification?.request?.content?.data?.orderData;
 
           const payload =
-            typeof rawOrderData === "string"
+            typeof rawOrderData === "string" && rawOrderData.trim().startsWith("{")
               ? JSON.parse(rawOrderData)
               : rawOrderData;
 
@@ -896,8 +896,6 @@ export default function RidePlanScreen() {
                 </TouchableOpacity>
 
                 <View style={styles.planHeaderText}>
-                  <Text style={styles.planEyebrow}>RAWAAN</Text>
-
                   <Text style={styles.planTitle}>Plan your ride</Text>
 
                   <Text style={styles.planSubtitle}>
@@ -914,42 +912,6 @@ export default function RidePlanScreen() {
                 </View>
               </View>
 
-              {/* ==================================================
-                  PICKUP TIME
-              ================================================== */}
-
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={styles.pickupTimeCard}
-              >
-                <View style={styles.pickupTimeIcon}>
-                  <Ionicons
-                    name="flash-outline"
-                    size={16}
-                    color={color.amber}
-                  />
-                </View>
-
-                <View style={styles.pickupTimeContent}>
-                  <Text style={styles.pickupTimeLabel}>PICKUP TIME</Text>
-
-                  <Text style={styles.pickupTimeTitle}>Pick-up now</Text>
-                </View>
-
-                <Ionicons
-                  name="chevron-down"
-                  size={17}
-                  color={color.textMuted}
-                />
-              </TouchableOpacity>
-
-              {/* ==================================================
-                  LOCATION CARD
-                  NOTE: the destination row's dropdown is rendered as
-                  an absolutely-positioned overlay by PlaceSearchInput
-                  itself, so this card no longer needs manual zIndex /
-                  elevation stacking to keep suggestions visible.
-              ================================================== */}
 
               <View style={styles.locationCard}>
                 {/* PICKUP */}
@@ -997,6 +959,8 @@ export default function RidePlanScreen() {
 
                     <PlaceSearchInput
                       placeholder="Where to?"
+                      latitude={currentLocation?.latitude}
+                      longitude={currentLocation?.longitude}
                       onSelect={(place) => {
                         handlePlaceSelect(place);
                       }}
@@ -1005,52 +969,7 @@ export default function RidePlanScreen() {
                 </View>
               </View>
 
-              {/* ==================================================
-                  ROUTE INFORMATION
-              ================================================== */}
-
-              {distance !== null && travelTime !== null && (
-                <View style={styles.tripInfoCard}>
-                  <View style={styles.tripInfoItem}>
-                    <View style={styles.tripInfoIcon}>
-                      <Ionicons
-                        name="navigate-outline"
-                        size={16}
-                        color={color.tealDark}
-                      />
-                    </View>
-
-                    <View>
-                      <Text style={styles.tripInfoLabel}>DISTANCE</Text>
-
-                      <Text style={styles.tripInfoValue}>
-                        {distance.toFixed(1)} km
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.tripInfoDivider} />
-
-                  <View style={styles.tripInfoItem}>
-                    <View style={styles.tripInfoIcon}>
-                      <Ionicons
-                        name="time-outline"
-                        size={16}
-                        color={color.tealDark}
-                      />
-                    </View>
-
-                    <View>
-                      <Text style={styles.tripInfoLabel}>EST. TIME</Text>
-
-                      <Text style={styles.tripInfoValue}>
-                        {travelTime.toFixed(0)} min
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              )}
-
+             
               {/* ==================================================
                   CONNECTION STATUS
               ================================================== */}

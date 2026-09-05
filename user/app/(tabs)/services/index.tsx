@@ -225,7 +225,7 @@ export default function ServicesScreen() {
 
       {/* ---------------- Report modal ---------------- */}
       <Modal
-        transparent
+        transparent={true}  
         visible={reportModalVisible}
         animationType="slide"
         onRequestClose={() => setReportModalVisible(false)}

@@ -59,7 +59,7 @@ export default function History() {
         {recentRides?.length > 0 ? (
           <View style={styles.ridesContainer}>
             {recentRides.map((item: any, index: number) => (
-              <View key={index} style={styles.rideWrapper}>
+              <View key={index} >
                 <RideCard item={item} />
               </View>
             ))}

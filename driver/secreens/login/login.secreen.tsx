@@ -31,9 +31,8 @@ const LoginScreen = () => {
       const response = await api.post(`/driver/auth/send-otp`, {
         email: email.trim(),
       });
-
+       console.log("response", response.data);
       setLoading(false);
-
       toast.show(response.data.message || "OTP sent successfully", {
         type: "success",
       });

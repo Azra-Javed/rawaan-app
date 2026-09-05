@@ -1,3 +1,4 @@
+
 import { View, Text, StyleSheet } from "react-native";
 import {
   fontSizes,
@@ -7,16 +8,13 @@ import {
 import color from "@/themes/app.colors";
 import { rideIcons } from "@/configs/constants";
 
-
 export default function RenderRideItem({
-  item, colors, driver
+  item,
+  colors,
+  driver,
 }: any) {
-
-  const iconIndex =
-    parseInt(item.id) - 1;
-
-  const icon =
-    rideIcons[iconIndex];
+  const iconIndex = parseInt(item.id) - 1;
+  const icon = rideIcons[iconIndex];
 
   const getValue = () => {
     switch (item.title) {
@@ -37,149 +35,171 @@ export default function RenderRideItem({
     }
   };
 
+  const getIconBackground = () => {
+    switch (item.title) {
+      case "Total Earning":
+        return "#FFF4DC";
+
+      case "Cancel Ride":
+        return "#FDECEA";
+
+      case "Pending Ride":
+        return "#FFF4DC";
+
+      case "Complete Ride":
+      default:
+        return color.tealSoft;
+    }
+  };
+
+  const getIconColor = () => {
+    switch (item.title) {
+      case "Total Earning":
+        return "#B77900";
+
+      case "Cancel Ride":
+        return color.coral;
+
+      case "Pending Ride":
+        return "#B77900";
+
+      case "Complete Ride":
+      default:
+        return color.tealDark;
+    }
+  };
+
   return (
     <View style={styles.main}>
-      <View
-        style={[
-          styles.card,
-          {
-            borderColor:
-              color.ivoryLine,
-            backgroundColor:
-              color.white,
-          },
-        ]}
-      >
-        <View style={styles.cardTop}>
-          <Text style={styles.data}>
-            {getValue()}
-          </Text>
+      <View style={styles.card}>
 
+        {/* Icon */}
+        <View
+          style={[
+            styles.statIcon,
+            {
+              backgroundColor: getIconBackground(),
+            },
+          ]}
+        >
           <View
-            style={styles.iconContain}
+            style={[
+              styles.iconInner,
+              {
+                backgroundColor: getIconBackground(),
+              },
+            ]}
           >
             {icon}
           </View>
         </View>
 
-        <Text style={styles.title}>
+        {/* Value */}
+        <Text
+          style={[
+            styles.data,
+            item.title === "Total Earning" && styles.earning,
+          ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+        >
+          {getValue()}
+        </Text>
+
+        {/* Label */}
+        <Text style={styles.title} numberOfLines={1}>
           {item.title}
         </Text>
       </View>
-
-      <View
-        style={styles.bottomBorder}
-      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   main: {
-    flex: 1,
-    marginVertical:
-      windowHeight(5),
-    marginHorizontal:
-      windowWidth(5),
+    width: "48.2%",
+    marginBottom: windowHeight(10),
   },
 
   card: {
-    minHeight:
-      windowHeight(82),
-
     width: "100%",
 
-    paddingHorizontal:
-      windowWidth(12),
+    minHeight: windowHeight(115),
 
-    paddingVertical:
-      windowHeight(11),
+    backgroundColor: color.white,
+
+    borderRadius: 17,
+
+    padding: windowWidth(13),
 
     borderWidth: 1,
+    borderColor: color.border,
 
-    borderRadius: 16,
+    justifyContent: "flex-start",
 
     overflow: "hidden",
   },
 
-  cardTop: {
-    flexDirection: "row",
+  /* ================= ICON ================= */
 
-    alignItems:
-      "center",
+  statIcon: {
+    width: 40,
+    height: 40,
 
-    justifyContent:
-      "space-between",
+    borderRadius: 12,
+
+    alignItems: "center",
+    justifyContent: "center",
+
+    marginBottom: windowHeight(10),
   },
+
+  iconInner: {
+    width: 40,
+    height: 40,
+
+    borderRadius: 12,
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  /* ================= VALUE ================= */
 
   data: {
-    flex: 1,
+    color: color.textDark,
 
-    color:
-      color.nightIndigo,
+    fontFamily: "TT-Octosquares-Medium",
 
-    fontFamily:
-      "TT-Octosquares-Medium",
+    fontSize: fontSizes.FONT22,
 
-    fontSize:
-      fontSizes.FONT21,
+    lineHeight: windowHeight(25),
+
+    letterSpacing: -0.5,
   },
 
-  iconContain: {
-    width:
-      windowWidth(36),
+  earning: {
+    fontSize: fontSizes.FONT17,
 
-    height:
-      windowWidth(36),
-
-    borderRadius: 11,
-
-    justifyContent:
-      "center",
-
-    alignItems:
-      "center",
-
-    backgroundColor:
-      "#0F4C4A12",
-
-    borderWidth: 1,
-
-    borderColor:
-      color.ivoryLine,
+    letterSpacing: -0.3,
   },
+
+  /* ================= LABEL ================= */
 
   title: {
-    marginTop:
-      windowHeight(10),
+    marginTop: windowHeight(3),
 
-    fontFamily:
-      "TT-Octosquares-Medium",
+    color: color.textMuted,
 
-    fontSize:
-      windowHeight(11.5),
+    fontFamily: "TT-Octosquares-Medium",
 
-    color:
-      color.slateTeal,
-  },
+    fontSize: windowHeight(8.5),
 
-  bottomBorder: {
-    position: "absolute",
+    fontWeight: "800",
 
-    bottom: 0,
+    letterSpacing: 1,
 
-    left:
-      windowWidth(15),
-
-    right:
-      windowWidth(15),
-
-    height:
-      windowHeight(3),
-
-    borderRadius: 10,
-
-    backgroundColor:
-      color.routeAmber,
+    textTransform: "uppercase",
   },
 });
+

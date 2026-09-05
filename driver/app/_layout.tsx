@@ -55,8 +55,8 @@ function RootLayoutNav() {
         fontWeight: "600",
       }}
     >
+      <StatusBar style="light" backgroundColor={color.tealDark} />
       <Stack screenOptions={{ headerShown: false }}>
-        <StatusBar style="light" backgroundColor={color.tealDark} />
         <Stack.Screen name="index" />
       </Stack>
     </ToastProvider>

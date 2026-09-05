@@ -1,3 +1,4 @@
+import api from "@/api/client";
 import { getUser } from "@/utils/authStorage";
 import { useEffect, useState } from "react";
 
@@ -8,7 +9,9 @@ export function useUser() {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const storedUser = await getUser();
+       const response = await api.get("/user/me");
+       console.log("User data in useUser hook:", response.data.user);
+        const storedUser = response.data.user;
         setUser(storedUser);
       } catch (error) {
         console.log("Failed to load user:", error);

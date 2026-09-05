@@ -5,7 +5,8 @@ import { History } from "@/assets/icons/history";
 import color from "@/themes/app.colors";
 import { Tabs } from "expo-router";
 import React from "react";
-import { StyleSheet, StatusBar, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { StatusBar } from "expo-status-bar";
 
 const palette = {
   white: "#FFFFFF",
@@ -36,8 +37,7 @@ const getTabIcon = (routeName: string, focused: boolean) => {
 export default function TabLayout() {
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor={color.tealDark} />
-
+      <StatusBar style="light" backgroundColor={color.tealDark} />
       <Tabs
         screenOptions={({ route }) => ({
           headerShown: false,

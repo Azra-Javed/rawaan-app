@@ -1,4 +1,5 @@
 import { DriverType } from "@/@types/global";
+import api from "@/api/client";
 import { getDriver } from "@/utils/authStorage";
 import { useEffect, useState } from "react";
 
@@ -9,8 +10,8 @@ export function useDriver() {
   useEffect(() => {
     const loadDriver = async () => {
       try {
-        const storedDriver = await getDriver();
-        setDriver(storedDriver);
+        const driver = await api.get("/driver/me");
+        setDriver(driver.data.driver);
       } catch (error) {
         console.log("Failed to load user:", error);
       } finally {

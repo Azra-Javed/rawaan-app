@@ -2,7 +2,6 @@ import { clearAuth, getToken } from "@/utils/authStorage";
 import axios from "axios";
 
 const BASE_URL = process.env.EXPO_PUBLIC_SERVER_URI;
-
 const api = axios.create({
   baseURL: BASE_URL,
   headers: {

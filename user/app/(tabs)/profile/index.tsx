@@ -5,8 +5,8 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  StatusBar,
 } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { windowHeight, windowWidth } from "@/themes/app.constant";
 import ScreenHeader from "@/components/common/screen-header";
@@ -40,7 +40,7 @@ export default function Profile() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar barStyle="light-content" backgroundColor={color.tealDark} />
+      <StatusBar Style="light" backgroundColor={color.tealDark} />
 
       <ScreenHeader
         eyebrow="RAWAAN ACCOUNT"

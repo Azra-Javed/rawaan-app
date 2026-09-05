@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     color: color.routeAmber,
     fontSize: 11,
     letterSpacing: 2,
-    marginBottom: windowHeight(13),
+    marginBottom: windowHeight(10),
   },
 
   headerTitle: {
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
   // ================= SEARCH =================
 
   searchContainer: {
-    marginTop: windowHeight(18),
+    marginTop: windowHeight(13),
 
     backgroundColor: color.white,
 
@@ -277,17 +277,7 @@ const styles = StyleSheet.create({
     gap: windowHeight(10),
   },
 
-  rideWrapper: {
-    backgroundColor: color.white,
-
-    borderRadius: 16,
-
-    borderWidth: 1,
-    borderColor: color.ivoryLine,
-
-    overflow: "hidden",
-  },
-
+ 
   // ================= EMPTY STATE =================
 
   emptyCard: {

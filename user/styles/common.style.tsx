@@ -153,7 +153,7 @@ const commonStyles = StyleSheet.create({
   homeHeader: {
     paddingHorizontal: windowWidth(20),
     paddingTop: windowHeight(18),
-    paddingBottom: windowHeight(16),
+    paddingBottom: windowHeight(12),
   },
 
   greeting: {
@@ -187,7 +187,7 @@ const commonStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: color.border,
 
-    padding: windowWidth(6),
+    padding: windowWidth(4),
 
     shadowColor: "#000",
     shadowOffset: {
@@ -205,7 +205,7 @@ const commonStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
 
-    marginBottom: windowHeight(14),
+    marginBottom: windowHeight(10),
   },
 
   sectionTitle: {
@@ -229,8 +229,8 @@ const commonStyles = StyleSheet.create({
 
   body: {
     paddingHorizontal: windowWidth(20),
-    paddingTop: windowHeight(24),
-    paddingBottom: windowHeight(40),
+    paddingTop: windowHeight(14),
+    paddingBottom: windowHeight(0)
   },
 
   card: {
@@ -380,7 +380,7 @@ const commonStyles = StyleSheet.create({
   },
 
   ridesContainer: {
-    gap: windowHeight(12),
+    gap: windowHeight(0),
   },
 
   rideWrapper: {

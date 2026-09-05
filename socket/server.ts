@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
 import geolib from "geolib";
@@ -122,10 +122,18 @@ const findNearbyDrivers = (
 
 const PORT = process.env.PORT
   ? parseInt(process.env.PORT)
-  : 4000;
+  : 8080;
 
 server.listen(PORT, () => {
   console.log(
     `Server running on port ${PORT}`
   );
+});
+
+//testing api
+app.get("/test", (req: Request, res: Response, next: NextFunction) => {
+  res.status(200).json({
+    success: true,
+    message: "API is working",
+  });
 });

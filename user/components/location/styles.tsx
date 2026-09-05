@@ -6,7 +6,7 @@ import fonts from "@/themes/app.fonts";
 
 export const styles = StyleSheet.create({
   container: {
-    minHeight: windowHeight(70),
+    minHeight: windowHeight(50),
 
     flexDirection: "row",
     alignItems: "center",

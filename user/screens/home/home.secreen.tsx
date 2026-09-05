@@ -1,9 +1,10 @@
+
 import { commonStyles } from "@/styles/common.style";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import api from "@/api/client";
 import LocationSearchBar from "@/components/location/location.search.bar";
@@ -12,27 +13,52 @@ import color from "@/themes/app.colors";
 import styles from "./styles";
 
 const HomeScreen = () => {
+  const insets = useSafeAreaInsets();
+
   const [recentRides, setrecentRides] = useState([]);
 
   useEffect(() => {
     const getRecentRides = async () => {
-      const res = await api.get(`/user/get-rides`);
-      setrecentRides(res.data.rides);
-    };
+      try {
+        const res = await api.get(`/user/get-rides`);
 
+        const rides = res.data.rides
+          .filter(
+            (ride: any) =>
+              String(ride.status).toLowerCase() === "completed"
+          )
+          .sort(
+            (a: any, b: any) =>
+              new Date(b.createdAt).getTime() -
+              new Date(a.createdAt).getTime()
+          );
+
+        setrecentRides(rides.slice(0, 3));
+      } catch (error) {
+        console.log("Failed to fetch recent rides:", error);
+      }
+    };
     getRecentRides();
   }, []);
 
   return (
     <View
-      style={[commonStyles.flexContainer, { backgroundColor: color.ivory }]}
+      style={[
+        commonStyles.flexContainer,
+        { backgroundColor: color.ivory },
+      ]}
     >
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <LinearGradient
           colors={[color.nightIndigo, color.nightIndigoLight]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.header}
+          style={[
+            styles.header,
+            {
+              paddingTop: insets.top + 18,
+            },
+          ]}
         >
           <Text style={styles.eyebrow}>RAWAAN</Text>
 
@@ -72,7 +98,7 @@ const HomeScreen = () => {
           {recentRides?.length > 0 ? (
             <View style={commonStyles.ridesContainer}>
               {recentRides?.map((item: any, index: number) => (
-                <View key={index} style={commonStyles.rideWrapper}>
+                <View key={index}>
                   <RideCard item={item} />
                 </View>
               ))}
@@ -87,18 +113,21 @@ const HomeScreen = () => {
                 />
               </View>
 
-              <Text style={commonStyles.emptyTitle}>No recent rides</Text>
+              <Text style={commonStyles.emptyTitle}>
+                No recent rides
+              </Text>
 
               <Text style={commonStyles.emptySubtitle}>
-                Your recent journeys will appear here after you book your first
-                ride.
+                Your recent journeys will appear here after you book your
+                first ride.
               </Text>
             </View>
           )}
         </ScrollView>
-      </SafeAreaView>
+      </View>
     </View>
   );
 };
 
 export default HomeScreen;
+

@@ -2,7 +2,8 @@ import { Person } from "@/assets/icons/person";
 import color from "@/themes/app.colors";
 import { Car, CarPrimary, Category, Home, HomeLight } from "@/utils/icons";
 import { Tabs } from "expo-router";
-import { StatusBar, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { StatusBar } from "expo-status-bar";
 
 const palette = {
   nightIndigo: "#0F4C4A",
@@ -37,7 +38,7 @@ const getTabIcon = (routeName: string, focused: boolean) => {
 export default function _layout() {
   return (
     <>
-    
+      <StatusBar style="light" backgroundColor={color.tealDark} />
       <Tabs
         screenOptions={({ route }) => ({
           headerShown: false,
