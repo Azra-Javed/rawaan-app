@@ -20,6 +20,7 @@ import {
 import ScreenHeader from "@/components/common/screen-header";
 import color from "@/themes/app.colors";
 import styles from "./styles";
+import { StatusBar } from "expo-status-bar";
 
 const CELL_COUNT = 4;
 
@@ -128,6 +129,8 @@ const OtpVerificationScreen = () => {
   };
 
   return (
+    <>
+      <StatusBar style="light" backgroundColor={color.tealDark} />
     <View style={styles.screen}>
       <ScreenHeader
         eyebrow="RAWAAN"
@@ -219,6 +222,7 @@ const OtpVerificationScreen = () => {
         </View>
       </View>
     </View>
+    </>
   );
 };
 

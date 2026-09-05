@@ -16,6 +16,7 @@ import api from "@/api/client";
 import ScreenHeader from "@/components/common/screen-header";
 import RouteDots from "@/components/common/route-dots";
 import color from "@/themes/app.colors";
+import { StatusBar } from "expo-status-bar";
 
 const displayFont = "TT-Octosquares-Medium";
 const palette = color;
@@ -107,6 +108,7 @@ export default function ServicesScreen() {
 
   return (
     <View style={styles.screen}>
+      <StatusBar style="light" backgroundColor={color.tealDark} />
       <ScreenHeader
         eyebrow="RAWAAN CARE"
         title="How can we help?"

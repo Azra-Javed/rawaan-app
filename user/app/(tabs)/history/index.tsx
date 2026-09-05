@@ -8,6 +8,7 @@ import ScreenHeader from "@/components/common/screen-header";
 import RouteDots from "@/components/common/route-dots";
 import api from "@/api/client";
 import color from "@/themes/app.colors";
+import { StatusBar } from "expo-status-bar";
 
 const displayFont = "TT-Octosquares-Medium";
 const palette = color;
@@ -25,69 +26,72 @@ export default function History() {
   }, []);
 
   return (
-    <View style={styles.screen}>
-      <ScreenHeader
-        eyebrow="RAWAAN RIDES"
-        title="Ride History"
-        subtitle="View your previous rides and journeys"
-        icon="time-outline"
-        showDots
-      />
+    <>
+      <StatusBar style="light" backgroundColor={color.tealDark} />
+      <View style={styles.screen}>
+        <ScreenHeader
+          eyebrow="RAWAAN RIDES"
+          title="Ride History"
+          subtitle="View your previous rides and journeys"
+          icon="time-outline"
+          showDots
+        />
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.body}
-      >
-        <View style={styles.sectionHeader}>
-          <View>
-            <Text style={styles.sectionTitle}>Previous rides</Text>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.body}
+        >
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={styles.sectionTitle}>Previous rides</Text>
 
-            <Text style={styles.sectionSubtitle}>
-              Your completed ride history
-            </Text>
-          </View>
+              <Text style={styles.sectionSubtitle}>
+                Your completed ride history
+              </Text>
+            </View>
 
-          <View style={styles.sectionIcon}>
-            <Ionicons
-              name="car-outline"
-              size={20}
-              color={palette.nightIndigo}
-            />
-          </View>
-        </View>
-
-        {recentRides?.length > 0 ? (
-          <View style={styles.ridesContainer}>
-            {recentRides.map((item: any, index: number) => (
-              <View key={index} >
-                <RideCard item={item} />
-              </View>
-            ))}
-          </View>
-        ) : (
-          <View style={styles.emptyCard}>
-            <View style={styles.emptyIcon}>
+            <View style={styles.sectionIcon}>
               <Ionicons
                 name="car-outline"
-                size={28}
+                size={20}
                 color={palette.nightIndigo}
               />
             </View>
-
-            <Text style={styles.emptyTitle}>No rides yet</Text>
-
-            <Text style={styles.emptySubtitle}>
-              Your completed rides will appear here once you take your first
-              ride.
-            </Text>
-
-            <View style={styles.emptyDots}>
-              <RouteDots colorValue={color.ivoryLine} count={4} />
-            </View>
           </View>
-        )}
-      </ScrollView>
-    </View>
+
+          {recentRides?.length > 0 ? (
+            <View style={styles.ridesContainer}>
+              {recentRides.map((item: any, index: number) => (
+                <View key={index} >
+                  <RideCard item={item} />
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View style={styles.emptyCard}>
+              <View style={styles.emptyIcon}>
+                <Ionicons
+                  name="car-outline"
+                  size={28}
+                  color={palette.nightIndigo}
+                />
+              </View>
+
+              <Text style={styles.emptyTitle}>No rides yet</Text>
+
+              <Text style={styles.emptySubtitle}>
+                Your completed rides will appear here once you take your first
+                ride.
+              </Text>
+
+              <View style={styles.emptyDots}>
+                <RouteDots colorValue={color.ivoryLine} count={4} />
+              </View>
+            </View>
+          )}
+        </ScrollView>
+      </View>
+    </>
   );
 }
 

@@ -11,6 +11,7 @@ import LocationSearchBar from "@/components/location/location.search.bar";
 import RideCard from "@/components/ride/ride.card";
 import color from "@/themes/app.colors";
 import styles from "./styles";
+import { StatusBar } from "expo-status-bar";
 
 const HomeScreen = () => {
   const insets = useSafeAreaInsets();
@@ -42,6 +43,8 @@ const HomeScreen = () => {
   }, []);
 
   return (
+    <>
+    <StatusBar style="light" backgroundColor={color.tealDark} />
     <View
       style={[
         commonStyles.flexContainer,
@@ -126,6 +129,8 @@ const HomeScreen = () => {
         </ScrollView>
       </View>
     </View>
+    </>
+    
   );
 };
 

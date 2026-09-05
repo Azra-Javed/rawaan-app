@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import Swiper from "react-native-swiper";
 import localStyles from "./styles";
+import { StatusBar } from "expo-status-bar";
 
 type Slide = {
   image: ImageSourcePropType;
@@ -21,6 +22,8 @@ type Slide = {
 
 const OnBoardingScreen = () => {
   return (
+    <>
+    <StatusBar style="light" backgroundColor={color.tealDark} />
     <View style={localStyles.container}>
       <Swiper
         activeDotStyle={localStyles.activeDot}
@@ -64,7 +67,7 @@ const OnBoardingScreen = () => {
           </View>
         ))}
       </Swiper>
-    </View>
+    </View></>
   );
 };
 

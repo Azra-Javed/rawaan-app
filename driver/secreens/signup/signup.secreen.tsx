@@ -20,6 +20,7 @@ import {
 } from "libphonenumber-js";
 import { Toast } from "react-native-toast-notifications";
 import ScreenHeader from "@/components/common/screen-header";
+import { StatusBar } from "expo-status-bar";
 
 const SignupScreen = () => {
   const { colors } = useTheme();
@@ -136,6 +137,7 @@ const SignupScreen = () => {
 
   return (
     <View style={styles.screen}>
+      <StatusBar style="light" backgroundColor={color.tealDark} />
       {/* Header */}
       <ScreenHeader
         eyebrow="RAWAAN"

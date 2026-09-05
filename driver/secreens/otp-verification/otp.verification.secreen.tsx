@@ -17,6 +17,7 @@ import { saveAuth } from "@/utils/authStorage";
 import { Ionicons } from "@expo/vector-icons";
 import { useToast } from "react-native-toast-notifications";
 import styles from "./styles";
+import { StatusBar } from "expo-status-bar";
 
 const CELL_COUNT = 4;
 
@@ -151,6 +152,7 @@ const OtpVerificationScreen = () => {
 
   return (
     <View style={styles.screen}>
+      <StatusBar  style="light" backgroundColor={color.tealDark} />
       <ScreenHeader
         eyebrow="RAWAAN"
         title="OTP Verification"

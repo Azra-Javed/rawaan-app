@@ -18,12 +18,39 @@ import { clearAuth } from "@/utils/authStorage";
 import { router } from "expo-router";
 import color from "@/themes/app.colors";
 
+const profileLoadingStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  text: {
+    color: "#FFFFFF",
+    fontSize: 16,
+  },
+});
+
 export default function Profile() {
   const { user, loading } = useUser();
 
   if (loading) {
-    return null;
+    return (
+      <View style={styles.screen}>
+        <StatusBar style="light" backgroundColor={color.tealDark} />
+        <ScreenHeader
+          eyebrow="RAWAAN ACCOUNT"
+          title="Profile"
+          subtitle="Manage your account details"
+          icon="person-outline"
+          showDots
+        />
+        <View style={profileLoadingStyles.container}>
+          <Text style={profileLoadingStyles.text}>Loading profile...</Text>
+        </View>
+      </View>
+    );
   }
+  
 
   const handleLogout = async () => {
     await clearAuth();
@@ -40,7 +67,7 @@ export default function Profile() {
 
   return (
     <View style={styles.screen}>
-      <StatusBar Style="light" backgroundColor={color.tealDark} />
+      <StatusBar style="light" backgroundColor={color.tealDark} />
 
       <ScreenHeader
         eyebrow="RAWAAN ACCOUNT"
@@ -50,17 +77,15 @@ export default function Profile() {
         showDots
       />
 
-      {/* ======================================================
-          BODY
-      ====================================================== */}
+
+
+
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.body}
       >
-        {/* ====================================================
-            USER SUMMARY
-        ==================================================== */}
+
 
         <View style={styles.summaryCard}>
           <View style={styles.avatarWrapper}>
@@ -84,9 +109,6 @@ export default function Profile() {
           </View>
         </View>
 
-        {/* ====================================================
-            ACCOUNT DETAILS
-        ==================================================== */}
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -135,9 +157,6 @@ export default function Profile() {
           </View>
         </View>
 
-        {/* ====================================================
-            ACCOUNT SECURITY / INFO
-        ==================================================== */}
 
         <View style={styles.infoCard}>
           <View style={styles.infoIcon}>
@@ -157,9 +176,7 @@ export default function Profile() {
           </View>
         </View>
 
-        {/* ====================================================
-            LOGOUT
-        ==================================================== */}
+
 
         <TouchableOpacity
           style={styles.logoutCard}
@@ -188,18 +205,12 @@ export default function Profile() {
 }
 
 const styles = StyleSheet.create({
-  // ==========================================================
-  // SCREEN
-  // ==========================================================
 
   screen: {
     flex: 1,
     backgroundColor: color.ivory,
   },
 
-  // ==========================================================
-  // HEADER
-  // ==========================================================
 
   header: {
     paddingTop: windowHeight(52),
@@ -260,9 +271,7 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
 
-  // ==========================================================
-  // ROUTE ACCENT
-  // ==========================================================
+
 
   routeAccent: {
     flexDirection: "row",
@@ -291,9 +300,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 7,
   },
 
-  // ==========================================================
-  // BODY
-  // ==========================================================
+
 
   body: {
     paddingHorizontal: windowWidth(18),
@@ -301,9 +308,7 @@ const styles = StyleSheet.create({
     paddingBottom: windowHeight(45),
   },
 
-  // ==========================================================
-  // SUMMARY CARD
-  // ==========================================================
+
 
   summaryCard: {
     flexDirection: "row",
@@ -383,9 +388,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // ==========================================================
-  // SECTION
-  // ==========================================================
+
 
   section: {
     marginBottom: windowHeight(20),
@@ -431,9 +434,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // ==========================================================
-  // DETAILS
-  // ==========================================================
 
   detailsCard: {
     backgroundColor: color.white,
@@ -443,9 +443,6 @@ const styles = StyleSheet.create({
     borderColor: color.border,
   },
 
-  // ==========================================================
-  // SECURITY INFO
-  // ==========================================================
 
   infoCard: {
     flexDirection: "row",
@@ -485,9 +482,7 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
 
-  // ==========================================================
-  // LOGOUT
-  // ==========================================================
+
 
   logoutCard: {
     flexDirection: "row",

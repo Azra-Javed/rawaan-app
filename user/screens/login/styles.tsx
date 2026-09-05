@@ -126,7 +126,15 @@ const styles = StyleSheet.create({
   },
 
   // ================= FOOTER =================
-
+ signUpContainer: {
+    marginTop: windowHeight(15),
+    alignItems: "center",
+  },
+  
+  signUpText: {
+    fontSize: 12,
+    color: color.slateTeal,
+  },
   footer: {
     flexDirection: "row",
 

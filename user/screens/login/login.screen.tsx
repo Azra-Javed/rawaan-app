@@ -9,6 +9,7 @@ import { useState } from "react";
 import { Text, View } from "react-native";
 import { useToast } from "react-native-toast-notifications";
 import color from "@/themes/app.colors";
+import { StatusBar } from "expo-status-bar";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
@@ -48,6 +49,8 @@ const LoginScreen = () => {
   };
 
   return (
+    <>
+    <StatusBar style="light" backgroundColor={color.tealDark} />
     <View style={localStyles.screen}>
       <LinearGradient
         colors={[color.nightIndigo, color.nightIndigoLight]}
@@ -97,6 +100,7 @@ const LoginScreen = () => {
               disabled={loading}
             />
           </View>
+
         </View>
 
         <View style={localStyles.footer}>
@@ -108,6 +112,7 @@ const LoginScreen = () => {
         </View>
       </View>
     </View>
+    </>
   );
 };
 

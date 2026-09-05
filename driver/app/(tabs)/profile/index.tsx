@@ -6,6 +6,7 @@ import { windowHeight, windowWidth } from "@/themes/app.constant";
 import { clearAuth } from "@/utils/authStorage";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import React from "react";
 import {
   ActivityIndicator,
@@ -44,6 +45,7 @@ export default function Profile() {
 
   return (
     <View style={styles.screen}>
+      <StatusBar style="light" backgroundColor={color.tealDark} />
       <ScreenHeader
         eyebrow="ACCOUNT"
         title="Profile"

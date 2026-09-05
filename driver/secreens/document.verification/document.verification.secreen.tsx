@@ -13,6 +13,7 @@ import React, { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { Toast } from "react-native-toast-notifications";
 import styles from "./styles";
+import { StatusBar } from "expo-status-bar";
 
 const DocumentVerificationSecreen = () => {
   const signupData = useLocalSearchParams();
@@ -86,6 +87,8 @@ const DocumentVerificationSecreen = () => {
   };
 
   return (
+    <>
+    <StatusBar style="light" backgroundColor={color.tealDark} />
     <View style={{ flex: 1, backgroundColor: color.ivory }}>
       <ScreenHeader
         eyebrow="RAWAAN"
@@ -229,6 +232,8 @@ const DocumentVerificationSecreen = () => {
         </View>
       </ScrollView>
     </View>
+    </>
+    
   );
 };
 

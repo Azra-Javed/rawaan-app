@@ -9,8 +9,9 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
-  StatusBar,
+
 } from "react-native";
+import { StatusBar } from "expo-status-bar";
 
 import styles from "./styles";
 import { useEffect, useRef, useState } from "react";
@@ -299,7 +300,7 @@ export default function RidePlanScreen() {
               ? JSON.parse(rawOrderData)
               : rawOrderData;
 
-          console.log("Rider notification data:", payload);
+
 
           // DRIVER REJECTED THE REQUEST
 
@@ -409,12 +410,6 @@ export default function RidePlanScreen() {
           await Notifications.getExpoPushTokenAsync({ projectId })
         ).data;
 
-        console.log("========== USER PUSH TOKEN ==========");
-        console.log("Project ID:", projectId);
-        console.log("User ID:", user?.id);
-        console.log("Push Token:", pushTokenString);
-        console.log("=====================================");
-
         const response = await api.put("/user/update-push-token", {
           pushToken: pushTokenString,
         });
@@ -512,511 +507,514 @@ export default function RidePlanScreen() {
   );
 
   return (
-    <KeyboardAvoidingView
-      style={styles.screen}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? insets.top : 0}
-    >
-      <View style={[styles.mapWrapper]}>
-        <MapView
-          style={styles.map}
-          initialRegion={region}
-          onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
-          rotateEnabled
-          zoomEnabled
-          zoomControlEnabled
-          showsCompass
-          pitchEnabled
-          scrollEnabled
-        >
-          <UrlTile
-            urlTemplate={`https://api.maptiler.com/maps/positron-v4/256/{z}/{x}/{y}.png?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
-            maximumZ={20}
-          />
-
-          {currentLocation && (
-            <Marker coordinate={currentLocation} title="Pickup" />
-          )}
-
-          {dropoff && (
-            <Marker
-              coordinate={{
-                latitude: dropoff.latitude,
-                longitude: dropoff.longitude,
-              }}
-              title="Dropoff"
-              pinColor={color.coral}
+    <>
+      <StatusBar style="light" backgroundColor={color.tealDark} />
+      <KeyboardAvoidingView
+        style={styles.screen}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? insets.top : 0}
+      >
+        <View style={[styles.mapWrapper]}>
+          <MapView
+            style={styles.map}
+            initialRegion={region}
+            onRegionChangeComplete={(newRegion) => setRegion(newRegion)}
+            rotateEnabled
+            zoomEnabled
+            zoomControlEnabled
+            showsCompass
+            pitchEnabled
+            scrollEnabled
+          >
+            <UrlTile
+              urlTemplate={`https://api.maptiler.com/maps/positron-v4/256/{z}/{x}/{y}.png?key=${process.env.EXPO_PUBLIC_MAPTILER_KEY}`}
+              maximumZ={20}
             />
-          )}
 
-          {routeCoords.length > 0 && (
-            <Polyline
-              coordinates={routeCoords}
-              strokeWidth={5}
-              strokeColor={color.teal}
-            />
-          )}
-        </MapView>
+            {currentLocation && (
+              <Marker coordinate={currentLocation} title="Pickup" />
+            )}
 
-        {/* MAP STATUS */}
+            {dropoff && (
+              <Marker
+                coordinate={{
+                  latitude: dropoff.latitude,
+                  longitude: dropoff.longitude,
+                }}
+                title="Dropoff"
+                pinColor={color.coral}
+              />
+            )}
 
-        <View style={styles.mapStatus}>
-          <View style={styles.mapStatusDot} />
+            {routeCoords.length > 0 && (
+              <Polyline
+                coordinates={routeCoords}
+                strokeWidth={5}
+                strokeColor={color.teal}
+              />
+            )}
+          </MapView>
 
-          <Text style={styles.mapStatusText}>
-            {wsConnected ? "Live location" : "Connecting"}
-          </Text>
+          {/* MAP STATUS */}
+
+          <View style={styles.mapStatus}>
+            <View style={styles.mapStatusDot} />
+
+            <Text style={styles.mapStatusText}>
+              {wsConnected ? "Live location" : "Connecting"}
+            </Text>
+          </View>
+
+          {/* MAP ATTRIBUTION */}
+
+          <View style={styles.mapAttribution}>
+            <Text style={styles.mapAttributionText}>
+              © MapTiler © OpenStreetMap contributors
+            </Text>
+          </View>
         </View>
 
-        {/* MAP ATTRIBUTION */}
-
-        <View style={styles.mapAttribution}>
-          <Text style={styles.mapAttributionText}>
-            © MapTiler © OpenStreetMap contributors
-          </Text>
-        </View>
-      </View>
-
-      {/* ======================================================
+        {/* ======================================================
           MAIN CONTENT
       ====================================================== */}
 
-      <View
-        style={[
-          styles.contentContainer,
-          {
-            paddingBottom: bottomSafeSpace,
-          },
-        ]}
-      >
-        <View style={styles.container}>
-          {locationSelected ? (
-            <>
-              {/* ==================================================
+        <View
+          style={[
+            styles.contentContainer,
+            {
+              paddingBottom: bottomSafeSpace,
+            },
+          ]}
+        >
+          <View style={styles.container}>
+            {locationSelected ? (
+              <>
+                {/* ==================================================
                   LOADING
               ================================================== */}
 
-              {driverLoader ? (
-                <View style={styles.loadingContainer}>
-                  <View style={styles.loadingIcon}>
-                    <Ionicons
-                      name="car-outline"
-                      size={27}
-                      color={color.tealDark}
-                    />
+                {driverLoader ? (
+                  <View style={styles.loadingContainer}>
+                    <View style={styles.loadingIcon}>
+                      <Ionicons
+                        name="car-outline"
+                        size={27}
+                        color={color.tealDark}
+                      />
+                    </View>
+
+                    <ActivityIndicator size="small" color={color.teal} />
+
+                    <Text style={styles.loadingTitle}>Finding nearby rides</Text>
+
+                    <Text style={styles.loadingSubtitle}>
+                      Looking for available drivers near you
+                    </Text>
                   </View>
-
-                  <ActivityIndicator size="small" color={color.teal} />
-
-                  <Text style={styles.loadingTitle}>Finding nearby rides</Text>
-
-                  <Text style={styles.loadingSubtitle}>
-                    Looking for available drivers near you
-                  </Text>
-                </View>
-              ) : (
-                <ScrollView
-                  showsVerticalScrollIndicator={false}
-                  keyboardShouldPersistTaps="handled"
-                  nestedScrollEnabled
-                  style={styles.optionsScroll}
-                  contentContainerStyle={[
-                    styles.optionsScrollContent,
-                    {
-                      paddingBottom: bottomSafeSpace + windowHeight(20),
-                    },
-                  ]}
-                >
-                  {/* ==================================================
+                ) : (
+                  <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                    nestedScrollEnabled
+                    style={styles.optionsScroll}
+                    contentContainerStyle={[
+                      styles.optionsScrollContent,
+                      {
+                        paddingBottom: bottomSafeSpace + windowHeight(20),
+                      },
+                    ]}
+                  >
+                    {/* ==================================================
                       OPTIONS HEADER
                   ================================================== */}
 
-                  <View style={styles.optionsHeader}>
-                    <Pressable
-                      onPress={() => setLocationSelected(false)}
-                      style={styles.backButton}
-                    >
-                      <Ionicons
-                        name="arrow-back"
-                        size={20}
-                        color={color.tealDark}
-                      />
-                    </Pressable>
+                    <View style={styles.optionsHeader}>
+                      <Pressable
+                        onPress={() => setLocationSelected(false)}
+                        style={styles.backButton}
+                      >
+                        <Ionicons
+                          name="arrow-back"
+                          size={20}
+                          color={color.tealDark}
+                        />
+                      </Pressable>
 
-                    <View style={styles.optionsHeaderText}>
-                      <Text style={styles.optionsEyebrow}>RAWAAN RIDE</Text>
+                      <View style={styles.optionsHeaderText}>
+                        <Text style={styles.optionsEyebrow}>RAWAAN RIDE</Text>
 
-                      <Text style={styles.optionsTitle}>Choose your ride</Text>
+                        <Text style={styles.optionsTitle}>Choose your ride</Text>
 
-                      <Text style={styles.optionsSubtitle}>
-                        Select the vehicle that suits you
-                      </Text>
+                        <Text style={styles.optionsSubtitle}>
+                          Select the vehicle that suits you
+                        </Text>
+                      </View>
+
+                      <View style={styles.optionsHeaderIcon}>
+                        <Ionicons
+                          name="car-outline"
+                          size={20}
+                          color={color.tealDark}
+                        />
+                      </View>
                     </View>
 
-                    <View style={styles.optionsHeaderIcon}>
-                      <Ionicons
-                        name="car-outline"
-                        size={20}
-                        color={color.tealDark}
-                      />
-                    </View>
-                  </View>
-
-                  {/* ==================================================
+                    {/* ==================================================
                       ROUTE SUMMARY
                   ================================================== */}
 
-                  {distance !== null && travelTime !== null && (
-                    <View style={styles.routeSummaryCard}>
-                      <View style={styles.routeSummaryItem}>
-                        <View style={styles.routeSummaryIcon}>
-                          <Ionicons
-                            name="navigate-outline"
-                            size={17}
-                            color={color.tealDark}
-                          />
-                        </View>
-
-                        <View>
-                          <Text style={styles.routeSummaryLabel}>DISTANCE</Text>
-
-                          <Text style={styles.routeSummaryValue}>
-                            {distance.toFixed(1)} km
-                          </Text>
-                        </View>
-                      </View>
-
-                      <View style={styles.routeDivider} />
-
-                      <View style={styles.routeSummaryItem}>
-                        <View style={styles.routeSummaryIcon}>
-                          <Ionicons
-                            name="time-outline"
-                            size={17}
-                            color={color.tealDark}
-                          />
-                        </View>
-
-                        <View>
-                          <Text style={styles.routeSummaryLabel}>ARRIVAL</Text>
-
-                          <Text style={styles.routeSummaryValue}>
-                            {getEstimatedArrivalTime()}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                  )}
-
-                  {/* ==================================================
-                      VEHICLE HEADER
-                  ================================================== */}
-
-                  <View style={styles.vehicleSectionHeader}>
-                    <View>
-                      <Text style={styles.vehicleEyebrow}>AVAILABLE NOW</Text>
-
-                      <Text style={styles.vehicleTitle}>Ride options</Text>
-                    </View>
-
-                    <View style={styles.availableBadge}>
-                      <View style={styles.availableDot} />
-
-                      <Text style={styles.availableText}>
-                        {driverLists.length} available
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* ==================================================
-                      DRIVERS
-                  ================================================== */}
-
-                  <View style={styles.driverList}>
-                    {driverLists.map((driver: any, index) => {
-                      const isSelected =
-                        String(selectedDriverId) === String(driver.id);
-
-                      return (
-                        <Pressable
-                          key={driver.id || index}
-                          style={[
-                            styles.driverCard,
-                            isSelected && styles.driverCardSelected,
-                          ]}
-
-                          onPress={() => {
-                            if (isSelected) {
-                              setSelectedDriverId(null);
-                            } else {
-                              setSelectedDriverId(String(driver.id));
-                              setSelectedVehicle(driver.vehicle_type);
-                            }
-                          }}
-                        >
-
-                          {isSelected && (
-
-                            <View style={styles.selectedBadge}>
-                              <Ionicons
-                                name="checkmark"
-                                size={13}
-                                color={color.white}
-                              />
-                            </View>
-                          )}
-
-                          <View
-                            style={[
-                              styles.vehicleImageWrapper,
-                              isSelected && styles.vehicleImageWrapperSelected,
-                            ]}
-                          >
-                            <Image
-                              source={
-                                driver.vehicle_type === "Car"
-                                  ? require("@/assets/images/vehicles/car.png")
-                                  : require("@/assets/images/vehicles/bike.png")
-                              }
-                              style={styles.vehicleImage}
-                              resizeMode="contain"
+                    {distance !== null && travelTime !== null && (
+                      <View style={styles.routeSummaryCard}>
+                        <View style={styles.routeSummaryItem}>
+                          <View style={styles.routeSummaryIcon}>
+                            <Ionicons
+                              name="navigate-outline"
+                              size={17}
+                              color={color.tealDark}
                             />
                           </View>
 
-                          <View style={styles.driverInfo}>
-                            <View style={styles.driverTitleRow}>
-                              <View style={styles.driverNameArea}>
-                                <Text
-                                  style={styles.driverName}
-                                  numberOfLines={1}
-                                >
-                                  Rawaan {driver.vehicle_type}
-                                </Text>
+                          <View>
+                            <Text style={styles.routeSummaryLabel}>DISTANCE</Text>
 
-                                <View style={styles.vehicleTypeBadge}>
-                                  <Text style={styles.vehicleTypeText}>
-                                    {driver.vehicle_type}
+                            <Text style={styles.routeSummaryValue}>
+                              {distance.toFixed(1)} km
+                            </Text>
+                          </View>
+                        </View>
+
+                        <View style={styles.routeDivider} />
+
+                        <View style={styles.routeSummaryItem}>
+                          <View style={styles.routeSummaryIcon}>
+                            <Ionicons
+                              name="time-outline"
+                              size={17}
+                              color={color.tealDark}
+                            />
+                          </View>
+
+                          <View>
+                            <Text style={styles.routeSummaryLabel}>ARRIVAL</Text>
+
+                            <Text style={styles.routeSummaryValue}>
+                              {getEstimatedArrivalTime()}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    )}
+
+                    {/* ==================================================
+                      VEHICLE HEADER
+                  ================================================== */}
+
+                    <View style={styles.vehicleSectionHeader}>
+                      <View>
+                        <Text style={styles.vehicleEyebrow}>AVAILABLE NOW</Text>
+
+                        <Text style={styles.vehicleTitle}>Ride options</Text>
+                      </View>
+
+                      <View style={styles.availableBadge}>
+                        <View style={styles.availableDot} />
+
+                        <Text style={styles.availableText}>
+                          {driverLists.length} available
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* ==================================================
+                      DRIVERS
+                  ================================================== */}
+
+                    <View style={styles.driverList}>
+                      {driverLists.map((driver: any, index) => {
+                        const isSelected =
+                          String(selectedDriverId) === String(driver.id);
+
+                        return (
+                          <Pressable
+                            key={driver.id || index}
+                            style={[
+                              styles.driverCard,
+                              isSelected && styles.driverCardSelected,
+                            ]}
+
+                            onPress={() => {
+                              if (isSelected) {
+                                setSelectedDriverId(null);
+                              } else {
+                                setSelectedDriverId(String(driver.id));
+                                setSelectedVehicle(driver.vehicle_type);
+                              }
+                            }}
+                          >
+
+                            {isSelected && (
+
+                              <View style={styles.selectedBadge}>
+                                <Ionicons
+                                  name="checkmark"
+                                  size={13}
+                                  color={color.white}
+                                />
+                              </View>
+                            )}
+
+                            <View
+                              style={[
+                                styles.vehicleImageWrapper,
+                                isSelected && styles.vehicleImageWrapperSelected,
+                              ]}
+                            >
+                              <Image
+                                source={
+                                  driver.vehicle_type === "Car"
+                                    ? require("@/assets/images/vehicles/car.png")
+                                    : require("@/assets/images/vehicles/bike.png")
+                                }
+                                style={styles.vehicleImage}
+                                resizeMode="contain"
+                              />
+                            </View>
+
+                            <View style={styles.driverInfo}>
+                              <View style={styles.driverTitleRow}>
+                                <View style={styles.driverNameArea}>
+                                  <Text
+                                    style={styles.driverName}
+                                    numberOfLines={1}
+                                  >
+                                    Rawaan {driver.vehicle_type}
+                                  </Text>
+
+                                  <View style={styles.vehicleTypeBadge}>
+                                    <Text style={styles.vehicleTypeText}>
+                                      {driver.vehicle_type}
+                                    </Text>
+                                  </View>
+                                </View>
+
+                                <Text style={styles.driverPrice}>
+                                  PKR{" "}
+                                  {distance !== null
+                                    ? (
+                                      distance * parseFloat(driver.rate || "0")
+                                    ).toFixed(2)
+                                    : "0.00"}
+                                </Text>
+                              </View>
+
+                              <View style={styles.driverMetaRow}>
+                                <View style={styles.driverMetaItem}>
+                                  <Ionicons
+                                    name="time-outline"
+                                    size={14}
+                                    color={color.textMuted}
+                                  />
+
+                                  <Text style={styles.driverMetaText}>
+                                    {getEstimatedArrivalTime()} dropoff
+                                  </Text>
+                                </View>
+
+                                <View style={styles.driverMetaItem}>
+                                  <Ionicons
+                                    name="checkmark-circle-outline"
+                                    size={14}
+                                    color={color.green}
+                                  />
+
+                                  <Text style={styles.driverMetaText}>
+                                    Available
                                   </Text>
                                 </View>
                               </View>
-
-                              <Text style={styles.driverPrice}>
-                                PKR{" "}
-                                {distance !== null
-                                  ? (
-                                    distance * parseFloat(driver.rate || "0")
-                                  ).toFixed(2)
-                                  : "0.00"}
-                              </Text>
                             </View>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
 
-                            <View style={styles.driverMetaRow}>
-                              <View style={styles.driverMetaItem}>
-                                <Ionicons
-                                  name="time-outline"
-                                  size={14}
-                                  color={color.textMuted}
-                                />
-
-                                <Text style={styles.driverMetaText}>
-                                  {getEstimatedArrivalTime()} dropoff
-                                </Text>
-                              </View>
-
-                              <View style={styles.driverMetaItem}>
-                                <Ionicons
-                                  name="checkmark-circle-outline"
-                                  size={14}
-                                  color={color.green}
-                                />
-
-                                <Text style={styles.driverMetaText}>
-                                  Available
-                                </Text>
-                              </View>
-                            </View>
-                          </View>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-
-                  {/* ==================================================
+                    {/* ==================================================
                       BOOKING
                   ================================================== */}
 
-                  <View style={styles.bookingSection}>
-                    <Button
-                      backgroundColor={color.tealDark}
-                      textColor={color.white}
-                      title={isLoading ? "Requesting..." : "Confirm Booking"}
-                      onPress={handleOrder}
-                      disabled={isLoading}
-                    />
-                    <View style={styles.bookingSecure}>
-                      <Ionicons
-                        name="shield-checkmark-outline"
-                        size={14}
-                        color={color.teal}
+                    <View style={styles.bookingSection}>
+                      <Button
+                        backgroundColor={color.tealDark}
+                        textColor={color.white}
+                        title={isLoading ? "Requesting..." : "Confirm Booking"}
+                        onPress={handleOrder}
+                        disabled={isLoading}
                       />
+                      <View style={styles.bookingSecure}>
+                        <Ionicons
+                          name="shield-checkmark-outline"
+                          size={14}
+                          color={color.teal}
+                        />
 
-                      <Text style={styles.bookingSecureText}>
-                        Your ride details are securely processed
-                      </Text>
+                        <Text style={styles.bookingSecureText}>
+                          Your ride details are securely processed
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                </ScrollView>
-              )}
-            </>
-          ) : (
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={[
-                styles.planScrollContent,
-                {
-                  paddingBottom: bottomSafeSpace + windowHeight(15),
-                },
-              ]}
-            >
-              {/* ==================================================
+                  </ScrollView>
+                )}
+              </>
+            ) : (
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={[
+                  styles.planScrollContent,
+                  {
+                    paddingBottom: bottomSafeSpace + windowHeight(15),
+                  },
+                ]}
+              >
+                {/* ==================================================
                   HEADER
               ================================================== */}
 
-              <View style={styles.planHeader}>
-                <TouchableOpacity
-                  onPress={() => router.back()}
-                  style={styles.backButton}
-                >
-                  <Ionicons
-                    name="arrow-back"
-                    size={20}
-                    color={color.tealDark}
-                  />
-                </TouchableOpacity>
-
-                <View style={styles.planHeaderText}>
-                  <Text style={styles.planTitle}>Plan your ride</Text>
-
-                  <Text style={styles.planSubtitle}>
-                    Where would you like to go?
-                  </Text>
-                </View>
-
-                <View style={styles.planIcon}>
-                  <Ionicons
-                    name="location-outline"
-                    size={21}
-                    color={color.tealDark}
-                  />
-                </View>
-              </View>
-
-
-              <View style={styles.locationCard}>
-                {/* PICKUP */}
-
-                <View style={styles.locationRow}>
-                  <View
-                    style={[styles.locationIcon, styles.pickupLocationIcon]}
+                <View style={styles.planHeader}>
+                  <TouchableOpacity
+                    onPress={() => router.back()}
+                    style={styles.backButton}
                   >
                     <Ionicons
-                      name="radio-button-on"
-                      size={17}
+                      name="arrow-back"
+                      size={20}
+                      color={color.tealDark}
+                    />
+                  </TouchableOpacity>
+
+                  <View style={styles.planHeaderText}>
+                    <Text style={styles.planTitle}>Plan your ride</Text>
+
+                    <Text style={styles.planSubtitle}>
+                      Where would you like to go?
+                    </Text>
+                  </View>
+
+                  <View style={styles.planIcon}>
+                    <Ionicons
+                      name="location-outline"
+                      size={21}
                       color={color.tealDark}
                     />
                   </View>
+                </View>
 
-                  <View style={styles.locationContent}>
-                    <Text style={styles.locationLabel}>PICKUP</Text>
 
-                    <Text style={styles.currentLocationText} numberOfLines={1}>
-                      {currentLocationName}
-                    </Text>
+                <View style={styles.locationCard}>
+                  {/* PICKUP */}
+
+                  <View style={styles.locationRow}>
+                    <View
+                      style={[styles.locationIcon, styles.pickupLocationIcon]}
+                    >
+                      <Ionicons
+                        name="radio-button-on"
+                        size={17}
+                        color={color.tealDark}
+                      />
+                    </View>
+
+                    <View style={styles.locationContent}>
+                      <Text style={styles.locationLabel}>PICKUP</Text>
+
+                      <Text style={styles.currentLocationText} numberOfLines={1}>
+                        {currentLocationName}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* CONNECTOR */}
+
+                  <View style={styles.locationConnector}>
+                    <View style={styles.connectorLine} />
+                  </View>
+
+                  {/* DESTINATION */}
+
+                  <View style={styles.locationRow}>
+                    <View
+                      style={[
+                        styles.locationIcon,
+                        styles.destinationLocationIcon,
+                      ]}
+                    >
+                      <Ionicons name="location" size={17} color={color.coral} />
+                    </View>
+
+                    <View style={styles.locationContent}>
+                      <Text style={styles.locationLabel}>DESTINATION</Text>
+
+                      <PlaceSearchInput
+                        placeholder="Where to?"
+                        latitude={currentLocation?.latitude}
+                        longitude={currentLocation?.longitude}
+                        onSelect={(place) => {
+                          handlePlaceSelect(place);
+                        }}
+                      />
+                    </View>
                   </View>
                 </View>
 
-                {/* CONNECTOR */}
 
-                <View style={styles.locationConnector}>
-                  <View style={styles.connectorLine} />
-                </View>
-
-                {/* DESTINATION */}
-
-                <View style={styles.locationRow}>
-                  <View
-                    style={[
-                      styles.locationIcon,
-                      styles.destinationLocationIcon,
-                    ]}
-                  >
-                    <Ionicons name="location" size={17} color={color.coral} />
-                  </View>
-
-                  <View style={styles.locationContent}>
-                    <Text style={styles.locationLabel}>DESTINATION</Text>
-
-                    <PlaceSearchInput
-                      placeholder="Where to?"
-                      latitude={currentLocation?.latitude}
-                      longitude={currentLocation?.longitude}
-                      onSelect={(place) => {
-                        handlePlaceSelect(place);
-                      }}
-                    />
-                  </View>
-                </View>
-              </View>
-
-             
-              {/* ==================================================
+                {/* ==================================================
                   CONNECTION STATUS
               ================================================== */}
 
-              <View style={styles.connectionCard}>
-                <View
-                  style={[
-                    styles.connectionIcon,
-                    wsConnected
-                      ? styles.connectionIconOnline
-                      : styles.connectionIconOffline,
-                  ]}
-                >
-                  <Ionicons
-                    name={
-                      wsConnected ? "wifi-outline" : "cloud-offline-outline"
-                    }
-                    size={15}
-                    color={wsConnected ? color.green : color.textMuted}
+                <View style={styles.connectionCard}>
+                  <View
+                    style={[
+                      styles.connectionIcon,
+                      wsConnected
+                        ? styles.connectionIconOnline
+                        : styles.connectionIconOffline,
+                    ]}
+                  >
+                    <Ionicons
+                      name={
+                        wsConnected ? "wifi-outline" : "cloud-offline-outline"
+                      }
+                      size={15}
+                      color={wsConnected ? color.green : color.textMuted}
+                    />
+                  </View>
+
+                  <View style={styles.connectionContent}>
+                    <Text style={styles.connectionTitle}>Driver network</Text>
+
+                    <Text style={styles.connectionSubtitle}>
+                      {wsConnected
+                        ? "Connected and ready to find nearby drivers"
+                        : "Connecting to nearby driver network"}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={[
+                      styles.connectionStatusDot,
+                      {
+                        backgroundColor: wsConnected
+                          ? color.green
+                          : color.textLight,
+                      },
+                    ]}
                   />
                 </View>
-
-                <View style={styles.connectionContent}>
-                  <Text style={styles.connectionTitle}>Driver network</Text>
-
-                  <Text style={styles.connectionSubtitle}>
-                    {wsConnected
-                      ? "Connected and ready to find nearby drivers"
-                      : "Connecting to nearby driver network"}
-                  </Text>
-                </View>
-
-                <View
-                  style={[
-                    styles.connectionStatusDot,
-                    {
-                      backgroundColor: wsConnected
-                        ? color.green
-                        : color.textLight,
-                    },
-                  ]}
-                />
-              </View>
-            </ScrollView>
-          )}
+              </ScrollView>
+            )}
+          </View>
         </View>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </>
   );
 }

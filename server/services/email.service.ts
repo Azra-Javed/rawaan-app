@@ -4,7 +4,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendOtpEmail(email: string, otp: string) {
   const { data, error } = await resend.emails.send({
-    from: "Rawaan <onboarding@resend.dev>",
+    from: "Rawaan <onboarding@yourdomain.com>",
     to: [email],
     subject: "Your Rawaan Verification Code",
     html: `

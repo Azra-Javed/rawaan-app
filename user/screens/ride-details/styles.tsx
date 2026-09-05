@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
 
   mapBackButton: {
     position: "absolute",
-    top: 18,
+    top: 35,
     left: 16,
     width: 44,
     height: 44,

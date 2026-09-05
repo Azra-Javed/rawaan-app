@@ -6,8 +6,9 @@ import {
   StyleSheet,
   Pressable,
   ScrollView,
-  StatusBar,
+
 } from "react-native";
+import { StatusBar } from "expo-status-bar";
 import { router, useLocalSearchParams } from "expo-router";
 import MapView, { Marker, Polyline, UrlTile, Region } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
@@ -59,35 +60,30 @@ export default function RideDetailsScreen() {
 
   // Parse the ride data passed in via navigation params
   useEffect(() => {
-  try {
-    if (!orderDataParam) {
-      console.log("No orderData received");
-      return;
+    try {
+      if (!orderDataParam) {
+        console.log("No orderData received");
+        return;
+      }
+
+      const parsed =
+        typeof orderDataParam === "string"
+          ? JSON.parse(orderDataParam)
+          : orderDataParam;
+
+
+      setOrderData(parsed);
+
+      setOrderStatus(
+        parsed?.ride?.status || "Processing"
+      );
+    } catch (error) {
+      console.log(
+        "Failed to parse ride data:",
+        error
+      );
     }
-
-    const parsed =
-      typeof orderDataParam === "string"
-        ? JSON.parse(orderDataParam)
-        : orderDataParam;
-
-    console.log(
-      "NEW RIDE RECEIVED:",
-      parsed?.ride?.id,
-      parsed?.ride?.status
-    );
-
-    setOrderData(parsed);
-
-    setOrderStatus(
-      parsed?.ride?.status || "Processing"
-    );
-  } catch (error) {
-    console.log(
-      "Failed to parse ride data:",
-      error
-    );
-  }
-}, [orderDataParam]);
+  }, [orderDataParam]);
 
   const pickup = useMemo<Coord | null>(() => {
     if (
@@ -292,16 +288,10 @@ export default function RideDetailsScreen() {
     );
   }
 
-  console.log("RideDetailsScreen render, orderData:", orderData);
-  console.log(user, pickup, dropoff, distance, payableAmount);
-
   return (
     <View style={styles.screen}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={color.tealDark}
-      />
-
+      <StatusBar style="light" backgroundColor={color.tealDark} />
+      
       {/* MAP */}
       <View style={styles.mapContainer}>
         <MapView

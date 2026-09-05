@@ -10,6 +10,7 @@ import fonts from "@/themes/app.fonts";
 import RouteDots from "@/components/common/route-dots";
 import { Ionicons } from "@expo/vector-icons";
 import ScreenHeader from "@/components/common/screen-header";
+import { StatusBar } from "expo-status-bar";
 
 export default function Rides() {
   const [recentRides, setrecentRides] = useState([]);
@@ -25,6 +26,7 @@ export default function Rides() {
 
   return (
     <View style={styles.screen}>
+      <StatusBar  style="light" backgroundColor={color.tealDark} />
       <ScreenHeader
         eyebrow="RAWAAN RIDES"
         title="Ride History"

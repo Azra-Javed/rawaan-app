@@ -19,6 +19,7 @@ import { connectWebSocket, disconnectWebSocket } from "@/utils/websocket";
 import { useToast } from "react-native-toast-notifications";
 import styles from "./styles";
 import api from "@/api/client";
+import { StatusBar } from "expo-status-bar";
 
 type RideData = {
   user?: any;
@@ -58,8 +59,8 @@ const RideDetailsScreen = () => {
     useState("Cash");
   const [paymentCompleted, setPaymentCompleted] = useState(false);
   const [ratingModalVisible, setRatingModalVisible] = useState(false);
-const [selectedRating, setSelectedRating] = useState(0);
-const [ratingSubmitted, setRatingSubmitted] = useState(false);
+  const [selectedRating, setSelectedRating] = useState(0);
+  const [ratingSubmitted, setRatingSubmitted] = useState(false);
 
   useEffect(() => {
     try {
@@ -73,7 +74,7 @@ const [ratingSubmitted, setRatingSubmitted] = useState(false);
           ? JSON.parse(orderDataParam)
           : orderDataParam;
 
-      console.log("Ride details received:", parsed);
+
       setOrderData(parsed);
       setOrderStatus(parsed?.ride?.status || "Processing");
     } catch (error) {
@@ -183,87 +184,79 @@ const [ratingSubmitted, setRatingSubmitted] = useState(false);
   };
 
   useEffect(() => {
-  connectWebSocket((data) => {
-    if (
-      data.type === "rideStatusUpdated" &&
-      data.rideId === orderData?.ride?.id
-    ) {
-      console.log(
-        "Ride status changed to:",
-        data.status
-      );
+    connectWebSocket((data) => {
+      if (
+        data.type === "rideStatusUpdated" &&
+        data.rideId === orderData?.ride?.id
+      ) {
 
-      const status = String(data.status || "").toLowerCase();
 
-      setOrderStatus(data.status);
+        const status = String(data.status || "").toLowerCase();
 
-      
+        setOrderStatus(data.status);
 
-      if (status === "ongoing") {
-        setOrderStatus("Ongoing");
-        toast.show("Your ride is in progress 🚗" , {type:"success"});
+
+
+        if (status === "ongoing") {
+          setOrderStatus("Ongoing");
+          toast.show("Your ride is in progress 🚗", { type: "success" });
+        }
+
+
+        if (status === "completed") {
+          toast.show(
+            "Ride completed. Please rate your driver ⭐"
+            , { type: "success" });
+
+          setRatingModalVisible(true);
+        }
       }
+    });
 
+    return () => {
+      disconnectWebSocket();
+    };
+  }, [orderData?.ride?.id]);
 
-      if (status === "completed") {
-        toast.show(
-          "Ride completed. Please rate your driver ⭐"
-        , {type: "success"});
-
-        setRatingModalVisible(true);
-      }
+  const handleSubmitRating = async () => {
+    if (selectedRating === 0) {
+      toast.show("Please select a rating ⭐");
+      return;
     }
-  });
 
-  return () => {
-    disconnectWebSocket();
-  };
-}, [orderData?.ride?.id]); 
+    try {
 
-const handleSubmitRating = async () => {
-  if (selectedRating === 0) {
-    toast.show("Please select a rating ⭐");
-    return;
-  }
-
-  try {
-    
 
       await api.put("/driver/rating", {
         rideId: orderData?.ride?.id,
         driverId: driver?.id,
         rating: selectedRating,
       });
-    
 
-    console.log("Rating submitted:", {
-      rideId: orderData?.ride?.id,
-      driverId: driver?.id,
-      rating: selectedRating,
-    });
 
-    setRatingSubmitted(true);
 
-  toast.show(
-      "Thanks for rating your driver!"
-    , { type: "success" });
+      setRatingSubmitted(true);
 
-    setTimeout(() => {
-      setRatingModalVisible(false);
-      router.replace("/");
-    }, 700);
+      toast.show(
+        "Thanks for rating your driver!"
+        , { type: "success" });
 
-  } catch (error) {
-    console.log(
-      "Failed to submit driver rating:",
-      error
-    );
+      setTimeout(() => {
+        setRatingModalVisible(false);
+        router.replace("/");
+      }, 700);
 
-    toast.show(
-      "Unable to submit rating. Please try again."
-    , {type: "danger"});
-  }
-};
+    } catch (error) {
+      console.log(
+        "Failed to submit driver rating:",
+        error
+      );
+
+      toast.show(
+        "Unable to submit rating. Please try again."
+        , { type: "danger" });
+    }
+  };
   if (!orderData) {
     return (
       <SafeAreaView style={styles.emptyScreen}>
@@ -301,11 +294,10 @@ const handleSubmitRating = async () => {
   }
 
   return (
+    <>  
+    <StatusBar style="light" backgroundColor={color.tealDark} />
     <View style={styles.container}>
-      {/* =====================================================
-          MAP
-      ===================================================== */}
-
+      
       <View style={styles.mapContainer}>
         <MapView
           style={styles.map}
@@ -794,126 +786,128 @@ const handleSubmitRating = async () => {
     DRIVER RATING MODAL
 ===================================================== */}
 
-<Modal
-  visible={ratingModalVisible}
-  transparent
-  animationType="slide"
-  onRequestClose={() => {}}
->
-  <View style={styles.ratingOverlay}>
-    <View style={styles.ratingModal}>
-      {/* Handle */}
-
-      <View style={styles.modalHandle} />
-
-      {/* Icon */}
-
-      <View style={styles.ratingIcon}>
-        <Ionicons
-          name="star"
-          size={25}
-          color={color.routeAmber}
-        />
-      </View>
-
-      {/* Heading */}
-
-      <Text style={styles.ratingTitle}>
-        How was your ride?
-      </Text>
-
-      <Text style={styles.ratingSubtitle}>
-        Your feedback helps us improve the
-        Rawaan experience.
-      </Text>
-
-      {/* Driver */}
-
-      <View style={styles.ratingDriver}>
-        <View style={styles.ratingDriverAvatar}>
-          <Ionicons
-            name="person"
-            size={21}
-            color={color.nightIndigo}
-          />
-        </View>
-
-        <View style={styles.ratingDriverInfo}>
-          <Text style={styles.ratingDriverLabel}>
-            YOUR DRIVER
-          </Text>
-
-          <Text style={styles.ratingDriverName}>
-            {driver?.name || "Driver"}
-          </Text>
-        </View>
-      </View>
-
-      {/* Stars */}
-
-      <View style={styles.starsContainer}>
-        {[1, 2, 3, 4, 5].map((star) => (
-          <TouchableOpacity
-            key={star}
-            onPress={() => setSelectedRating(star)}
-            activeOpacity={0.7}
-            style={styles.starButton}
-          >
-            <Ionicons
-              name={
-                star <= selectedRating
-                  ? "star"
-                  : "star-outline"
-              }
-              size={38}
-              color={color.routeAmber}
-            />
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Rating text */}
-
-      <Text style={styles.ratingText}>
-        {selectedRating === 0
-          ? "Tap a star to rate"
-          : selectedRating === 1
-          ? "Very poor"
-          : selectedRating === 2
-          ? "Poor"
-          : selectedRating === 3
-          ? "Good"
-          : selectedRating === 4
-          ? "Very good"
-          : "Excellent!"}
-      </Text>
-
-      {/* Submit */}
-
-      <TouchableOpacity
-        style={[
-          styles.submitRatingButton,
-          selectedRating === 0 &&
-            styles.submitRatingButtonDisabled,
-        ]}
-        disabled={selectedRating === 0}
-        onPress={handleSubmitRating}
-        activeOpacity={0.8}
+      <Modal
+        visible={ratingModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => { }}
       >
-        <Text style={styles.submitRatingText}>
-          Submit Rating
-        </Text>
+        <View style={styles.ratingOverlay}>
+          <View style={styles.ratingModal}>
+            {/* Handle */}
 
-        <Ionicons
-          name="arrow-forward"
-          size={18}
-          color={color.white}
-        />
-      </TouchableOpacity>
+            <View style={styles.modalHandle} />
+
+            {/* Icon */}
+
+            <View style={styles.ratingIcon}>
+              <Ionicons
+                name="star"
+                size={25}
+                color={color.routeAmber}
+              />
+            </View>
+
+            {/* Heading */}
+
+            <Text style={styles.ratingTitle}>
+              How was your ride?
+            </Text>
+
+            <Text style={styles.ratingSubtitle}>
+              Your feedback helps us improve the
+              Rawaan experience.
+            </Text>
+
+            {/* Driver */}
+
+            <View style={styles.ratingDriver}>
+              <View style={styles.ratingDriverAvatar}>
+                <Ionicons
+                  name="person"
+                  size={21}
+                  color={color.nightIndigo}
+                />
+              </View>
+
+              <View style={styles.ratingDriverInfo}>
+                <Text style={styles.ratingDriverLabel}>
+                  YOUR DRIVER
+                </Text>
+
+                <Text style={styles.ratingDriverName}>
+                  {driver?.name || "Driver"}
+                </Text>
+              </View>
+            </View>
+
+            {/* Stars */}
+
+            <View style={styles.starsContainer}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <TouchableOpacity
+                  key={star}
+                  onPress={() => setSelectedRating(star)}
+                  activeOpacity={0.7}
+                  style={styles.starButton}
+                >
+                  <Ionicons
+                    name={
+                      star <= selectedRating
+                        ? "star"
+                        : "star-outline"
+                    }
+                    size={38}
+                    color={color.routeAmber}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            {/* Rating text */}
+
+            <Text style={styles.ratingText}>
+              {selectedRating === 0
+                ? "Tap a star to rate"
+                : selectedRating === 1
+                  ? "Very poor"
+                  : selectedRating === 2
+                    ? "Poor"
+                    : selectedRating === 3
+                      ? "Good"
+                      : selectedRating === 4
+                        ? "Very good"
+                        : "Excellent!"}
+            </Text>
+
+            {/* Submit */}
+
+            <TouchableOpacity
+              style={[
+                styles.submitRatingButton,
+                selectedRating === 0 &&
+                styles.submitRatingButtonDisabled,
+              ]}
+              disabled={selectedRating === 0}
+              onPress={handleSubmitRating}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.submitRatingText}>
+                Submit Rating
+              </Text>
+
+              <Ionicons
+                name="arrow-forward"
+                size={18}
+                color={color.white}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
-  </View>
-</Modal>
-    </View>
+    </>
+  
   );
 };
 

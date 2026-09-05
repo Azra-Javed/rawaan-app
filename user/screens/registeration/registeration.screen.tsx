@@ -16,6 +16,7 @@ import React, { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useToast } from "react-native-toast-notifications";
 import styles from "./styles";
+import { StatusBar } from "expo-status-bar";
 
 const RegisteranScreen = () => {
   const toast = useToast();
@@ -115,6 +116,8 @@ const RegisteranScreen = () => {
   };
 
   return (
+    <>
+    <StatusBar style="light" backgroundColor={color.tealDark} />
     <View style={styles.screen}>
       {/* =====================================================
         FIXED HEADER
@@ -281,7 +284,7 @@ const RegisteranScreen = () => {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </View></>
   );
 };
 
