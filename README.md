@@ -1,16 +1,55 @@
-# 🚕 Rawaan — Ride-Sharing & Mobility Platform
+# Rawaan — Real-Time Ride-Sharing & Mobility Platform
 
-> A modern real-time ride-booking platform built with React Native, Expo, Node.js, Express, Prisma, MongoDB and WebSockets.
+> A modern full-stack ride-sharing platform built with **React Native, Expo, Node.js, Express, Prisma, MongoDB and WebSockets**, featuring real-time ride updates and live driver tracking.
 
-Rawaan is a full-stack ride-sharing application designed to connect passengers with drivers through a real-time ride-booking system.
+Rawaan is a full-stack mobile ride-booking platform designed to connect **passengers and drivers through a real-time ride lifecycle**.
 
-The application provides separate experiences for **Passengers** and **Drivers**, allowing passengers to search for destinations, request rides, monitor ride status in real time, communicate with drivers, complete rides and rate drivers.
+Passengers can search for destinations, request rides, receive driver assignments, track their driver's location in real time, monitor ride progress, contact drivers, view fare information, complete rides and submit ratings.
 
-The project focuses on building a scalable mobile architecture with real-time communication, location-based services, REST APIs, database persistence and a modern mobile UI.
+Drivers have a dedicated application where they can register, manage their availability, receive ride requests, accept rides, update ride status, share their live location and track their ride statistics and earnings.
 
 ---
 
-# 📱 Project Overview
+# Screenshots
+
+### Passenger App
+
+<p align="center">
+  <img src="./screenshots/user/home.png" width="250"/>
+  <img src="./screenshots/user/ride-plan.png" width="250"/>
+  <img src="./screenshots/user/ride-details.png" width="250"/>
+</p>
+
+<p align="center">
+  <b>Passenger Home</b> &nbsp;&nbsp;&nbsp;
+  <b>Ride Planner</b> &nbsp;&nbsp;&nbsp;
+  <b>Live Driver Tracking</b>
+</p>
+
+###  Driver App
+
+<p align="center">
+  <img src="./screenshots/driver/home.png" width="250"/>
+  <img src="./screenshots/driver/ride-request.png" width="250"/>
+  <img src="./screenshots/driver/ride-details.png" width="250"/>
+</p>
+
+<p align="center">
+  <b>Driver Dashboard</b> &nbsp;&nbsp;&nbsp;
+  <b>Ride Request</b> &nbsp;&nbsp;&nbsp;
+  <b>Active Ride</b>
+</p>
+
+### Ride Completion
+
+<p align="center">
+  <img src="./screenshots/user/ride-history.png" width="250"/>
+  <img src="./screenshots/user/rating.png" width="250"/>
+</p>
+
+---
+
+#  Project Overview
 
 Rawaan consists of two primary mobile applications:
 
@@ -43,190 +82,376 @@ flowchart TB
 Passengers can:
 
 * Create an account
-* Authenticate using phone/email verification
-* Search for pickup and destination locations
-* View locations on a map
-* Calculate route information
+* Verify their phone/email
+* Manage their profile
+* Detect their current location
+* Search for locations
+* Select pickup and destination
+* View routes on a map
+* Calculate distance
+* Calculate/view fare information
 * Request rides
-* Receive real-time ride status updates
+* Receive driver assignments
 * View driver information
-* Contact their driver
-* Track ride progress
-* View fare information
-* Select payment method
-* Receive ride completion feedback
-* Rate their driver
-* View recent rides
+* Call their driver
+* Track the driver in real time
+* Receive real-time ride status updates
+* Monitor ride progress
+* Complete rides
+* Rate drivers
+* View recent rides and ride history
+* Select a payment method
 
 ### Driver Application
 
 Drivers can:
 
-* Register their profile
+* Register their driver profile
 * Provide vehicle information
-* Manage availability/status
+* Provide license information
+* Manage availability
 * Receive ride requests
 * Accept rides
 * Update ride status
+* Share their current location
+* Navigate toward passengers
 * Complete rides
 * Track earnings
-* Track ride statistics
+* View ride statistics
 * Maintain their driver rating
 * Manage their profile
 
 ---
 
-# 🎯 Problem Statement
+# Key Feature — Real-Time Driver Tracking
 
-Traditional ride-booking systems require multiple independent services to work together:
+One of the core features of Rawaan is **real-time driver location tracking**.
 
-```text
-Passenger
-   │
-   ├── Authentication
-   ├── Location Search
-   ├── Maps
-   ├── Driver Matching
-   ├── Ride Booking
-   ├── Real-Time Status
-   ├── Payment
-   └── Rating
-           │
-           ▼
-        Backend
-           │
-           ▼
-        Database
+After a driver accepts a ride, the driver's mobile application can continuously provide location updates while the ride is active.
+
+The passenger receives these updates through the WebSocket connection and updates the driver's marker on the map.
+
+```mermaid
+sequenceDiagram
+
+    participant D as Driver App
+    participant WS as WebSocket Server
+    participant P as Passenger App
+
+    D->>WS: Send GPS Location
+    WS->>P: driverLocationUpdated
+    P->>P: Update Driver Marker
+
+    D->>WS: Send New GPS Location
+    WS->>P: driverLocationUpdated
+    P->>P: Move Driver Marker
+
+    D->>WS: Send New GPS Location
+    WS->>P: driverLocationUpdated
+    P->>P: Update Driver Position
 ```
 
-The challenge was to build a system where these components communicate reliably while maintaining a responsive mobile experience.
+Conceptually:
 
-The main engineering challenges include:
+```text
+Driver GPS
+    │
+    ▼
+Driver Application
+    │
+    │ WebSocket
+    ▼
+WebSocket Server
+    │
+    │ Real-Time Event
+    ▼
+Passenger Application
+    │
+    ▼
+Update Driver Marker
+```
 
-* Real-time communication
-* Location handling
-* Ride state management
-* Driver/passenger synchronization
-* Database consistency
-* Authentication
-* Mobile navigation
-* API communication
-* Map rendering
-* Rating calculations
-* Error handling
-* Production deployment
+Example event:
+
+```json
+{
+  "type": "driverLocationUpdated",
+  "rideId": "ride_id",
+  "driverId": "driver_id",
+  "latitude": 31.5204,
+  "longitude": 74.3587
+}
+```
+
+This allows the passenger to see the driver's movement instead of relying on periodic polling.
 
 ---
 
-# 🏗️ High-Level Architecture
+# Complete Ride Lifecycle
+
+The complete Rawaan ride lifecycle is:
+
+```text
+Passenger Opens App
+        │
+        ▼
+Select Pickup Location
+        │
+        ▼
+Select Destination
+        │
+        ▼
+Preview Route / Fare
+        │
+        ▼
+Request Ride
+        │
+        ▼
+Available Driver Receives Request
+        │
+        ▼
+Driver Accepts
+        │
+        ▼
+Passenger Receives Driver Information
+        │
+        ▼
+Live Driver Tracking Starts
+        │
+        ▼
+Driver Travels Toward Pickup
+        │
+        ▼
+Driver Reaches Passenger
+        │
+        ▼
+Ride Starts
+        │
+        ▼
+Live Ride Tracking
+        │
+        ▼
+Driver Reaches Destination
+        │
+        ▼
+Ride Completed
+        │
+        ▼
+Passenger Rates Driver
+```
+
+---
+
+# Ride State Management
+
+A ride progresses through controlled states:
+
+```mermaid
+stateDiagram-v2
+
+    [*] --> Processing
+
+    Processing --> Accepted
+    Processing --> Cancelled
+
+    Accepted --> Ongoing
+    Accepted --> Cancelled
+
+    Ongoing --> Completed
+
+    Completed --> Rated
+
+    Cancelled --> [*]
+    Rated --> [*]
+```
+
+### Ride States
+
+| State        | Description                              |
+| ------------ | ---------------------------------------- |
+| `Processing` | Ride request has been created            |
+| `Accepted`   | A driver has accepted the ride           |
+| `Ongoing`    | Driver/passenger are actively travelling |
+| `Completed`  | Ride has reached its destination         |
+| `Rated`      | Passenger has submitted a rating         |
+| `Cancelled`  | Ride has been cancelled                  |
+
+Keeping ride states synchronized between the backend and both mobile applications is an important part of the architecture.
+
+---
+
+# Real-Time WebSocket Architecture
+
+REST APIs are used for persistent operations, while WebSockets are used for events that require immediate synchronization.
 
 ```mermaid
 flowchart LR
 
-    subgraph Mobile["📱 Mobile Layer"]
-        Passenger["Passenger App\nReact Native + Expo"]
-        Driver["Driver App\nReact Native + Expo"]
-    end
+    Passenger["👤 Passenger App"]
+    Driver["🚗 Driver App"]
 
-    subgraph Backend["☁️ Backend Layer"]
-        REST["REST API\nExpress.js"]
-        Socket["WebSocket\nReal-Time Communication"]
-        Auth["Authentication"]
-        Ride["Ride Management"]
-        DriverService["Driver Management"]
-        Rating["Rating Service"]
-    end
+    WS["🔌 WebSocket Server"]
 
-    subgraph Data["💾 Data Layer"]
-        Prisma["Prisma ORM"]
-        Mongo["MongoDB"]
-    end
+    Passenger <--> WS
+    Driver <--> WS
 
-    subgraph External["🌍 External Services"]
-        Maps["Map / Geocoding Services"]
-        SMS["SMS Verification"]
-        Email["Email Verification"]
-    end
-
-    Passenger --> REST
-    Driver --> REST
-
-    Passenger <--> Socket
-    Driver <--> Socket
-
-    REST --> Auth
-    REST --> Ride
-    REST --> DriverService
-    REST --> Rating
-
-    Ride --> Prisma
-    DriverService --> Prisma
-    Rating --> Prisma
-
-    Prisma --> Mongo
-
-    Passenger --> Maps
-    Driver --> Maps
-
-    Auth --> SMS
-    Auth --> Email
+    WS --> Status["Ride Status"]
+    WS --> Location["Driver Location"]
+    WS --> Request["Ride Requests"]
+    WS --> Assignment["Driver Assignment"]
+    WS --> Completion["Ride Completion"]
 ```
 
----
+### Real-Time Events
 
-# 🧰 Technology Stack
-
-## Frontend
-
-| Technology              | Purpose                                  |
-| ----------------------- | ---------------------------------------- |
-| React Native            | Cross-platform mobile development        |
-| Expo                    | React Native development/build ecosystem |
-| Expo Router             | File-based navigation                    |
-| TypeScript              | Static typing                            |
-| Axios                   | HTTP API communication                   |
-| React Native Maps       | Map rendering                            |
-| Expo Location           | Device location                          |
-| WebSocket               | Real-time ride updates                   |
-| Ionicons / custom icons | UI icons                                 |
-| Custom Theme System     | Consistent UI                            |
-
----
-
-## Backend
-
-| Technology    | Purpose                 |
-| ------------- | ----------------------- |
-| Node.js       | JavaScript runtime      |
-| Express.js    | REST API framework      |
-| TypeScript    | Backend type safety     |
-| Prisma        | ORM/database access     |
-| MongoDB       | Primary database        |
-| WebSocket     | Real-time communication |
-| Twilio Verify | Phone verification      |
-| Email service | Email OTP/verification  |
-
----
-
-## Mapping
-
-The application uses a map/location architecture consisting of:
+Examples of real-time events include:
 
 ```text
-Location
-   │
-   ├── Device GPS
-   │
-   ├── Location Search
-   │
-   ├── Geocoding
-   │
-   ├── Route Calculation
-   │
-   └── Map Rendering
+newRideRequest
+       ↓
+rideAccepted
+       ↓
+driverAssigned
+       ↓
+driverLocationUpdated
+       ↓
+rideStatusUpdated
+       ↓
+rideCompleted
 ```
 
-Depending on the configured environment, the project can use services such as:
+Example ride status event:
+
+```json
+{
+  "type": "rideStatusUpdated",
+  "rideId": "ride_id",
+  "status": "Ongoing"
+}
+```
+
+Example driver location event:
+
+```json
+{
+  "type": "driverLocationUpdated",
+  "rideId": "ride_id",
+  "driverId": "driver_id",
+  "latitude": 31.5204,
+  "longitude": 74.3587
+}
+```
+
+---
+
+# Driver Location Flow
+
+The driver's GPS location is used throughout the active ride.
+
+```mermaid
+flowchart TD
+
+    GPS["📍 Device GPS"]
+
+    DriverApp["🚗 Driver App"]
+
+    Socket["🔌 WebSocket Connection"]
+
+    Server["⚙️ WebSocket Server"]
+
+    Passenger["👤 Passenger App"]
+
+    Map["🗺️ Update Driver Marker"]
+
+    GPS --> DriverApp
+    DriverApp --> Socket
+    Socket --> Server
+    Server --> Passenger
+    Passenger --> Map
+```
+
+This architecture allows the passenger's map to react to driver movement in near real time.
+
+---
+
+# Ride Booking Architecture
+
+When a passenger requests a ride:
+
+```mermaid
+sequenceDiagram
+
+    participant P as Passenger
+    participant API as Backend
+    participant DB as MongoDB
+    participant WS as WebSocket
+    participant D as Driver
+
+    P->>API: Create Ride
+    API->>DB: Save Ride
+    DB-->>API: Ride Created
+
+    API->>WS: Notify Available Drivers
+    WS-->>D: New Ride Request
+
+    D->>API: Accept Ride
+    API->>DB: Update Ride
+
+    API->>WS: Driver Assigned
+    WS-->>P: Ride Accepted
+
+    P->>P: Display Driver Information
+
+    D->>WS: Send Location Updates
+    WS-->>P: Driver Location
+
+    P->>P: Update Driver Marker
+```
+
+---
+
+# Location & Route Architecture
+
+Rawaan uses device GPS, location search, geocoding and routing services to create the ride planning experience.
+
+```text
+                  Device GPS
+                      │
+                      ▼
+               Current Location
+                      │
+                      ▼
+              Location Search
+                      │
+                      ▼
+                 Destination
+                      │
+                      ▼
+                Route Service
+                      │
+            ┌─────────┴─────────┐
+            ▼                   ▼
+        Distance             Route
+            │                   │
+            └─────────┬─────────┘
+                      ▼
+                 Ride Preview
+                      │
+                      ▼
+                  Book Ride
+```
+
+The route pipeline can include:
+
+* Device GPS
+* Location search
+* Geocoding
+* Route calculation
+* Distance calculation
+* Polyline decoding
+* Map rendering
+
+Depending on the configured environment, Rawaan can work with services such as:
 
 * MapTiler
 * OpenStreetMap
@@ -236,47 +461,58 @@ Depending on the configured environment, the project can use services such as:
 
 ---
 
-# 🔐 Authentication Flow
+# Authentication
 
-The authentication architecture is designed around verification before allowing access to protected functionality.
+Rawaan uses verification-based authentication for protected functionality.
 
 ```mermaid
 sequenceDiagram
 
-    participant U as Passenger
+    participant U as User
     participant A as Mobile App
     participant API as Express API
     participant OTP as OTP Service
     participant DB as MongoDB
 
-    U->>A: Enter phone/email
-    A->>API: Request verification
-    API->>OTP: Generate/send OTP
+    U->>A: Enter Phone / Email
+    A->>API: Request Verification
+    API->>OTP: Send OTP
     OTP-->>U: OTP
     U->>A: Enter OTP
     A->>API: Verify OTP
-    API->>DB: Find/Create User
-    DB-->>API: User
+
+    API->>DB: Find / Create User
+    DB-->>API: User Data
+
     API-->>A: Authentication Success
-    A->>A: Navigate to Home
+    A->>A: Navigate to Application
 ```
 
-The same principle can be applied to driver registration.
+The same verification principle can be applied to driver registration.
 
 ---
 
-# 🚗 Driver Registration Flow
+# Driver Registration
+
+Drivers provide the information required to operate within the platform.
 
 ```mermaid
 flowchart TD
 
-    Start["Driver Opens Registration"]
-    Personal["Enter Personal Information"]
-    Vehicle["Enter Vehicle Information"]
-    License["Enter Driving License"]
+    Start["Driver Registration"]
+
+    Personal["Personal Information"]
+
+    Vehicle["Vehicle Information"]
+
+    License["Driving License"]
+
     Phone["Phone Verification"]
+
     Email["Email Verification"]
+
     Save["Create Driver"]
+
     Dashboard["Driver Dashboard"]
 
     Start --> Personal
@@ -299,210 +535,68 @@ Driver information includes:
 * Registration date
 * Driving license
 * Vehicle color
-* Rate
+* Driver rate
 
 ---
 
-# 📍 Location Search Flow
+# Driver Communication
 
-A passenger begins a ride by selecting locations.
-
-```mermaid
-flowchart TD
-
-    Start["Passenger opens Ride Planner"]
-
-    Current["Get Current Location"]
-
-    Search["Search Destination"]
-
-    Geocode["Geocoding / Location Search"]
-
-    Select["Passenger Selects Location"]
-
-    Route["Calculate Route"]
-
-    Distance["Calculate Distance"]
-
-    Preview["Display Route + Ride Information"]
-
-    Book["Book Ride"]
-
-    Start --> Current
-    Current --> Search
-    Search --> Geocode
-    Geocode --> Select
-    Select --> Route
-    Route --> Distance
-    Distance --> Preview
-    Preview --> Book
-```
-
----
-
-# 🗺️ Route Calculation
-
-The route pipeline is conceptually:
+Passengers can access the driver's phone number from the ride details.
 
 ```text
-Pickup Coordinates
-        │
-        ▼
-Destination Coordinates
-        │
-        ▼
-Routing Service
-        │
-        ▼
-Route Geometry
-        │
-        ▼
-Polyline Coordinates
-        │
-        ▼
-React Native Map
+Passenger
+    │
+    ▼
+Ride Details
+    │
+    ▼
+Call Driver
+    │
+    ▼
+Native Phone Dialer
 ```
 
-The route is then rendered on the map using a polyline.
+The application delegates the actual phone call to the device's native calling functionality.
 
 ---
 
-# 🚕 Ride Booking Architecture
+# Payment
 
-When a passenger books a ride:
+The passenger application includes a payment-method interface as part of the ride-booking experience.
 
-```mermaid
-sequenceDiagram
+The ride architecture keeps payment information associated with the ride lifecycle so that payment handling can be extended independently.
 
-    participant P as Passenger App
-    participant API as Backend
-    participant DB as MongoDB
-    participant WS as WebSocket
-    participant D as Driver App
-
-    P->>API: Create Ride
-    API->>DB: Save Ride
-    DB-->>API: Ride Created
-
-    API->>WS: Notify available drivers
-    WS-->>D: New Ride Request
-
-    D->>API: Accept Ride
-    API->>DB: Update Ride
-
-    API->>WS: Ride Accepted
-    WS-->>P: Driver Assigned
-
-    P->>P: Display Driver Details
-```
+> If a production payment gateway is added later, it can be integrated into the existing ride/payment layer without redesigning the entire application.
 
 ---
 
-# 🔄 Ride Lifecycle
+# Rating System
 
-A ride moves through several states.
-
-```mermaid
-stateDiagram-v2
-
-    [*] --> Processing
-
-    Processing --> Accepted
-    Processing --> Cancelled
-
-    Accepted --> Ongoing
-    Accepted --> Cancelled
-
-    Ongoing --> Completed
-
-    Completed --> Rated
-
-    Cancelled --> [*]
-    Rated --> [*]
-```
-
-The exact state names should remain consistent between frontend and backend.
----
-
-# 🔌 Real-Time WebSocket Architecture
-
-REST APIs handle persistent operations while WebSockets handle events that need immediate delivery.
+After a ride is completed, passengers can provide feedback about the driver.
 
 ```text
-                  ┌─────────────────┐
-                  │   WebSocket     │
-                  │     Server      │
-                  └────────┬────────┘
-                           │
-             ┌─────────────┴─────────────┐
-             │                           │
-             ▼                           ▼
-       Passenger App               Driver App
-             │                           │
-             │                           │
-       Ride Updates                Ride Updates
-       Driver Updates              New Requests
-       Completion                  Status Changes
+Ride Completed
+      │
+      ▼
+Rating Screen
+      │
+      ▼
+Passenger Selects Rating
+      │
+      ▼
+Backend Updates Driver Rating
+      │
+      ▼
+Driver Profile
 ```
 
-Example event:
-
-```json
-{
-  "type": "rideStatusUpdated",
-  "rideId": "ride_id",
-  "status": "Ongoing"
-}
-```
-
-Passenger receives:
-
-```text
-Processing
-     ↓
-Accepted
-     ↓
-Ongoing
-     ↓
-Completed
-```
+The driver profile maintains rating and ride statistics.
 
 ---
 
-# 📡 Ride Status Update Flow
+# Database Architecture
 
-```mermaid
-sequenceDiagram
-
-    participant D as Driver
-    participant API as Backend
-    participant DB as MongoDB
-    participant WS as WebSocket
-    participant P as Passenger
-
-    D->>API: Update Ride Status
-    API->>DB: Update Ride
-
-    DB-->>API: Updated Ride
-
-    API->>WS: Broadcast status event
-
-    WS-->>P: rideStatusUpdated
-
-    P->>P: Update UI
-
-    alt Status = Ongoing
-        P->>P: Show ride progress feedback
-    else Status = Completed
-        P->>P: Open rating modal
-    end
-```
-
----
-
-# 💾 Database Architecture
-
-Rawaan uses MongoDB with Prisma.
+Rawaan uses **MongoDB with Prisma ORM**.
 
 ```mermaid
 erDiagram
@@ -560,9 +654,9 @@ erDiagram
 
 ---
 
-# 🗃️ Core Database Models
+# Core Data Models
 
-## User
+### User
 
 ```text
 User
@@ -577,7 +671,7 @@ User
 └── updatedAt
 ```
 
-## Driver
+### Driver
 
 ```text
 Driver
@@ -603,10 +697,10 @@ Driver
 └── updatedAt
 ```
 
-## Ride
+### Ride
 
 ```text
-Rides
+Ride
 ├── id
 ├── userId
 ├── driverId
@@ -622,24 +716,118 @@ Rides
 
 ---
 
+# Technology Stack
 
-# 📞 Driver Communication
+## Mobile
 
-Passengers can access the driver's phone number from the ride details.
+| Technology              | Purpose                                      |
+| ----------------------- | -------------------------------------------- |
+| React Native            | Cross-platform mobile application            |
+| Expo                    | React Native development and build ecosystem |
+| Expo Router             | File-based navigation                        |
+| TypeScript              | Static type safety                           |
+| Axios                   | HTTP API communication                       |
+| React Native Maps       | Map rendering                                |
+| Expo Location           | Device GPS/location                          |
+| WebSocket               | Real-time communication                      |
+| Ionicons / Custom Icons | Application UI                               |
+| Custom Theme System     | Consistent design system                     |
 
-The mobile application can initiate:
+## Backend
 
-```text
-Passenger
-    ↓
-Ride Details
-    ↓
-Call Driver
-    ↓
-Android/iOS Phone Dialer
+| Technology    | Purpose                 |
+| ------------- | ----------------------- |
+| Node.js       | JavaScript runtime      |
+| Express.js    | REST API framework      |
+| TypeScript    | Backend type safety     |
+| Prisma        | ORM/database access     |
+| MongoDB       | Primary database        |
+| WebSocket     | Real-time communication |
+| Twilio Verify | Phone verification      |
+| Email Service | Email OTP/verification  |
+
+## Mapping
+
+| Technology    | Purpose                   |
+| ------------- | ------------------------- |
+| MapTiler      | Map tiles                 |
+| OpenStreetMap | Map data                  |
+| Nominatim     | Location search/geocoding |
+| OSRM          | Route calculation         |
+| Expo Location | Device GPS                |
+
+---
+
+# High-Level Architecture
+
+```mermaid
+flowchart TB
+
+    subgraph Mobile["📱 Mobile Applications"]
+
+        Passenger["👤 Passenger App\nReact Native + Expo"]
+
+        Driver["🚗 Driver App\nReact Native + Expo"]
+
+    end
+
+    subgraph Backend["⚙️ Backend"]
+
+        REST["REST API\nExpress.js"]
+
+        WS["WebSocket Server"]
+
+        Auth["Authentication"]
+
+        Ride["Ride Management"]
+
+        DriverService["Driver Management"]
+
+        Rating["Rating Service"]
+
+    end
+
+    subgraph Data["💾 Data Layer"]
+
+        Prisma["Prisma ORM"]
+
+        Mongo["MongoDB"]
+
+    end
+
+    subgraph External["🌍 External Services"]
+
+        Maps["Maps / Routing"]
+
+        SMS["SMS Verification"]
+
+        Email["Email Verification"]
+
+    end
+
+    Passenger --> REST
+    Driver --> REST
+
+    Passenger <--> WS
+    Driver <--> WS
+
+    REST --> Auth
+    REST --> Ride
+    REST --> DriverService
+    REST --> Rating
+
+    Ride --> Prisma
+    DriverService --> Prisma
+    Rating --> Prisma
+
+    Prisma --> Mongo
+
+    Passenger --> Maps
+    Driver --> Maps
+
+    Auth --> SMS
+    Auth --> Email
 ```
-
-The app does not need to directly manage the phone call itself.
 
 ---
 
@@ -647,14 +835,15 @@ The app does not need to directly manage the phone call itself.
 
 ## Why React Native?
 
-One codebase can target:
+React Native allows the platform to target Android and iOS while sharing a large portion of the application code.
 
 ```text
-Android
-iOS
+             React Native
+                  │
+          ┌───────┴───────┐
+          ▼               ▼
+       Android           iOS
 ```
-
-while still providing access to native device capabilities.
 
 ## Why Expo?
 
@@ -662,18 +851,18 @@ Expo simplifies:
 
 * Development
 * Native configuration
-* Builds
 * Device testing
+* Builds
 * App distribution
 
 ## Why Node.js?
 
-Node.js is suitable for:
+Node.js works well for:
 
 * REST APIs
-* Real-time communication
+* Real-time applications
 * I/O-heavy workloads
-* JavaScript/TypeScript ecosystem
+* TypeScript-based backend development
 
 ## Why Prisma?
 
@@ -686,127 +875,173 @@ Prisma provides:
 
 ## Why MongoDB?
 
-MongoDB provides a flexible document-oriented data model suitable for rapidly evolving application data.
+MongoDB provides a flexible document-oriented data model suitable for application data that evolves during development.
 
 ## Why WebSockets?
 
-Ride status is time-sensitive.
+Ride-sharing applications contain information that needs to reach users quickly.
 
-Polling would require:
-
-```text
-Request
-Wait
-Request
-Wait
-Request
-Wait
-```
-
-WebSockets allow:
+Traditional polling requires:
 
 ```text
-Server ───────────────► Client
-        instant event
+Client → Request
+        ↓
+       Wait
+        ↓
+Client → Request
+        ↓
+       Wait
+        ↓
+Client → Request
 ```
 
-This provides a better real-time experience.
+WebSockets provide a persistent communication channel:
 
+```text
+Driver
+   │
+   │ Real-Time Event
+   ▼
+WebSocket Server
+   │
+   │ Real-Time Event
+   ▼
+Passenger
+```
 
----
+This is particularly useful for:
 
-# 🏆 Key Features
-
-## Passenger Features
-
-* Authentication
-* OTP verification
-* Profile management
-* Current location detection
-* Location search
-* Destination selection
-* Route visualization
-* Distance calculation
-* Fare calculation
-* Ride booking
+* Driver location updates
+* Ride status
+* Ride requests
 * Driver assignment
-* Driver information
-* Driver calling
-* Real-time ride status
 * Ride completion
-* Driver rating
-* Ride history
-* Recent rides
-* Payment interface
-
-## Driver Features
-
-* Driver registration
-* Vehicle registration
-* License information
-* Driver profile
-* Driver availability
-* Ride request handling
-* Ride acceptance
-* Ride status updates
-* Ride completion
-* Earnings tracking
-* Ride statistics
-* Rating management
-
-## Backend Features
-
-* REST API
-* Prisma ORM
-* MongoDB
-* Ride management
-* Driver management
-* User management
-* Rating system
-* OTP verification
-* WebSocket communication
-* Server-side validation
-* Error handling
 
 ---
 
-# 🧠 Lessons Learned
+# Feature Overview
 
-This project provided practical experience with:
+## Passenger
+
+* [x] Authentication
+* [x] OTP verification
+* [x] Profile management
+* [x] Current location detection
+* [x] Location search
+* [x] Destination selection
+* [x] Route visualization
+* [x] Distance calculation
+* [x] Fare information
+* [x] Ride booking
+* [x] Driver assignment
+* [x] Driver information
+* [x] Driver calling
+* [x] Real-time ride status
+* [x] Live driver tracking
+* [x] Ride progress
+* [x] Ride completion
+* [x] Driver rating
+* [x] Ride history
+* [x] Recent rides
+* [x] Payment interface
+
+## Driver
+
+* [x] Driver registration
+* [x] Vehicle information
+* [x] License information
+* [x] Driver profile
+* [x] Availability management
+* [x] Ride request handling
+* [x] Ride acceptance
+* [x] Ride status updates
+* [x] Live location sharing
+* [x] Ride completion
+* [x] Earnings tracking
+* [x] Ride statistics
+* [x] Rating management
+
+## Backend
+
+* [x] REST API
+* [x] WebSocket communication
+* [x] User management
+* [x] Driver management
+* [x] Ride management
+* [x] Prisma ORM
+* [x] MongoDB persistence
+* [x] Authentication
+* [x] OTP verification
+* [x] Rating system
+* [x] Validation
+* [x] Error handling
+
+---
+
+# Security & Validation
+
+The backend is responsible for validating requests before modifying ride or user data.
+
+Important areas include:
+
+* Authentication verification
+* Protected API routes
+* Request validation
+* Ride ownership validation
+* Driver assignment validation
+* Ride state validation
+* Database validation
+* Environment-based configuration
+* Secure handling of API credentials
+
+Sensitive configuration (database URL, API keys, auth secrets) is kept outside the source code through environment variables — see [Running the Project](#-running-the-project) for the required variables.
+
+---
+
+# Lessons Learned
+
+Building Rawaan provided practical experience in:
 
 ### React Native
 
 * Component architecture
 * Expo Router
+* Mobile navigation
 * Native permissions
 * Maps
 * Device location
+* Responsive UI
 * Production builds
 
-### Backend
+### Backend Development
 
-* REST APIs
+* REST API design
 * Express controllers
 * Authentication
-* Database relationships
+* Validation
 * Prisma
 * MongoDB
+* Error handling
 
 ### Real-Time Systems
 
 * WebSocket connections
-* Event-driven architecture
+* Event-driven communication
+* Driver location updates
 * Ride status synchronization
-* Reconnection handling
+* Real-time UI updates
+* Connection management
 
 ### Software Engineering
 
 * Separation of concerns
 * API design
 * State management
-* Validation
-* Error handling
-* Production debugging
+* Database modeling
 * Environment configuration
+* Debugging
+* Mobile/backend integration
 
 ---
+
+> 🚕 **Rawaan** — Connecting passengers and drivers through a real-time mobility experience.
