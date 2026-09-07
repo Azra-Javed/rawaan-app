@@ -15,9 +15,9 @@ Drivers have a dedicated application where they can register, manage their avail
 ### Passenger App
 
 <p align="center">
-  <img src="./screenshots/user/home.png" width="250"/>
-  <img src="./screenshots/user/ride-plan.png" width="250"/>
-  <img src="./screenshots/user/ride-details.png" width="250"/>
+  <img src="./screenshots/user/home.png" width="140"/>
+  <img src="./screenshots/user/ride-plan.png" width="140"/>
+  <img src="./screenshots/user/ride-details.png" width="140"/>
 </p>
 
 <p align="center">
@@ -29,9 +29,9 @@ Drivers have a dedicated application where they can register, manage their avail
 ###  Driver App
 
 <p align="center">
-  <img src="./screenshots/driver/home.png" width="250"/>
-  <img src="./screenshots/driver/ride-request.png" width="250"/>
-  <img src="./screenshots/driver/ride-details.png" width="250"/>
+  <img src="./screenshots/driver/home.png" width="140"/>
+  <img src="./screenshots/driver/ride-request.png" width="140"/>
+  <img src="./screenshots/driver/ride-details.png" width="140"/>
 </p>
 
 <p align="center">
@@ -43,8 +43,8 @@ Drivers have a dedicated application where they can register, manage their avail
 ### Ride Completion
 
 <p align="center">
-  <img src="./screenshots/user/ride-history.png" width="250"/>
-  <img src="./screenshots/user/rating.png" width="250"/>
+  <img src="./screenshots/user/ride-history.png" width="140"/>
+  <img src="./screenshots/user/rating.png" width="140"/>
 </p>
 
 ---
